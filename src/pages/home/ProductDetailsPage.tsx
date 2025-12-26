@@ -372,7 +372,7 @@ const ProductDetailsPage: React.FC = () => {
                                     id={p.id}
                                     name={p.name || ""}
                                     imageUrl={thumbnail?.image_url}
-                                    price={minPriceVariant.price}
+                                    price={minPriceVariant?.price}
                                     rating={4.3}
                                     salePrice={0.4}
                                 />

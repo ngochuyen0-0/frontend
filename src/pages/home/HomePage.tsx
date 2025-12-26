@@ -105,7 +105,7 @@ const HomePage = () => {
                                     id={p.id}
                                     name={p.name || ""}
                                     imageUrl={thumbnail?.image_url}
-                                    price={minPriceVariant.price}
+                                    price={minPriceVariant?.price}
                                     rating={4.3}
                                     salePrice={0.4}
                                     onAddToCart={() => console.log('Add to cart', p.id)}
@@ -146,7 +146,7 @@ const HomePage = () => {
                         {/* Products Section */}
                         <div className="lg:w-3/4">
                             <div className="grid grid-cols-4 gap-4 h-full">
-                                {newProducts.map((p) => {
+                                {newProducts?.map((p) => {
                                     const thumbnail = p.images?.find(p => p.is_thumbnail);
                                     const variants = p.variants || [];
                                     let index = 0;
@@ -164,7 +164,7 @@ const HomePage = () => {
                                             key={p.id}
                                             name={p.name || ""}
                                             imageUrl={thumbnail?.image_url}
-                                            price={minPriceVariant.price}
+                                            price={minPriceVariant?.price || 0}
                                             rating={4.3}
                                             onClick={() => navigate(`/product/${p.id}`)}
                                             salePrice={3}
