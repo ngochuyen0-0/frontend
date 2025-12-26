@@ -1,0 +1,90 @@
+.footer-section {
+  background-color: #E3E6F3;
+  padding: 40px 20px;
+  font-family: Arial, sans-serif;
+  color: #111;
+  font-size: 14px;
+}
+
+.footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 200px;
+}
+
+.footer-logo {
+  width: 70px;
+  margin-bottom: 10px;
+}
+
+.footer-column h4 {
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 6px;
+}
+
+.footer-column ul li a {
+  text-decoration: none;
+  color: #333;
+  transition: color 0.2s ease;
+}
+
+.footer-column ul li a:hover {
+  color: #0077cc;
+}
+
+.company-info p {
+  line-height: 1.6;
+}
+
+.social-icons img {
+  width: 26px;
+  margin-right: 8px;
+  margin-top: 10px;
+  vertical-align: middle;
+}
+
+.payment-icons img {
+  width: 50px;
+  margin-right: 10px;
+  margin-top: 10px;
+  
+}
+
+.footer-bottom {
+  border-top: 1px solid #ccc;
+  padding-top: 15px;
+  margin-top: 40px;
+  font-size: 13px;
+  color: #666;
+
+  display: flex;              
+  justify-content: space-between; 
+  align-items: center;       
+  flex-wrap: wrap;            
+  gap: 10px;                 
+  text-align: left;
+}
+
+.footer-bottom img {
+  width: 120px;
+  margin-top: 10px;
+}
