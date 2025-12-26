@@ -48,19 +48,19 @@ const AdminDashboard: React.FC = () => {
             id: "ORD-001",
             customer: "Nguyễn Văn A",
             amount: 1200000,
-            status: "completed",
+            status: "Đã hoàn thành",
         },
         {
             id: "ORD-002",
             customer: "Trần Thị B",
             amount: 850000,
-            status: "processing",
+            status: "Đang xử lý",
         },
         {
             id: "ORD-003",
             customer: "Lê Văn C",
             amount: 2100000,
-            status: "pending",
+            status: "Chờ xác nhận",
         },
     ];
 
@@ -73,7 +73,7 @@ const AdminDashboard: React.FC = () => {
             key: "amount",
             render: (amount: number) => `${amount.toLocaleString()}₫`,
         },
-        { title: "Trạng thái", dataIndex: "status", key: "status" },
+        { title: "Trạng thái đơn hàng", dataIndex: "status", key: "status" },
     ];
 
     const formatCurrency = (value: number) => {
@@ -88,7 +88,7 @@ const AdminDashboard: React.FC = () => {
             {/* <h1 className="text-2xl font-bold mb-6">Dashboard</h1> */}
 
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">Dashboard</h1>
+                <h1 className="text-2xl font-bold">Bảng điều khiển</h1>
                 <div className="text-sm text-gray-500">
                     Cập nhật lúc: {new Date().toLocaleString("vi-VN")}
                 </div>
@@ -145,8 +145,8 @@ const AdminDashboard: React.FC = () => {
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
           <Card 
-            title="Doanh thu theo tháng" 
-            extra={<Tag color="blue">6 tháng gần nhất</Tag>}
+            title="Doanh thu theo tháng"
+            extra={<Tag color="blue">6 tháng gần đây</Tag>}
             className="h-auto"
           >
                 <ResponsiveContainer width="100%" height={350} >
@@ -267,28 +267,28 @@ const AdminDashboard: React.FC = () => {
             <div className="space-y-6 pt-4">
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm">CPU Usage</span>
+                  <span className="text-sm">Sử dụng CPU</span>
                   <span className="font-semibold">65%</span>
                 </div>
                 <Progress percent={65} strokeColor="#13c2c2" size="small" />
               </div>
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm">Memory</span>
+                  <span className="text-sm">Bộ nhớ</span>
                   <span className="font-semibold">42%</span>
                 </div>
                 <Progress percent={42} strokeColor="#722ed1" size="small" />
               </div>
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm">Disk Space</span>
+                  <span className="text-sm">Dung lượng đĩa</span>
                   <span className="font-semibold">78%</span>
                 </div>
                 <Progress percent={78} strokeColor="#eb2f96" size="small" />
               </div>
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm">Network</span>
+                  <span className="text-sm">Mạng</span>
                   <span className="font-semibold">35%</span>
                 </div>
                 <Progress percent={35} strokeColor="#52c41a" size="small" />

@@ -64,7 +64,7 @@ const AdminBrands: React.FC = () => {
 
     // Mock brands data
 
-    // Columns definition
+    // Định nghĩa cột
     const columns = [
         {
             title: "Logo",
@@ -89,7 +89,7 @@ const AdminBrands: React.FC = () => {
             ),
         },
         {
-            title: "Brand Name",
+            title: "Tên thương hiệu",
             dataIndex: "name",
             key: "name",
             render: (name: string, record: any) => (
@@ -108,7 +108,7 @@ const AdminBrands: React.FC = () => {
             sorter: (a: any, b: any) => a.name.localeCompare(b.name),
         },
         {
-            title: "Description",
+            title: "Mô tả",
             dataIndex: "description",
             key: "description",
             render: (description: string) => (
@@ -118,31 +118,31 @@ const AdminBrands: React.FC = () => {
             ),
         },
         {
-            title: "Products",
+            title: "Sản phẩm",
             dataIndex: "products",
             key: "products",
             render: (products: number) => (
-                <Tag color="blue">{products} 0 products</Tag>
+                <Tag color="blue">{products} sản phẩm</Tag>
             ),
             sorter: (a: any, b: any) => a.products - b.products,
         },
         {
-            title: "Status",
+            title: "Trạng thái",
             dataIndex: "status",
             key: "status",
             render: (status: string) => (
                 <Tag color={status === "ACTIVE" ? "green" : "gray"}>
-                    {status === "ACTIVE" ? "Active" : "Draft"}
+                    {status === "ACTIVE" ? "Hoạt động" : "Nháp"}
                 </Tag>
             ),
             filters: [
-                { text: "Active", value: "active" },
-                { text: "Draft", value: "draft" },
+                { text: "Hoạt động", value: "active" },
+                { text: "Nháp", value: "draft" },
             ],
             onFilter: (value: any, record: any) => record.status === value,
         },
         {
-            title: "Actions",
+            title: "Hành động",
             key: "actions",
             render: (_: any, record: any) => (
                 <Dropdown
@@ -150,20 +150,20 @@ const AdminBrands: React.FC = () => {
                         items: [
                             {
                                 key: "edit",
-                                label: "Edit Brand",
+                                label: "Chỉnh sửa thương hiệu",
                                 icon: <EditOutlined />,
                                 onClick: () => handleEditBrand(record),
                             },
                             {
                                 key: "view",
-                                label: "View Products",
+                                label: "Xem sản phẩm",
                                 icon: <EyeOutlined />,
                                 onClick: () => handleViewProducts(record.id),
                             },
                             { type: "divider" },
                             {
                                 key: "delete",
-                                label: "Delete Brand",
+                                label: "Xóa thương hiệu",
                                 icon: <DeleteOutlined />,
                                 danger: true,
                                 onClick: () => handleDeleteBrand(record.id),
@@ -196,14 +196,14 @@ const AdminBrands: React.FC = () => {
 
     const handleDeleteBrand = (brandId: string) => {
         Modal.confirm({
-            title: "Delete Brand",
+            title: "Xóa thương hiệu",
             content:
-                "Are you sure you want to delete this brand? This action cannot be undone.",
-            okText: "Delete",
+                "Bạn có chắc chắn muốn xóa thương hiệu này? Hành động này không thể hoàn tác.",
+            okText: "Xóa",
             okType: "danger",
-            cancelText: "Cancel",
+            cancelText: "Hủy",
             onOk() {
-                console.log(`Delete brand: ${brandId}`);
+                console.log(`Xóa thương hiệu: ${brandId}`);
                 // API call would go here
             },
         });
@@ -230,7 +230,7 @@ const AdminBrands: React.FC = () => {
                     const res = await updateBrand(editingBrand.id, values);
                     console.log("API response from sendVerifyEmail:", res);
                     if (res) {
-                        toast.success("Edit brand success");
+                        toast.success("Chỉnh sửa thương hiệu thành công");
                     }
                 } else {
                     console.log("Adding new brand with data:", values);
@@ -238,7 +238,7 @@ const AdminBrands: React.FC = () => {
                     const res = await createBrand(values);
                     console.log("API response from sendVerifyEmail:", res);
                     if (res) {
-                        toast.success("Add brand success");
+                        toast.success("Thêm thương hiệu thành công");
                     }
                 }
 
@@ -265,9 +265,9 @@ const AdminBrands: React.FC = () => {
         <>
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold">Brands Management</h1>
+                    <h1 className="text-2xl font-bold">Quản lý thương hiệu</h1>
                     <p className="text-gray-600">
-                        Manage product brands and manufacturers
+                        Quản lý các thương hiệu và nhà sản xuất sản phẩm
                     </p>
                 </div>
                 <Button
@@ -275,20 +275,20 @@ const AdminBrands: React.FC = () => {
                     icon={<PlusOutlined />}
                     onClick={handleAddBrand}
                 >
-                    Add New Brand
+                    Thêm thương hiệu mới
                 </Button>
             </div>
 
             <Row gutter={16}>
                 <Col span={6}>
                     <Card>
-                        <Statistic title="Total Brands" value={brands.length} />
+                        <Statistic title="Tổng số thương hiệu" value={brands.length} />
                     </Card>
                 </Col>
                 <Col span={6}>
                     <Card>
                         <Statistic
-                            title="Active Brands"
+                            title="Thương hiệu đang hoạt động"
                             value={brands.filter(b => b.is_active != true).length}
                             valueStyle={{ color: "#3f8600" }}
                         />
@@ -297,7 +297,7 @@ const AdminBrands: React.FC = () => {
                 <Col span={6}>
                     <Card>
                         <Statistic
-                            title="Featured Brands"
+                            title="Thương hiệu nổi bật"
                             value={brands.length}
                             valueStyle={{ color: "#cf1322" }}
                         />
@@ -306,7 +306,7 @@ const AdminBrands: React.FC = () => {
                 <Col span={6}>
                     <Card>
                         <Statistic
-                            title="Total Products"
+                            title="Tổng số sản phẩm"
                             value={156}
                             valueStyle={{ color: "#1890ff" }}
                         />
@@ -318,17 +318,17 @@ const AdminBrands: React.FC = () => {
                 <div className="flex flex-wrap gap-4 items-center justify-between">
                     <Space>
                         <Input
-                            placeholder="Search brands..."
+                            placeholder="Tìm kiếm thương hiệu..."
                             prefix={<SearchOutlined />}
                             style={{ width: 250 }}
                         />
-                        <Select placeholder="All Status" style={{ width: 150 }}>
-                            <Option value="active">Active</Option>
-                            <Option value="draft">Draft</Option>
+                        <Select placeholder="Tất cả trạng thái" style={{ width: 150 }}>
+                            <Option value="active">Hoạt động</Option>
+                            <Option value="draft">Nháp</Option>
                         </Select>
-                        <Select placeholder="Featured" style={{ width: 150 }}>
-                            <Option value="true">Featured</Option>
-                            <Option value="false">Regular</Option>
+                        <Select placeholder="Nổi bật" style={{ width: 150 }}>
+                            <Option value="true">Nổi bật</Option>
+                            <Option value="false">Bình thường</Option>
                         </Select>
                     </Space>
 
@@ -339,31 +339,31 @@ const AdminBrands: React.FC = () => {
                                     items: [
                                         {
                                             key: "activate",
-                                            label: "Activate Selected",
+                                            label: "Kích hoạt đã chọn",
                                         },
                                         {
                                             key: "deactivate",
-                                            label: "Deactivate Selected",
+                                            label: "Vô hiệu hóa đã chọn",
                                         },
                                         {
                                             key: "feature",
-                                            label: "Mark as Featured",
+                                            label: "Đánh dấu là nổi bật",
                                         },
                                         {
                                             key: "unfeature",
-                                            label: "Remove Featured",
+                                            label: "Bỏ đánh dấu nổi bật",
                                         },
                                         { type: "divider" },
                                         {
                                             key: "delete",
-                                            label: "Delete Selected",
+                                            label: "Xóa đã chọn",
                                             danger: true,
                                         },
                                     ],
                                 }}
                             >
                                 <Button>
-                                    Bulk Actions ({selectedRowKeys.length})
+                                    Hành động hàng loạt ({selectedRowKeys.length})
                                 </Button>
                             </Dropdown>
                         )}
@@ -383,40 +383,40 @@ const AdminBrands: React.FC = () => {
                         showSizeChanger: true,
                         showQuickJumper: true,
                         showTotal: (total, range) =>
-                            `${range[0]}-${range[1]} of ${total} brands`,
+                            `${range[0]}-${range[1]} của ${total} thương hiệu`,
                     }}
                 />
             </Card>
 
             {/* Add/Edit Brand Modal */}
             <Modal
-                title={editingBrand ? "Edit Brand" : "Add New Brand"}
+                title={editingBrand ? "Chỉnh sửa thương hiệu" : "Thêm thương hiệu mới"}
                 open={isModalVisible}
                 onOk={handleModalOk}
                 onCancel={handleModalCancel}
                 width={600}
             >
                 <Form layout="vertical" form={form}>
-                    <Form.Item label="Brand Name" required name="name">
-                        <Input placeholder="Enter brand name" />
+                    <Form.Item label="Tên thương hiệu" required name="name">
+                        <Input placeholder="Nhập tên thương hiệu" />
                     </Form.Item>
-                    <Form.Item label="Description" name="description">
+                    <Form.Item label="Mô tả" name="description">
                         <Input.TextArea
                             rows={3}
-                            placeholder="Enter brand description..."
+                            placeholder="Nhập mô tả thương hiệu..."
                         />
                     </Form.Item>
                     <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item label="Logo" name="logo_url">
-                                <Input placeholder="Logo URL" />
+                                <Input placeholder="URL logo" />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="Status">
+                            <Form.Item label="Trạng thái">
                                 <Select defaultValue="active">
-                                    <Option value="active">Active</Option>
-                                    <Option value="draft">Draft</Option>
+                                    <Option value="active">Hoạt động</Option>
+                                    <Option value="draft">Nháp</Option>
                                 </Select>
                             </Form.Item>
                         </Col>

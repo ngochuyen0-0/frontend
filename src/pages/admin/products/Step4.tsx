@@ -107,16 +107,16 @@ const Step4Review: React.FC<Step4Props> = ({
       {/* Progress Steps */}
       <Card>
         <Steps current={3} size="small">
-          <Step title="Basic Info" description="Product details" />
-          <Step title="Variants" description="Product variants" />
-          <Step title="Images" description="Product images" />
-          <Step title="Review" description="Confirm & publish" />
+          <Step title="Thông tin cơ bản" description="Chi tiết sản phẩm" />
+          <Step title="Biến thể" description="Các biến thể sản phẩm" />
+          <Step title="Hình ảnh" description="Hình ảnh sản phẩm" />
+          <Step title="Xem lại" description="Xác nhận & xuất bản" />
         </Steps>
       </Card>
 
       {/* Status Alert */}
       <Alert
-        message={`Product will be ${publishStatus === 'published' ? 'published' : 'saved as draft'}`}
+        message={`Sản phẩm sẽ được ${publishStatus === 'published' ? 'xuất bản' : 'lưu dưới dạng bản nháp'}`}
         type={publishStatus === 'published' ? 'success' : 'info'}
         showIcon
         action={
@@ -127,14 +127,14 @@ const Step4Review: React.FC<Step4Props> = ({
               publishStatus === 'published' ? 'draft' : 'published'
             )}
           >
-            Switch to {publishStatus === 'published' ? 'Draft' : 'Publish'}
+            Chuyển sang {publishStatus === 'published' ? 'Bản nháp' : 'Xuất bản'}
           </Button>
         }
       />
 
       {/* Product Summary */}
       <Card 
-        title="📝 Product Information" 
+        title="📝 Thông tin sản phẩm"
         className="!shadow-sm"
         extra={
           <Button 
@@ -142,37 +142,37 @@ const Step4Review: React.FC<Step4Props> = ({
             icon={<EditOutlined />}
             onClick={() => onEditStep(0)}
           >
-            Edit
+            Chỉnh sửa
           </Button>
         }
       >
         <Row gutter={[16, 16]}>
           <Col xs={24} md={12}>
             <Descriptions column={1} size="small">
-              <Descriptions.Item label="Product Name">
-                <strong>{productData.name}</strong>
+              <Descriptions.Item label="Tên sản phẩm">
+                               <strong>{productData.name}</strong>
               </Descriptions.Item>
-              <Descriptions.Item label="Brand">
-                {productData.brand_id}
+              <Descriptions.Item label="Thương hiệu">
+                               {productData.brand_id}
               </Descriptions.Item>
-              <Descriptions.Item label="Category">
-                {productData.category_id}
-                {productData.subcategory_id && ` / ${productData.subcategory_id}`}
+              <Descriptions.Item label="Danh mục">
+                               {productData.category_id}
+                               {productData.subcategory_id && ` / ${productData.subcategory_id}`}
               </Descriptions.Item>
             </Descriptions>
           </Col>
           <Col xs={24} md={12}>
             <Descriptions column={1} size="small">
-              <Descriptions.Item label="Status">
-                <Tag color={publishStatus === 'published' ? 'green' : 'orange'}>
-                  {publishStatus.toUpperCase()}
+              <Descriptions.Item label="Trạng thái">
+                               <Tag color={publishStatus === 'published' ? 'green' : 'orange'}>
+                                 {publishStatus.toUpperCase()}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Total Variants">
-                <strong>{variants.length}</strong>
+              <Descriptions.Item label="Tổng số biến thể">
+                               <strong>{variants.length}</strong>
               </Descriptions.Item>
-              <Descriptions.Item label="Total Stock">
-                <strong>{totalStock}</strong> units
+              <Descriptions.Item label="Tổng số tồn kho">
+                               <strong>{totalStock}</strong> đơn vị
               </Descriptions.Item>
             </Descriptions>
           </Col>
@@ -181,7 +181,7 @@ const Step4Review: React.FC<Step4Props> = ({
         <Divider />
 
         <div>
-          <div className="font-medium mb-2">Description:</div>
+          <div className="font-medium mb-2">Mô tả:</div>
           <div className="text-gray-700 whitespace-pre-wrap">
             {productData.description}
           </div>
@@ -191,7 +191,7 @@ const Step4Review: React.FC<Step4Props> = ({
           <>
             <Divider />
             <div>
-              <div className="font-medium mb-2">Tags:</div>
+              <div className="font-medium mb-2">Thẻ:</div>
               <Space wrap>
                 {productData.tags.map((tag: string) => (
                   <Tag key={tag}>{tag}</Tag>
@@ -204,7 +204,7 @@ const Step4Review: React.FC<Step4Props> = ({
 
       {/* Variants Summary */}
       <Card 
-        title="🎨 Product Variants" 
+        title="🎨 Biến thể sản phẩm"
         className="!shadow-sm"
         extra={
           <Button 
@@ -212,13 +212,13 @@ const Step4Review: React.FC<Step4Props> = ({
             icon={<EditOutlined />}
             onClick={() => onEditStep(1)}
           >
-            Edit
+            Chỉnh sửa
           </Button>
         }
       >
         {priceRange && (
           <div className="mb-4">
-            <strong>Price Range:</strong> ${priceRange.min.toFixed(2)} - ${priceRange.max.toFixed(2)}
+            <strong>Phạm vi giá:</strong> ${priceRange.min.toFixed(2)} - ${priceRange.max.toFixed(2)}
           </div>
         )}
         
@@ -233,7 +233,7 @@ const Step4Review: React.FC<Step4Props> = ({
 
       {/* Images Summary */}
       <Card 
-        title="🖼️ Product Images" 
+        title="🖼️ Hình ảnh sản phẩm"
         className="!shadow-sm"
         extra={
           <Button 
@@ -241,12 +241,12 @@ const Step4Review: React.FC<Step4Props> = ({
             icon={<EditOutlined />}
             onClick={() => onEditStep(2)}
           >
-            Edit
+            Chỉnh sửa
           </Button>
         }
       >
         <div className="mb-3">
-          <strong>Total Images:</strong> {images.length}
+          <strong>Tổng số hình ảnh:</strong> {images.length}
           {thumbnail && (
             <span className="ml-4">
               <Tag color="blue">Thumbnail Selected</Tag>
@@ -285,7 +285,7 @@ const Step4Review: React.FC<Step4Props> = ({
             onClick={onBack}
             icon={<ArrowLeftOutlined />}
           >
-            Back
+            Quay lại
           </Button>
           
           <Space>
@@ -293,7 +293,7 @@ const Step4Review: React.FC<Step4Props> = ({
               size="large"
               onClick={() => setPublishStatus('draft')}
             >
-              Save as Draft
+              Lưu dưới dạng bản nháp
             </Button>
             
             <Button 
@@ -303,7 +303,7 @@ const Step4Review: React.FC<Step4Props> = ({
               onClick={handleSubmit}
               icon={<CheckCircleOutlined />}
             >
-              {publishStatus === 'published' ? 'Publish Product' : 'Save Draft'}
+              {publishStatus === 'published' ? 'Xuất bản sản phẩm' : 'Lưu bản nháp'}
             </Button>
           </Space>
         </div>

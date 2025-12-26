@@ -27,9 +27,9 @@ const ProductAddPage: React.FC = () => {
       setProductId(mockResponse.id);
       setProductData(data);
       setCurrentStep(1);
-      message.success('Product created successfully!');
+      message.success('Tạo sản phẩm thành công!');
     } catch (error) {
-      message.error('Failed to create product');
+      message.error('Tạo sản phẩm thất bại');
     }
   };
 
@@ -49,9 +49,9 @@ const ProductAddPage: React.FC = () => {
       
       setVariants(variantsData);
       setCurrentStep(2);
-      message.success('Variants added successfully!');
+      message.success('Biến thể được thêm thành công!');
     } catch (error) {
-      message.error('Failed to add variants');
+      message.error('Thêm biến thể thất bại');
     }
   };
 
@@ -68,9 +68,9 @@ const ProductAddPage: React.FC = () => {
       
       setImages(imagesData);
       setCurrentStep(3);
-      message.success('Images uploaded successfully!');
+      message.success('Tải ảnh lên thành công!');
     } catch (error) {
-      message.error('Failed to upload images');
+      message.error('Tải ảnh lên thất bại');
     }
   };
 
@@ -80,7 +80,7 @@ const ProductAddPage: React.FC = () => {
     console.log('Final product data:', finalData);
     
     // Redirect hoặc thông báo thành công
-    message.success('Product completed successfully!');
+    message.success('Sản phẩm hoàn tất thành công!');
   };
 
   const handleEditStep = (step: number) => {

@@ -222,10 +222,10 @@ const Step1BasicInfo: React.FC<Step1Props> = ({
             {/* Progress Steps */}
             <Card style={{ marginBottom: "20px" }}>
                 <Steps current={0} size="small">
-                    <Step title="Basic Info" description="Product details" />
-                    <Step title="Variants" description="Product variants" />
-                    <Step title="Images" description="Product images" />
-                    <Step title="Done" description="Review & edit" />
+                    <Step title="Thông tin cơ bản" description="Chi tiết sản phẩm" />
+                    <Step title="Biến thể" description="Các biến thể sản phẩm" />
+                    <Step title="Hình ảnh" description="Hình ảnh sản phẩm" />
+                    <Step title="Hoàn tất" description="Xem lại và chỉnh sửa" />
                 </Steps>
             </Card>
 
@@ -240,23 +240,23 @@ const Step1BasicInfo: React.FC<Step1Props> = ({
             >
                 {/* Product Details */}
                 <Card
-                    title="🛠️ Product Details"
+                    title="🛠️ Chi tiết sản phẩm"
                     className="!shadow-sm"
                     style={{ marginBottom: "20px" }}
                 >
                     <Space direction="vertical" className="w-full" size="large">
                         <Form.Item
-                            label="Product Name"
+                            label="Tên sản phẩm"
                             name="name"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Please enter product name",
+                                                                         message: "Vui lòng nhập tên sản phẩm",
                                 },
                                 {
                                     min: 2,
-                                    message:
-                                        "Product name must be at least 2 characters",
+                                                                         message:
+                                                                             "Tên sản phẩm phải có ít nhất 2 ký tự",
                                 },
                             ]}
                         >
@@ -268,28 +268,28 @@ const Step1BasicInfo: React.FC<Step1Props> = ({
                         </Form.Item>
 
                         <Form.Item
-                            label="Description"
+                            label="Mô tả"
                             name="description"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Please enter product description",
+                                                                         message: "Vui lòng nhập mô tả sản phẩm",
                                 },
                                 {
                                     min: 10,
-                                    message:
-                                        "Description must be at least 10 characters",
+                                                                         message:
+                                                                             "Mô tả phải có ít nhất 10 ký tự",
                                 },
                                 {
                                     max: 2000,
-                                    message:
-                                        "Description cannot exceed 2000 characters",
+                                                                         message:
+                                                                             "Mô tả không được vượt quá 2000 ký tự",
                                 },
                             ]}
                         >
                             <TextArea
                                 rows={6}
-                                placeholder="Describe your product in detail. Include features, materials, sizing information, etc."
+                                placeholder="Mô tả chi tiết sản phẩm. Bao gồm các tính năng, chất liệu, thông tin kích thước, v.v."
                                 showCount
                                 maxLength={2000}
                             />
@@ -299,31 +299,31 @@ const Step1BasicInfo: React.FC<Step1Props> = ({
 
                 {/* Categorization */}
                 <Card
-                    title="🏷️ Categorization"
+                    title="🏷️ Phân loại"
                     className="!shadow-sm"
                     style={{ marginBottom: "20px" }}
                 >
                     <Row gutter={[16, 16]}>
                         <Col xs={24} md={12}>
                             <Form.Item
-                                label="Brand"
+                                label="Thương hiệu"
                                 name="brand_id"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please select brand",
+                                                                                 message: "Vui lòng chọn thương hiệu",
                                     },
                                 ]}
                             >
                                 <Select
-                                    placeholder="Select brand"
+                                    placeholder="Chọn thương hiệu"
                                     size="large"
                                     showSearch
                                     optionFilterProp="children"
                                     filterOption={(input, option) =>
-                                        (option?.label ?? "")
-                                            .toLowerCase()
-                                            .includes(input.toLowerCase())
+                                                                             (option?.label?.toString() ?? "")
+                                                                                 .toLowerCase()
+                                                                                 .includes(input.toLowerCase())
                                     }
                                 >
                                     {brands.map((brand) => (
@@ -350,17 +350,17 @@ const Step1BasicInfo: React.FC<Step1Props> = ({
 
                         <Col xs={24} md={12}>
                             <Form.Item
-                                label="Category"
+                                label="Danh mục"
                                 name="parent_category_id"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please select category",
+                                                                                 message: "Vui lòng chọn danh mục",
                                     },
                                 ]}
                             >
                                 <Select
-                                    placeholder="Select category"
+                                    placeholder="Chọn danh mục"
                                     size="large"
                                     onChange={handleCategoryChange}
                                     showSearch
@@ -460,7 +460,7 @@ const Step1BasicInfo: React.FC<Step1Props> = ({
                             onClick={onCancel}
                             icon={<ArrowLeftOutlined />}
                         >
-                            Cancel
+                            Hủy
                         </Button>
 
                         <Button
@@ -470,7 +470,7 @@ const Step1BasicInfo: React.FC<Step1Props> = ({
                             htmlType="submit"
                             icon={<ArrowRightOutlined />}
                         >
-                            Next: Variants
+                            Tiếp: Biến thể
                         </Button>
                     </div>
                 </Card>

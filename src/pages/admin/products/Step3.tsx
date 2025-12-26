@@ -192,10 +192,10 @@ const Step3Images: React.FC<Step3Props> = ({
             {/* Progress Steps */}
             <Card>
                 <Steps current={2} size="small">
-                    <Step title="Basic Info" description="Product details" />
-                    <Step title="Variants" description="Product variants" />
-                    <Step title="Images" description="Product images" />
-                    <Step title="Done" description="Review & edit" />
+                    <Step title="Thông tin cơ bản" description="Chi tiết sản phẩm" />
+                    <Step title="Biến thể" description="Các biến thể sản phẩm" />
+                    <Step title="Hình ảnh" description="Hình ảnh sản phẩm" />
+                    <Step title="Hoàn tất" description="Xem lại và chỉnh sửa" />
                 </Steps>
             </Card>
 

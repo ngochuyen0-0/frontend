@@ -58,7 +58,6 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 
-
 const AdminOrderDetailPage: React.FC = () => {
     const navigate = useNavigate();
     const { order_id } = useParams<{ order_id: string }>();
@@ -68,12 +67,12 @@ const AdminOrderDetailPage: React.FC = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editForm] = Form.useForm();
 
-    // Status update modal
+    // Modal cập nhật trạng thái
     const [statusModalVisible, setStatusModalVisible] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('');
     const [statusNotes, setStatusNotes] = useState('');
 
-    // Tracking modal
+    // Modal theo dõi
     const [trackingModalVisible, setTrackingModalVisible] = useState(false);
     const [trackingNumber, setTrackingNumber] = useState('');
 
@@ -107,7 +106,7 @@ const AdminOrderDetailPage: React.FC = () => {
                 })
             }).catch(err => { })
         } catch (error) {
-            console.error('Error fetching order detail:', error);
+            console.error('Lỗi khi tải thông tin đơn hàng:', error);
             message.error('Không thể tải thông tin đơn hàng');
         } finally {
             setLoading(false);
@@ -145,9 +144,9 @@ const AdminOrderDetailPage: React.FC = () => {
     };
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'VND'
         }).format(amount);
     };
 
@@ -160,8 +159,8 @@ const AdminOrderDetailPage: React.FC = () => {
 
         setUpdating(true);
         try {
-            // Call API to update status
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+            // Gọi API để cập nhật trạng thái
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Mô phỏng gọi API
 
             const updatedOrder = {
                 ...order,
@@ -187,7 +186,7 @@ const AdminOrderDetailPage: React.FC = () => {
 
         setUpdating(true);
         try {
-            // Call API to update tracking
+            // Gọi API để cập nhật theo dõi
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             const updatedOrder = {
@@ -213,7 +212,7 @@ const AdminOrderDetailPage: React.FC = () => {
 
         setUpdating(true);
         try {
-            // Call API to update order info
+            // Gọi API để cập nhật thông tin đơn hàng
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             const updatedOrder = { ...order, ...values };
@@ -233,7 +232,7 @@ const AdminOrderDetailPage: React.FC = () => {
 
         setUpdating(true);
         try {
-            // Call API to cancel order
+            // Gọi API để hủy đơn hàng
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             const updatedOrder = { ...order, status: 'cancelled' };
@@ -268,8 +267,8 @@ const AdminOrderDetailPage: React.FC = () => {
             key: 'variant',
             render: (record: OrderItem) => (
                 <Space>
-                    {record.size && <Tag>Size: {record.size}</Tag>}
-                    {record.color && <Tag color={record.color.toLowerCase()}>Color: {record.color}</Tag>}
+                    {record.size && <Tag>Kích thước: {record.size}</Tag>}
+                    {record.color && <Tag color={record.color.toLowerCase()}>Màu sắc: {record.color}</Tag>}
                 </Space>
             ),
         },
@@ -297,7 +296,7 @@ const AdminOrderDetailPage: React.FC = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div>Loading...</div>
+                <div>Đang tải...</div>
             </div>
         );
     }
@@ -306,8 +305,8 @@ const AdminOrderDetailPage: React.FC = () => {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <Alert
-                    message="Order Not Found"
-                    description="The order you are looking for does not exist."
+                    message="Không tìm thấy đơn hàng"
+                    description="Đơn hàng bạn đang tìm kiếm không tồn tại."
                     type="error"
                     showIcon
                 />
@@ -331,14 +330,14 @@ const AdminOrderDetailPage: React.FC = () => {
                         onClick={() => navigate('/admin/v1/orders')}
                         className="mb-4"
                     >
-                        Back to Orders
+                        Quay lại Đơn hàng
                     </Button>
 
                     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                         <div>
-                            <Title level={2} className="mb-2">Order Details - Admin</Title>
+                            <Title level={2} className="mb-2">Chi tiết đơn hàng - Quản trị viên</Title>
                             <Space wrap>
-                                <Text strong>Order ID:</Text>
+                                <Text strong>Mã đơn hàng:</Text>
                                 <Text code>{order.id}</Text>
                                 <Badge
                                     status="processing"
@@ -349,7 +348,7 @@ const AdminOrderDetailPage: React.FC = () => {
                                     }
                                 />
                                 <Text type="secondary">
-                                    Created: {formatDate(order.created_at)}
+                                    Đã tạo: {formatDate(order.created_at)}
                                 </Text>
                             </Space>
                         </div>
@@ -359,14 +358,14 @@ const AdminOrderDetailPage: React.FC = () => {
                                 icon={<PrinterOutlined />}
                                 size="large"
                             >
-                                Print Invoice
+                                In hóa đơn
                             </Button>
                             <Button
                                 icon={<EditOutlined />}
                                 size="large"
                                 onClick={() => setIsEditing(!isEditing)}
                             >
-                                {isEditing ? 'Cancel Edit' : 'Edit Order'}
+                                {isEditing ? 'Hủy chỉnh sửa' : 'Chỉnh sửa đơn hàng'}
                             </Button>
                             <Button
                                 type="primary"
@@ -374,22 +373,22 @@ const AdminOrderDetailPage: React.FC = () => {
                                 onClick={() => setStatusModalVisible(true)}
                                 icon={<SyncOutlined />}
                             >
-                                Update Status
+                                Cập nhật trạng thái
                             </Button>
                             {order.status !== 'cancelled' && order.status !== 'refunded' && (
                                 <Popconfirm
-                                    title="Cancel Order"
-                                    description="Are you sure you want to cancel this order?"
+                                    title="Hủy đơn hàng"
+                                    description="Bạn có chắc chắn muốn hủy đơn hàng này không?"
                                     onConfirm={handleCancelOrder}
-                                    okText="Yes"
-                                    cancelText="No"
+                                    okText="Có"
+                                    cancelText="Không"
                                 >
                                     <Button
                                         danger
                                         size="large"
                                         icon={<CloseCircleOutlined />}
                                     >
-                                        Cancel Order
+                                        Hủy đơn hàng
                                     </Button>
                                 </Popconfirm>
                             )}
@@ -398,11 +397,11 @@ const AdminOrderDetailPage: React.FC = () => {
                 </div>
 
                 <Row gutter={[24, 24]}>
-                    {/* Left Column - Order Information */}
+                    {/* Cột trái - Thông tin đơn hàng */}
                     <Col xs={24} lg={16}>
-                        {/* Order Progress */}
+                        {/* Tiến trình đơn hàng */}
                         <Card
-                            title="Order Progress"
+                            title="Tiến trình đơn hàng"
                             className="mb-6"
                             extra={
                                 <Button
@@ -410,7 +409,7 @@ const AdminOrderDetailPage: React.FC = () => {
                                     icon={<EyeOutlined />}
                                     onClick={() => navigate(`/order/${order.id}`)}
                                 >
-                                    Customer View
+                                    Xem khách hàng
                                 </Button>
                             }
                         >
@@ -419,24 +418,24 @@ const AdminOrderDetailPage: React.FC = () => {
                                 status={order.status === 'cancelled' ? 'error' : 'process'}
                             >
                                 <Step
-                                    title="Pending"
-                                    description="Order has been placed"
+                                    title="Chờ xử lý"
+                                    description="Đơn hàng đã được đặt"
                                 />
                                 <Step
-                                    title="Confirmed"
-                                    description="Order confirmed"
+                                    title="Đã xác nhận"
+                                    description="Đơn hàng đã xác nhận"
                                 />
                                 <Step
-                                    title="Processing"
-                                    description="Preparing your order"
+                                    title="Đang xử lý"
+                                    description="Đang chuẩn bị đơn hàng của bạn"
                                 />
                                 <Step
-                                    title="Shipped"
-                                    description="Order is on the way"
+                                    title="Đã giao hàng"
+                                    description="Đơn hàng đang trên đường giao"
                                 />
                                 <Step
-                                    title="Delivered"
-                                    description="Order has been delivered"
+                                    title="Đã nhận hàng"
+                                    description="Đơn hàng đã được giao"
                                 />
                             </Steps>
 
@@ -444,14 +443,14 @@ const AdminOrderDetailPage: React.FC = () => {
                                 <Alert
                                     message={
                                         <Space>
-                                            <Text strong>Tracking Number:</Text>
+                                            <Text strong>Mã theo dõi:</Text>
                                             <Text code>{order.tracking_number}</Text>
                                             <Button
                                                 type="link"
                                                 size="small"
                                                 onClick={() => setTrackingModalVisible(true)}
                                             >
-                                                Update
+                                                Cập nhật
                                             </Button>
                                         </Space>
                                     }
@@ -463,8 +462,8 @@ const AdminOrderDetailPage: React.FC = () => {
 
                             {!order.tracking_number && order.status === 'processing' && (
                                 <Alert
-                                    message="Ready to Ship"
-                                    description="Add tracking number when order is shipped"
+                                    message="Sẵn sàng giao hàng"
+                                    description="Thêm mã theo dõi khi đơn hàng được giao"
                                     type="warning"
                                     showIcon
                                     className="mt-4"
@@ -474,15 +473,15 @@ const AdminOrderDetailPage: React.FC = () => {
                                             type="primary"
                                             onClick={() => setTrackingModalVisible(true)}
                                         >
-                                            Add Tracking
+                                            Thêm theo dõi
                                         </Button>
                                     }
                                 />
                             )}
                         </Card>
 
-                        {/* Order Items */}
-                        <Card title="Order Items">
+                        {/* Mặt hàng trong đơn */}
+                        <Card title="Mặt hàng trong đơn">
                             <Table
                                 columns={orderItemsColumns}
                                 dataSource={order.items.map(item => ({ ...item, key: item.id }))}
@@ -492,7 +491,7 @@ const AdminOrderDetailPage: React.FC = () => {
                                         <Table.Summary.Row>
                                             <Table.Summary.Cell index={0} colSpan={3}></Table.Summary.Cell>
                                             <Table.Summary.Cell index={1}>
-                                                <Text strong>Subtotal</Text>
+                                                <Text strong>Tạm tính</Text>
                                             </Table.Summary.Cell>
                                             <Table.Summary.Cell index={2}>
                                                 <Text strong>{formatCurrency(subtotal)}</Text>
@@ -501,7 +500,7 @@ const AdminOrderDetailPage: React.FC = () => {
                                         <Table.Summary.Row>
                                             <Table.Summary.Cell index={0} colSpan={3}></Table.Summary.Cell>
                                             <Table.Summary.Cell index={1}>
-                                                <Text>Shipping</Text>
+                                                <Text>Phí giao hàng</Text>
                                             </Table.Summary.Cell>
                                             <Table.Summary.Cell index={2}>
                                                 <Text>{formatCurrency(shippingCost)}</Text>
@@ -510,7 +509,7 @@ const AdminOrderDetailPage: React.FC = () => {
                                         <Table.Summary.Row>
                                             <Table.Summary.Cell index={0} colSpan={3}></Table.Summary.Cell>
                                             <Table.Summary.Cell index={1}>
-                                                <Text>Tax</Text>
+                                                <Text>Thuế</Text>
                                             </Table.Summary.Cell>
                                             <Table.Summary.Cell index={2}>
                                                 <Text>{formatCurrency(tax)}</Text>
@@ -519,7 +518,7 @@ const AdminOrderDetailPage: React.FC = () => {
                                         <Table.Summary.Row>
                                             <Table.Summary.Cell index={0} colSpan={3}></Table.Summary.Cell>
                                             <Table.Summary.Cell index={1}>
-                                                <Text strong>Total</Text>
+                                                <Text strong>Tổng cộng</Text>
                                             </Table.Summary.Cell>
                                             <Table.Summary.Cell index={2}>
                                                 <Text strong type="danger">{formatCurrency(total)}</Text>
@@ -531,11 +530,11 @@ const AdminOrderDetailPage: React.FC = () => {
                         </Card>
                     </Col>
 
-                    {/* Right Column - Order Details & Actions */}
+                    {/* Cột phải - Chi tiết đơn hàng và hành động */}
                     <Col xs={24} lg={8}>
-                        {/* Customer Information */}
+                        {/* Thông tin khách hàng */}
                         <Card
-                            title="Customer Information"
+                            title="Thông tin khách hàng"
                             className="mb-6"
                             extra={
                                 isEditing ? (
@@ -546,7 +545,7 @@ const AdminOrderDetailPage: React.FC = () => {
                                         onClick={() => editForm.submit()}
                                         loading={updating}
                                     >
-                                        Save
+                                        Lưu
                                     </Button>
                                 ) : null
                             }
@@ -557,23 +556,23 @@ const AdminOrderDetailPage: React.FC = () => {
                                 onFinish={handleSaveEdit}
                                 disabled={!isEditing}
                             >
-                                <Form.Item name="fullname" label="Full Name">
+                                <Form.Item name="fullname" label="Họ tên đầy đủ">
                                     <Input prefix={<UserOutlined />} />
                                 </Form.Item>
                                 <Form.Item name="email" label="Email">
                                     <Input prefix={<MailOutlined />} />
                                 </Form.Item>
-                                <Form.Item name="phone" label="Phone">
+                                <Form.Item name="phone" label="Số điện thoại">
                                     <Input prefix={<PhoneOutlined />} />
                                 </Form.Item>
                             </Form>
                         </Card>
 
-                        {/* Shipping & Payment Information */}
-                        <Card title="Shipping & Payment" className="mb-6">
+                        {/* Thông tin vận chuyển & thanh toán */}
+                        <Card title="Vận chuyển & Thanh toán" className="mb-6">
                             <Space direction="vertical" className="w-full" size="middle">
                                 <div>
-                                    <Text strong>Shipping Address</Text>
+                                    <Text strong>Địa chỉ giao hàng</Text>
                                     <Paragraph className="mt-1">
                                         {order.specific_address}<br />
                                         {order.ward}, {order.city}, {order.province}<br />
@@ -584,49 +583,49 @@ const AdminOrderDetailPage: React.FC = () => {
                                 <Divider />
 
                                 <div className="flex justify-between">
-                                    <Text strong>Shipping Method:</Text>
+                                    <Text strong>Phương thức giao hàng:</Text>
                                     <Tag>{order.shipping_method.toUpperCase()}</Tag>
                                 </div>
 
                                 <div className="flex justify-between">
-                                    <Text strong>Payment Method:</Text>
+                                    <Text strong>Phương thức thanh toán:</Text>
                                     <Tag icon={<CreditCardOutlined />}>
                                         {order.payment_method.toUpperCase()}
                                     </Tag>
                                 </div>
 
                                 <div className="flex justify-between">
-                                    <Text strong>Payment Status:</Text>
+                                    <Text strong>Trạng thái thanh toán:</Text>
                                     <Badge
                                         status={order.payment_method === 'COD' ? 'warning' : 'success'}
-                                        text={order.payment_method === 'COD' ? 'Pending' : 'Paid'}
+                                        text={order.payment_method === 'COD' ? 'Chờ thanh toán' : 'Đã thanh toán'}
                                     />
                                 </div>
                             </Space>
                         </Card>
 
-                        {/* Order Notes */}
-                        <Card title="Order Notes">
+                        {/* Ghi chú đơn hàng */}
+                        <Card title="Ghi chú đơn hàng">
                             <TextArea
-                                placeholder="Add internal notes..."
+                                placeholder="Thêm ghi chú nội bộ..."
                                 rows={4}
                                 value={order.notes}
                                 onChange={(e) => setOrder(prev => prev ? { ...prev, notes: e.target.value } : null)}
                             />
                             <Button type="dashed" block className="mt-2">
-                                Add Note
+                                Thêm ghi chú
                             </Button>
                         </Card>
 
-                        {/* Quick Actions */}
-                        <Card title="Quick Actions" className="mt-6">
+                        {/* Hành động nhanh */}
+                        <Card title="Hành động nhanh" className="mt-6">
                             <Space direction="vertical" className="w-full">
                                 <Button
                                     icon={<FileTextOutlined />}
                                     block
                                     onClick={() => window.print()}
                                 >
-                                    Print Invoice
+                                    In hóa đơn
                                 </Button>
                                 <Button
                                     icon={<TruckOutlined />}
@@ -634,27 +633,27 @@ const AdminOrderDetailPage: React.FC = () => {
                                     onClick={() => setTrackingModalVisible(true)}
                                     disabled={!order.tracking_number}
                                 >
-                                    Update Tracking
+                                    Cập nhật theo dõi
                                 </Button>
                                 <Button
                                     icon={<MailOutlined />}
                                     block
                                 >
-                                    Email Customer
+                                    Gửi email cho khách hàng
                                 </Button>
                             </Space>
                         </Card>
                     </Col>
                 </Row>
 
-                {/* Update Status Modal */}
+                {/* Modal cập nhật trạng thái */}
                 <Modal
-                    title="Update Order Status"
+                    title="Cập nhật trạng thái đơn hàng"
                     open={statusModalVisible}
                     onCancel={() => setStatusModalVisible(false)}
                     footer={[
                         <Button key="cancel" onClick={() => setStatusModalVisible(false)}>
-                            Cancel
+                            Hủy
                         </Button>,
                         <Button
                             key="submit"
@@ -663,20 +662,20 @@ const AdminOrderDetailPage: React.FC = () => {
                             onClick={handleStatusUpdate}
                             disabled={!selectedStatus}
                         >
-                            Update Status
+                            Cập nhật trạng thái
                         </Button>,
                     ]}
                 >
                     <Space direction="vertical" className="w-full" size="middle">
                         <div>
-                            <Text strong>Current Status:</Text>
+                            <Text strong>Trạng thái hiện tại:</Text>
                             <Tag color={getStatusColor(order.status)} className="ml-2">
                                 {order.status.toUpperCase()}
                             </Tag>
                         </div>
 
                         <Select
-                            placeholder="Select new status"
+                            placeholder="Chọn trạng thái mới"
                             value={selectedStatus}
                             onChange={setSelectedStatus}
                             className="w-full"
@@ -689,7 +688,7 @@ const AdminOrderDetailPage: React.FC = () => {
                         </Select>
 
                         <TextArea
-                            placeholder="Add notes about this status change (optional)"
+                            placeholder="Thêm ghi chú về thay đổi trạng thái này (tùy chọn)"
                             value={statusNotes}
                             onChange={(e) => setStatusNotes(e.target.value)}
                             rows={3}
@@ -697,14 +696,14 @@ const AdminOrderDetailPage: React.FC = () => {
                     </Space>
                 </Modal>
 
-                {/* Update Tracking Modal */}
+                {/* Modal cập nhật theo dõi */}
                 <Modal
-                    title="Update Tracking Information"
+                    title="Cập nhật thông tin theo dõi"
                     open={trackingModalVisible}
                     onCancel={() => setTrackingModalVisible(false)}
                     footer={[
                         <Button key="cancel" onClick={() => setTrackingModalVisible(false)}>
-                            Cancel
+                            Hủy
                         </Button>,
                         <Button
                             key="submit"
@@ -713,26 +712,26 @@ const AdminOrderDetailPage: React.FC = () => {
                             onClick={handleTrackingUpdate}
                             disabled={!trackingNumber}
                         >
-                            Update Tracking
+                            Cập nhật theo dõi
                         </Button>,
                     ]}
                 >
                     <Space direction="vertical" className="w-full" size="middle">
                         <div>
-                            <Text strong>Current Tracking:</Text>
+                            <Text strong>Mã theo dõi hiện tại:</Text>
                             <Text code className="ml-2">
-                                {order.tracking_number || 'Not set'}
+                                {order.tracking_number || 'Chưa thiết lập'}
                             </Text>
                         </div>
 
                         <Input
-                            placeholder="Enter tracking number"
+                            placeholder="Nhập mã theo dõi"
                             value={trackingNumber}
                             onChange={(e) => setTrackingNumber(e.target.value)}
                         />
 
                         <Alert
-                            message="Status will be automatically updated to 'Shipped'"
+                            message="Trạng thái sẽ tự động cập nhật thành 'Đã giao hàng'"
                             type="info"
                             showIcon
                         />

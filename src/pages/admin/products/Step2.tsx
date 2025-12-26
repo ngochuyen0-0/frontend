@@ -241,10 +241,10 @@ const Step2Variants: React.FC<Step2Props> = ({
             {/* Progress Steps */}
             <Card>
                 <Steps current={1} size="small">
-                    <Step title="Basic Info" description="Product details" />
-                    <Step title="Variants" description="Product variants" />
-                    <Step title="Images" description="Product images" />
-                    <Step title="Done" description="Review & edit" />
+                    <Step title="Thông tin cơ bản" description="Chi tiết sản phẩm" />
+                    <Step title="Biến thể" description="Các biến thể sản phẩm" />
+                    <Step title="Hình ảnh" description="Hình ảnh sản phẩm" />
+                    <Step title="Hoàn tất" description="Xem lại và chỉnh sửa" />
                 </Steps>
             </Card>
 
@@ -253,7 +253,7 @@ const Step2Variants: React.FC<Step2Props> = ({
                 <Row gutter={[16, 8]}>
                     <Col xs={24} md={12}>
                         <div>
-                            <strong>Name:</strong> {productData.name}
+                            <strong>Tên:</strong> {productData.name}
                         </div>
                         <div>
                             <strong>Description:</strong>{" "}
@@ -262,10 +262,10 @@ const Step2Variants: React.FC<Step2Props> = ({
                     </Col>
                     <Col xs={24} md={12}>
                         <div>
-                            <strong>Brand:</strong> {productData.brand_id}
+                            <strong>Thương hiệu:</strong> {productData.brand_id}
                         </div>
                         <div>
-                            <strong>Category:</strong> {productData.category_id}
+                            <strong>Danh mục:</strong> {productData.category_id}
                         </div>
                     </Col>
                 </Row>
@@ -273,7 +273,7 @@ const Step2Variants: React.FC<Step2Props> = ({
 
             {/* Variants Management */}
             <Card
-                title="🎨 Product Variants"
+                title="🎨 Biến thể sản phẩm"
                 className="!shadow-sm"
                 extra={
                     <Button
@@ -285,7 +285,7 @@ const Step2Variants: React.FC<Step2Props> = ({
                             setModalVisible(true);
                         }}
                     >
-                        Add Variant
+                        Thêm biến thể
                     </Button>
                 }
             >
@@ -298,14 +298,12 @@ const Step2Variants: React.FC<Step2Props> = ({
                     />
                 ) : (
                     <div className="text-center py-8 text-gray-500">
-                        No variants added yet. Click "Add Variant" to get
-                        started.
+                        Chưa có biến thể nào được thêm. Nhấn "Thêm biến thể" để bắt đầu.
                     </div>
                 )}
 
                 <div className="mt-4 text-sm text-gray-500">
-                    💡 Tip: Each variant represents a unique combination of
-                    color and size.
+                    💡 Mẹo: Mỗi biến thể đại diện cho một sự kết hợp duy nhất của màu sắc và kích thước.
                 </div>
             </Card>
 
@@ -317,7 +315,7 @@ const Step2Variants: React.FC<Step2Props> = ({
                         onClick={onBack}
                         icon={<ArrowLeftOutlined />}
                     >
-                        Back
+                        Quay lại
                     </Button>
 
                     <Button
@@ -328,14 +326,14 @@ const Step2Variants: React.FC<Step2Props> = ({
                         disabled={variants.length === 0}
                         icon={<ArrowRightOutlined />}
                     >
-                        Next: Images
+                        Tiếp: Hình ảnh
                     </Button>
                 </div>
             </Card>
 
             {/* Add/Edit Variant Modal */}
             <Modal
-                title={editingVariant ? "Edit Variant" : "Add Variant"}
+                title={editingVariant ? "Chỉnh sửa biến thể" : "Thêm biến thể"}
                 open={modalVisible}
                 onCancel={() => {
                     setModalVisible(false);
@@ -373,17 +371,17 @@ const Step2Variants: React.FC<Step2Props> = ({
                             </Form.Item> */}
 
                             <Form.Item
-                                label="SKU (Stock Keeping Unit)"
+                                label="SKU (Đơn vị lưu kho)"
                                 name="sku"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please enter SKU",
+                                                                                 message: "Vui lòng nhập SKU",
                                     },
                                     {
                                         min: 3,
-                                        message:
-                                            "SKU must be at least 3 characters",
+                                                                                 message:
+                                                                                     "SKU phải có ít nhất 3 ký tự",
                                     },
                                 ]}
                             >
@@ -397,7 +395,7 @@ const Step2Variants: React.FC<Step2Props> = ({
                                               width: '50px'
                                             }}
                                         >
-                                            Gen Auto
+                                            Tự động tạo
                                         </Button>
                                     }
                                 />
@@ -405,17 +403,17 @@ const Step2Variants: React.FC<Step2Props> = ({
                         </Col>
                         <Col xs={24} md={12}>
                             <Form.Item
-                                label="Price"
+                                label="Giá"
                                 name="price"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please enter price",
+                                                                                 message: "Vui lòng nhập giá",
                                     },
                                     {
                                         type: "number",
-                                        min: 0.01,
-                                        message: "Price must be greater than 0",
+                                                                                 min: 0.01,
+                                                                                 message: "Giá phải lớn hơn 0",
                                     },
                                 ]}
                             >
@@ -438,12 +436,12 @@ const Step2Variants: React.FC<Step2Props> = ({
                     <Row gutter={16}>
                         <Col xs={24} md={12}>
                             <Form.Item
-                                label="Color"
+                                label="Màu sắc"
                                 name="color"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please enter color",
+                                                                                 message: "Vui lòng nhập màu sắc",
                                     },
                                 ]}
                             >
@@ -452,12 +450,12 @@ const Step2Variants: React.FC<Step2Props> = ({
                         </Col>
                         <Col xs={24} md={12}>
                             <Form.Item
-                                label="Size"
+                                label="Kích thước"
                                 name="size"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please enter size",
+                                                                                 message: "Vui lòng nhập kích thước",
                                     },
                                 ]}
                             >
@@ -467,17 +465,17 @@ const Step2Variants: React.FC<Step2Props> = ({
                     </Row>
 
                     <Form.Item
-                        label="Stock Quantity"
+                        label="Số lượng tồn kho"
                         name="stock_quantity"
                         rules={[
                             {
                                 required: true,
-                                message: "Please enter stock quantity",
+                                                                 message: "Vui lòng nhập số lượng tồn kho",
                             },
                             {
                                 type: "number",
-                                min: 0,
-                                message: "Stock cannot be negative",
+                                                                 min: 0,
+                                                                 message: "Tồn kho không thể âm",
                             },
                         ]}
                     >
@@ -496,10 +494,10 @@ const Step2Variants: React.FC<Step2Props> = ({
                                 form.resetFields();
                             }}
                         >
-                            Cancel
+                            Hủy
                         </Button>
                         <Button type="primary" htmlType="submit">
-                            {editingVariant ? "Update" : "Add"} Variant
+                            {editingVariant ? "Cập nhật" : "Thêm"} biến thể
                         </Button>
                     </div>
                 </Form>

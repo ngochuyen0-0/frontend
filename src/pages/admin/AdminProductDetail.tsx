@@ -71,7 +71,7 @@ const AdminProductDetail: React.FC = () => {
     // Columns definition
     const columns = [
         {
-            title: "SKU Code",
+            title: "Mã SKU",
             dataIndex: "sku",
             key: "sku",
             render: (sku: string, record: any) => (
@@ -84,7 +84,7 @@ const AdminProductDetail: React.FC = () => {
             sorter: (a: any, b: any) => a.sku.localeCompare(b.sku),
         },
         {
-            title: "Price ($)",
+            title: "Giá (VND)",
             dataIndex: "price",
             key: "price",
             render: (value: string) => {
@@ -93,7 +93,7 @@ const AdminProductDetail: React.FC = () => {
             onFilter: (value: any, record: any) => record.status === value,
         },
         {
-            title: "Size",
+            title: "Kích cỡ",
             dataIndex: "size",
             key: "color",
             render: (value: string) => {
@@ -102,7 +102,7 @@ const AdminProductDetail: React.FC = () => {
             onFilter: (value: any, record: any) => record.status === value,
         },
         {
-            title: "Color",
+            title: "Màu sắc",
             dataIndex: "color",
             key: "color",
             render: (status: string) => {
@@ -111,7 +111,7 @@ const AdminProductDetail: React.FC = () => {
             onFilter: (value: any, record: any) => record.status === value,
         },
         {
-            title: "Stock Quantity",
+            title: "Số lượng tồn kho",
             dataIndex: "stock_quantity",
             key: "stock_quantity",
             render: (value: string) => {
@@ -130,7 +130,7 @@ const AdminProductDetail: React.FC = () => {
             onFilter: (value: any, record: any) => record.status === value,
         },
         {
-            title: "Actions",
+            title: "Hành động",
             key: "actions",
             width: 100,
             render: (_, record) => (
@@ -139,24 +139,24 @@ const AdminProductDetail: React.FC = () => {
                         items: [
                             {
                                 key: "edit",
-                                label: "Edit",
+                                label: "Sửa",
                                 icon: <EditOutlined />,
                                 onClick: () => handleEdit(record)
                             },
                             {
                                 key: "view",
-                                label: "View Details",
+                                label: "Xem chi tiết",
                                 icon: <EyeOutlined />,
                             },
                             {
                                 key: "duplicate",
-                                label: "Duplicate",
+                                label: "Nhân bản",
                                 icon: <CopyOutlined />,
                             },
                             { type: "divider" },
                             {
                                 key: "delete",
-                                label: "Delete",
+                                label: "Xóa",
                                 icon: <DeleteOutlined />,
                                 danger: true,
                             },
@@ -171,10 +171,10 @@ const AdminProductDetail: React.FC = () => {
     ];
 
     const bulkActionItems = [
-        { key: "publish", label: "Publish Selected" },
-        { key: "draft", label: "Move to Draft" },
-        { key: "archive", label: "Archive Selected" },
-        { key: "delete", label: "Delete Selected", danger: true },
+        { key: "publish", label: "Xuất bản đã chọn" },
+        { key: "draft", label: "Chuyển sang bản nháp" },
+        { key: "archive", label: "Lưu trữ đã chọn" },
+        { key: "delete", label: "Xóa đã chọn", danger: true },
     ];
 
     const rowSelection = {
@@ -186,16 +186,16 @@ const AdminProductDetail: React.FC = () => {
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold">
-                        Products Management
-                    </h1>
-                    <p className="text-gray-600">
-                        Manage your products, inventory, and pricing
-                    </p>
-                </div>
+                        Quản lý sản phẩm
+                      </h1>
+                      <p className="text-gray-600">
+                          Quản lý sản phẩm, hàng tồn kho và giá cả
+                      </p>
+                  </div>
                 <Space>
                     <Button icon={<ExportOutlined />}>Export</Button>
                     <Button type="primary" onClick={handleCreate} icon={<PlusOutlined />}>
-                        Add New Variant
+                        Thêm phiên bản mới
                     </Button>
                 </Space>
             </div>
@@ -207,18 +207,18 @@ const AdminProductDetail: React.FC = () => {
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                     <Card>
-                        Total Variant:
+                        Tổng số phiên bản:
                         <Tag color="blue" style={{
                             fontSize: "14px",
                             margin: "0px 10px"
-                        }}>{variants.length} Variants</Tag>
+                        }}>{variants.length} Phiên bản</Tag>
                     </Card>
                     <Card>
-                        <label style={{ fontSize: "12px", fontWeight: 550 }}>Product Name</label>
+                        <label style={{ fontSize: "12px", fontWeight: 550 }}>Tên sản phẩm</label>
                         <Card>{product?.name}</Card>
-                        <label style={{ fontSize: "12px", fontWeight: 550 }}>Description</label>
+                        <label style={{ fontSize: "12px", fontWeight: 550 }}>Mô tả</label>
                         <Card>{product?.description}</Card>
-                        <label style={{ fontSize: "12px", fontWeight: 550 }}>Created Date</label>
+                        <label style={{ fontSize: "12px", fontWeight: 550 }}>Ngày tạo</label>
                         <Card>{`${new Date(product?.created_at || "").toLocaleDateString()} - ${new Date(product?.created_at || "").toLocaleTimeString()}`}</Card>
                     </Card>
                 </div>
@@ -228,22 +228,22 @@ const AdminProductDetail: React.FC = () => {
                         <div className="flex flex-wrap gap-4 items-center justify-between">
                             <Space>
                                 <Input
-                                    placeholder="Search products..."
+                                    placeholder="Tìm kiếm sản phẩm..."
                                     prefix={<SearchOutlined />}
                                 />
                                 <Select
-                                    placeholder="All Categories"
+                                    placeholder="Tất cả danh mục"
                                 >
                                     <Option value="leather">Túi da</Option>
                                     <Option value="cloth">Túi vải</Option>
                                     <Option value="limit">Bộ sưu tập</Option>
                                 </Select>
                                 <Select
-                                    placeholder="All Status"
+                                    placeholder="Tất cả trạng thái"
                                 >
-                                    <Option value="published">Published</Option>
-                                    <Option value="draft">Draft</Option>
-                                    <Option value="archived">Archived</Option>
+                                    <Option value="published">Đã xuất bản</Option>
+                                    <Option value="draft">Bản nháp</Option>
+                                    <Option value="archived">Đã lưu trữ</Option>
                                 </Select>
                             </Space>
 
@@ -251,12 +251,12 @@ const AdminProductDetail: React.FC = () => {
                                 {selectedRowKeys.length > 0 && (
                                     <Dropdown menu={{ items: bulkActionItems }}>
                                         <Button>
-                                            Bulk Actions ({selectedRowKeys.length})
+                                            Hành động hàng loạt ({selectedRowKeys.length})
                                         </Button>
                                     </Dropdown>
                                 )}
                                 <Button icon={<FilterOutlined />}>
-                                    More Filters
+                                    Bộ lọc khác
                                 </Button>
                             </Space>
                         </div>

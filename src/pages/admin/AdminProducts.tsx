@@ -67,7 +67,7 @@ const AdminProducts: React.FC = () => {
                 return (<img style={{ width: 70, height: 40, borderRadius: 6 }} src={thumbnail.image_url} />)
             },
         }, {
-            title: "Product Info",
+            title: "Thông tin sản phẩm",
             dataIndex: "name",
             key: "name",
             render: (name: string, record: any) => (
@@ -76,20 +76,20 @@ const AdminProducts: React.FC = () => {
                         cursor: "pointer"
                     }} onClick={() => navigate(`/admin/v1/product/${record.id}`)}>{name}</div>
                     <div className="text-xs text-gray-400">
-                        {record.variants.length || 0} Variants
+                        {record.variants.length || 0} Biến thể
                     </div>
                 </div>
             ),
             sorter: (a: any, b: any) => a.name.localeCompare(b.name),
         }, {
-            title: "Brand",
+            title: "Thương hiệu",
             dataIndex: ["brand", "name"],
             key: "brand",
             render: (category: string) => <div>{category}</div>,
             onFilter: (value: any, record: any) => record.brand.name === value,
         },
         {
-            title: "Category",
+            title: "Danh mục",
             dataIndex: ["category", "name"],
             key: "category",
             render: (category: string) => <div>{category}</div>,
@@ -101,28 +101,28 @@ const AdminProducts: React.FC = () => {
             onFilter: (value: any, record: any) => record.category.name === value,
         },
         {
-            title: "Status",
+            title: "Trạng thái",
             dataIndex: "status",
             key: "status",
             render: (status: string) => {
                 const statusConfig: any = {
-                    published: { color: "green", text: "Published" },
-                    draft: { color: "blue", text: "Draft" },
-                    archived: { color: "gray", text: "Archived" },
+                    published: { color: "green", text: "Đã công bố" },
+                    draft: { color: "blue", text: "Bản nháp" },
+                    archived: { color: "gray", text: "Đã lưu trữ" },
                 };
 
                 const config = statusConfig[status] || statusConfig.draft;
                 return <Tag color={config.color}>{config.text}</Tag>;
             },
             filters: [
-                { text: "Published", value: "published" },
-                { text: "Draft", value: "draft" },
-                { text: "Archived", value: "archived" },
+                { text: "Đã công bố", value: "published" },
+                { text: "Bản nháp", value: "draft" },
+                { text: "Đã lưu trữ", value: "archived" },
             ],
             onFilter: (value: any, record: any) => record.status === value,
         },
         {
-            title: "Actions",
+            title: "Hành động",
             key: "actions",
             width: 100,
             render: (_, record) => (
@@ -131,30 +131,30 @@ const AdminProducts: React.FC = () => {
                         items: [
                             {
                                 key: "edit",
-                                label: "Edit",
+                                label: "Sửa",
                                 icon: <EditOutlined />,
                                 onClick: () => handleEdit(record)
 
                             },
                             {
                                 key: "quick-edit",
-                                label: "Quick Edit",
+                                label: "Sửa nhanh",
                                 icon: <FormOutlined />,
                             },
                             {
                                 key: "view",
-                                label: "View Details",
+                                label: "Xem chi tiết",
                                 icon: <EyeOutlined />,
                             },
                             {
                                 key: "duplicate",
-                                label: "Duplicate",
+                                label: "Nhân bản",
                                 icon: <CopyOutlined />,
                             },
                             { type: "divider" },
                             {
                                 key: "delete",
-                                label: "Delete",
+                                label: "Xóa",
                                 icon: <DeleteOutlined />,
                                 danger: true,
                             },
@@ -169,10 +169,10 @@ const AdminProducts: React.FC = () => {
     ];
 
     const bulkActionItems = [
-        { key: "publish", label: "Publish Selected" },
-        { key: "draft", label: "Move to Draft" },
-        { key: "archive", label: "Archive Selected" },
-        { key: "delete", label: "Delete Selected", danger: true },
+        { key: "publish", label: "Công bố mục đã chọn" },
+        { key: "draft", label: "Chuyển sang bản nháp" },
+        { key: "archive", label: "Lưu trữ mục đã chọn" },
+        { key: "delete", label: "Xóa mục đã chọn", danger: true },
     ];
 
     const rowSelection = {
@@ -185,16 +185,16 @@ const AdminProducts: React.FC = () => {
                 <div className="flex justify-between items-center">
                     <div>
                         <h1 className="text-2xl font-bold">
-                            Products Management
+                            Quản lý sản phẩm
                         </h1>
                         <p className="text-gray-600">
-                            Manage your products, inventory, and pricing
+                            Quản lý sản phẩm, hàng tồn kho và giá cả
                         </p>
                     </div>
                     <Space>
-                        <Button icon={<ExportOutlined />}>Export</Button>
+                        <Button icon={<ExportOutlined />}>Xuất dữ liệu</Button>
                         <Button type="primary" onClick={() => navigate('/admin/v1/products/add-products')} icon={<PlusOutlined />}>
-                            Add New Product
+                            Thêm sản phẩm mới
                         </Button>
                     </Space>
                 </div>
@@ -202,13 +202,13 @@ const AdminProducts: React.FC = () => {
                 <Row gutter={16}>
                     <Col span={6}>
                         <Card>
-                            <Statistic title="Total Products" value={156} />
+                            <Statistic title="Tổng số sản phẩm" value={156} />
                         </Card>
                     </Col>
                     <Col span={6}>
                         <Card>
                             <Statistic
-                                title="In Stock"
+                                title="Còn hàng"
                                 value={45}
                                 valueStyle={{ color: "#3f8600" }}
                             />
@@ -217,7 +217,7 @@ const AdminProducts: React.FC = () => {
                     <Col span={6}>
                         <Card>
                             <Statistic
-                                title="Low Stock"
+                                title="Sắp hết hàng"
                                 value={12}
                                 valueStyle={{ color: "#faad14" }}
                             />
@@ -226,7 +226,7 @@ const AdminProducts: React.FC = () => {
                     <Col span={6}>
                         <Card>
                             <Statistic
-                                title="Out of Stock"
+                                title="Hết hàng"
                                 value={3}
                                 valueStyle={{ color: "#cf1322" }}
                             />
@@ -239,12 +239,12 @@ const AdminProducts: React.FC = () => {
                     <div className="flex flex-wrap gap-4 items-center justify-between">
                         <Space>
                             <Input
-                                placeholder="Search products..."
+                                placeholder="Tìm kiếm sản phẩm..."
                                 prefix={<SearchOutlined />}
                                 style={{ width: 300 }}
                             />
                             <Select
-                                placeholder="All Categories"
+                                placeholder="Tất cả danh mục"
                                 style={{ width: 150 }}
                             >
                                 <Option value="leather">Túi da</Option>
@@ -252,12 +252,12 @@ const AdminProducts: React.FC = () => {
                                 <Option value="limit">Bộ sưu tập</Option>
                             </Select>
                             <Select
-                                placeholder="All Status"
+                                placeholder="Tất cả trạng thái"
                                 style={{ width: 150 }}
                             >
-                                <Option value="published">Published</Option>
-                                <Option value="draft">Draft</Option>
-                                <Option value="archived">Archived</Option>
+                                <Option value="published">Đã công bố</Option>
+                                <Option value="draft">Bản nháp</Option>
+                                <Option value="archived">Đã lưu trữ</Option>
                             </Select>
                         </Space>
 
@@ -265,12 +265,12 @@ const AdminProducts: React.FC = () => {
                             {selectedRowKeys.length > 0 && (
                                 <Dropdown menu={{ items: bulkActionItems }}>
                                     <Button>
-                                        Bulk Actions ({selectedRowKeys.length})
+                                        Hành động hàng loạt ({selectedRowKeys.length})
                                     </Button>
                                 </Dropdown>
                             )}
                             <Button icon={<FilterOutlined />}>
-                                More Filters
+                                Bộ lọc khác
                             </Button>
                         </Space>
                     </div>
@@ -289,7 +289,7 @@ const AdminProducts: React.FC = () => {
                             showSizeChanger: true,
                             showQuickJumper: true,
                             showTotal: (total, range) =>
-                                `${range[0]}-${range[1]} of ${total} items`,
+                                `${range[0]}-${range[1]} trên ${total} mục`,
                         }}
                         scroll={{ x: 1000 }}
                     />

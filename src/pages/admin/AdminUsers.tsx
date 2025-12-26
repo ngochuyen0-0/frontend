@@ -1,4 +1,4 @@
-// pages/admin/UserManagement.tsx
+// pages/admin/QuanLyNguoiDung.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Table,
@@ -68,7 +68,7 @@ const AdminUsers: React.FC = () => {
       }).catch(err => {
       })
     } catch (error) {
-      message.error('Failed to load users');
+      message.error('Tải người dùng thất bại');
       setLoading(false);
     }
   };
@@ -112,20 +112,20 @@ const AdminUsers: React.FC = () => {
   const handleDelete = async (userId: string) => {
     try {
       // await userApi.deleteUser(userId);
-      message.success('User deleted successfully');
+      message.success('Xóa người dùng thành công');
       loadUsers();
     } catch (error) {
-      message.error('Failed to delete user');
+      message.error('Xóa người dùng thất bại');
     }
   };
 
   const handleBulkDelete = () => {
     Modal.confirm({
-      title: 'Delete Selected Users',
-      content: `Are you sure you want to delete ${selectedRowKeys.length} users?`,
+      title: 'Xóa người dùng đã chọn',
+      content: `Bạn có chắc chắn muốn xóa ${selectedRowKeys.length} người dùng?`,
       onOk: async () => {
         // await userApi.bulkDeleteUsers(selectedRowKeys as string[]);
-        message.success(`Deleted ${selectedRowKeys.length} users`);
+        message.success(`Đã xóa ${selectedRowKeys.length} người dùng`);
         setSelectedRowKeys([]);
         loadUsers();
       }
@@ -133,12 +133,12 @@ const AdminUsers: React.FC = () => {
   };
 
   const handleExport = () => {
-    message.info('Export feature coming soon...');
+    message.info('Tính năng xuất dữ liệu sẽ sớm được cập nhật...');
   };
 
   const columns: ColumnsType<UserProfile> = [
     {
-      title: 'User',
+      title: 'Người dùng',
       dataIndex: 'fullName',
       key: 'user',
       render: (text, record) => (
@@ -151,7 +151,7 @@ const AdminUsers: React.FC = () => {
       ),
     },
     {
-      title: 'Role',
+      title: 'Vai trò',
       dataIndex: 'role',
       key: 'role',
       render: (role: string) => (
@@ -164,7 +164,7 @@ const AdminUsers: React.FC = () => {
       ),
     },
     {
-      title: 'Status',
+      title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
@@ -177,32 +177,32 @@ const AdminUsers: React.FC = () => {
       ),
     },
     {
-      title: 'Registration Date',
+      title: 'Ngày đăng ký',
       dataIndex: 'created_at',
       key: 'created_at',
       render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
     },
     {
-      title: 'Coins',
+      title: 'Xu',
       dataIndex: 'id',
       key: 'id',
       render: (id, record) => (
-        <Tag color="gold">{record.loyalty_points?.find(p=>p.source=="daily_login")?.points} xu</Tag>
+        <Tag color="gold">{record.loyalty_points?.find(p=>p.source=="daily_login")?.points} Xu</Tag>
       ),
     },
     {
-      title: 'Actions',
+      title: 'Hành động',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
-          <Tooltip title="View Details">
+          <Tooltip title="Xem chi tiết">
             <Button
               type="text"
               icon={<EyeOutlined />}
               onClick={() => handleViewDetail(record)}
             />
           </Tooltip>
-          <Tooltip title="Edit">
+          <Tooltip title="Chỉnh sửa">
             <Button
               type="text"
               icon={<EditOutlined />}
@@ -210,13 +210,13 @@ const AdminUsers: React.FC = () => {
             />
           </Tooltip>
           <Popconfirm
-            title="Delete User"
-            description="Are you sure to delete this user?"
+            title="Xóa người dùng"
+            description="Bạn có chắc chắn muốn xóa người dùng này?"
             onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
+            okText="Có"
+            cancelText="Không"
           >
-            <Tooltip title="Delete">
+            <Tooltip title="Xóa">
               <Button
                 type="text"
                 danger
@@ -249,8 +249,8 @@ const AdminUsers: React.FC = () => {
       {/* Page Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600">Manage your customers and their data</p>
+          <h1 className="text-2xl font-bold text-gray-900">Quản lý người dùng</h1>
+          <p className="text-gray-600">Quản lý người dùng và dữ liệu của họ</p>
         </div>
         <Button
           type="primary"
@@ -258,7 +258,7 @@ const AdminUsers: React.FC = () => {
           onClick={handleCreate}
           size="large"
         >
-          Add New User
+          Thêm người dùng mới
         </Button>
       </div>
 
@@ -267,7 +267,7 @@ const AdminUsers: React.FC = () => {
         <Col xs={24} sm={6}>
           <Card>
             <Statistic
-              title="Total Users"
+              title="Tổng số người dùng"
               value={stats.totalUsers}
               prefix={<UserAddOutlined />}
             />
@@ -276,7 +276,7 @@ const AdminUsers: React.FC = () => {
         <Col xs={24} sm={6}>
           <Card>
             <Statistic
-              title="Active Users"
+              title="Người dùng hoạt động"
               value={stats.activeUsers}
               valueStyle={{ color: '#52c41a' }}
             />
@@ -284,7 +284,7 @@ const AdminUsers: React.FC = () => {
         </Col>
         <Col xs={24} sm={6}>
           <Card>
-            <Statistic title="New Today" value={stats.newUsersToday} />
+            <Statistic title="Mới hôm nay" value={stats.newUsersToday} />
           </Card>
         </Col>
       </Row>
@@ -293,9 +293,9 @@ const AdminUsers: React.FC = () => {
       <Card>
         <div className="flex flex-wrap gap-4 items-end mb-4">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium mb-2">Search</label>
+            <label className="block text-sm font-medium mb-2">Tìm kiếm</label>
             <Search
-              placeholder="Search by name, email, phone..."
+              placeholder="Tìm kiếm theo tên, email, số điện thoại..."
               allowClear
               onSearch={handleSearch}
               style={{ width: '100%' }}
@@ -303,35 +303,35 @@ const AdminUsers: React.FC = () => {
           </div>
 
           <div style={{ width: 120 }}>
-            <label className="block text-sm font-medium mb-2">Role</label>
+            <label className="block text-sm font-medium mb-2">Vai trò</label>
             <Select
-              placeholder="All Roles"
+              placeholder="Tất cả vai trò"
               style={{ width: '100%' }}
               onChange={handleRoleFilter}
               allowClear
             >
-              <Option value="admin">Admin</Option>
-              <Option value="moderator">Moderator</Option>
-              <Option value="user">User</Option>
+              <Option value="admin">Quản trị viên</Option>
+              <Option value="moderator">Kiểm duyệt viên</Option>
+              <Option value="user">Người dùng</Option>
             </Select>
           </div>
 
           <div style={{ width: 120 }}>
-            <label className="block text-sm font-medium mb-2">Status</label>
+            <label className="block text-sm font-medium mb-2">Trạng thái</label>
             <Select
-              placeholder="All Status"
+              placeholder="Tất cả trạng thái"
               style={{ width: '100%' }}
               onChange={handleStatusFilter}
               allowClear
             >
-              <Option value="active">Active</Option>
-              <Option value="inactive">Inactive</Option>
-              <Option value="banned">Banned</Option>
+              <Option value="active">Hoạt động</Option>
+              <Option value="inactive">Không hoạt động</Option>
+              <Option value="banned">Bị cấm</Option>
             </Select>
           </div>
 
           <div style={{ width: 250 }}>
-            <label className="block text-sm font-medium mb-2">Registration Date</label>
+            <label className="block text-sm font-medium mb-2">Ngày đăng ký</label>
             <RangePicker
               style={{ width: '100%' }}
               onChange={handleDateRange}
@@ -343,13 +343,13 @@ const AdminUsers: React.FC = () => {
               icon={<ReloadOutlined />}
               onClick={loadUsers}
             >
-              Refresh
+              Làm mới
             </Button>
             <Button
               icon={<ExportOutlined />}
               onClick={handleExport}
             >
-              Export
+              Xuất dữ liệu
             </Button>
           </div>
         </div>
@@ -358,20 +358,20 @@ const AdminUsers: React.FC = () => {
         {selectedRowKeys.length > 0 && (
           <div className="mb-4 p-3 bg-blue-50 rounded border">
             <Space>
-              <span>{selectedRowKeys.length} users selected</span>
+              <span>{selectedRowKeys.length} người dùng đã chọn</span>
               <Button
                 danger
                 icon={<DeleteOutlined />}
                 onClick={handleBulkDelete}
                 size="small"
               >
-                Delete Selected
+                Xóa đã chọn
               </Button>
               <Button
                 onClick={() => setSelectedRowKeys([])}
                 size="small"
               >
-                Clear Selection
+                Bỏ chọn
               </Button>
             </Space>
           </div>
@@ -389,7 +389,7 @@ const AdminUsers: React.FC = () => {
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`,
+              `${range[0]}-${range[1]} trên ${total} mục`,
           }}
         />
       </Card>

@@ -63,15 +63,15 @@ const AdminProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
-  // Mock data for admin
+  // Mock data cho admin
   const mockAdminProfile: AdminProfile = {
     id: 'admin-001',
     avatar: 'https://via.placeholder.com/100',
-    fullName: 'Admin Manager',
+    fullName: 'Quản trị viên',
     email: 'admin@company.com',
     phone: '0123 456 789',
-    role: 'Super Admin',
-    department: 'IT Department',
+    role: 'Quản trị viên cấp cao',
+    department: 'Phòng IT',
     permissions: ['users:read', 'users:write', 'products:manage', 'orders:manage', 'settings:manage'],
     lastLogin: '2024-01-20 14:30:25',
     loginIp: '192.168.1.100',
@@ -99,7 +99,7 @@ const AdminProfilePage: React.FC = () => {
         setLoading(false);
       }, 500);
     } catch (error) {
-      message.error('Failed to load profile');
+      message.error('Tải thông tin hồ sơ thất bại');
       setLoading(false);
     }
   };
@@ -108,11 +108,11 @@ const AdminProfilePage: React.FC = () => {
     setLoading(true);
     try {
       // await adminApi.updateProfile(values);
-      message.success('Profile updated successfully');
+      message.success('Cập nhật hồ sơ thành công');
       setEditing(false);
       loadProfile();
     } catch (error) {
-      message.error('Update failed');
+      message.error('Cập nhật thất bại');
     } finally {
       setLoading(false);
     }
@@ -122,9 +122,9 @@ const AdminProfilePage: React.FC = () => {
     try {
       // await adminApi.toggleTwoFactor(enabled);
       setProfile(prev => prev ? { ...prev, twoFactorEnabled: enabled } : null);
-      message.success(`Two-factor authentication ${enabled ? 'enabled' : 'disabled'}`);
+      message.success(`Xác thực hai yếu tố đã ${enabled ? 'bật' : 'tắt'}`);
     } catch (error) {
-      message.error('Operation failed');
+      message.error('Thao tác thất bại');
     }
   };
 
@@ -135,14 +135,14 @@ const AdminProfilePage: React.FC = () => {
         ...prev,
         notificationSettings: { ...prev.notificationSettings, [key]: value }
       } : null);
-      message.success('Notification settings updated');
+      message.success('Cài đặt thông báo đã được cập nhật');
     } catch (error) {
-      message.error('Update failed');
+      message.error('Cập nhật thất bại');
     }
   };
 
   if (!profile) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>;
   }
 
   return (
@@ -159,7 +159,7 @@ const AdminProfilePage: React.FC = () => {
                   icon={<UserOutlined />}
                   className="border-4 border-white shadow-lg"
                 />
-                <Upload 
+                <Upload
                   showUploadList={false}
                   // beforeUpload={handleAvatarUpload}
                 >
@@ -190,7 +190,7 @@ const AdminProfilePage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <UserOutlined />
-                    <span>Admin since {new Date(profile.createdAt).toLocaleDateString('vi-VN')}</span>
+                    <span>Quản trị viên từ {new Date(profile.createdAt).toLocaleDateString('vi-VN')}</span>
                   </div>
                 </div>
               </div>
@@ -202,17 +202,17 @@ const AdminProfilePage: React.FC = () => {
               loading={loading}
               onClick={editing ? form.submit : () => setEditing(true)}
             >
-              {editing ? 'Save Changes' : 'Edit Profile'}
+              {editing ? 'Lưu thay đổi' : 'Chỉnh sửa hồ sơ'}
             </Button>
           </div>
         </Card>
 
-        {/* Quick Stats */}
+        {/* Thống kê nhanh */}
         <Row gutter={[16, 16]} className="mb-6">
           <Col xs={24} sm={8}>
             <Card className="text-center !shadow-sm">
               <Statistic
-                title="Last Login"
+                title="Lần đăng nhập cuối"
                 value={new Date(profile.lastLogin).toLocaleDateString('vi-VN')}
                 valueStyle={{ fontSize: '16px' }}
               />
@@ -221,7 +221,7 @@ const AdminProfilePage: React.FC = () => {
           <Col xs={24} sm={8}>
             <Card className="text-center !shadow-sm">
               <Statistic
-                title="Login IP"
+                title="IP đăng nhập"
                 value={profile.loginIp}
                 valueStyle={{ fontSize: '16px' }}
               />
@@ -230,8 +230,8 @@ const AdminProfilePage: React.FC = () => {
           <Col xs={24} sm={8}>
             <Card className="text-center !shadow-sm">
               <Statistic
-                title="2FA Status"
-                value={profile.twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                title="Trạng thái 2FA"
+                value={profile.twoFactorEnabled ? 'Đã bật' : 'Đã tắt'}
                 valueStyle={{
                   color: profile.twoFactorEnabled ? '#52c41a' : '#ff4d4f',
                   fontSize: '16px'
@@ -241,15 +241,15 @@ const AdminProfilePage: React.FC = () => {
           </Col>
         </Row>
 
-        {/* Main Content */}
+        {/* Nội dung chính */}
         <Card className="!shadow-sm">
           <Tabs defaultActiveKey="profile" size="large">
-            {/* Personal Information Tab */}
+            {/* Tab Thông tin cá nhân */}
             <TabPane
               tab={
                 <span className="flex items-center gap-2">
                   <UserOutlined />
-                  Personal Information
+                  Thông tin cá nhân
                 </span>
               }
               key="profile"
@@ -263,9 +263,9 @@ const AdminProfilePage: React.FC = () => {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Form.Item
-                    label="Full Name"
+                    label="Họ và tên đầy đủ"
                     name="fullName"
-                    rules={[{ required: true, message: 'Please enter full name' }]}
+                    rules={[{ required: true, message: 'Vui lòng nhập họ tên đầy đủ' }]}
                   >
                     <Input prefix={<UserOutlined />} size="large" />
                   </Form.Item>
@@ -274,23 +274,23 @@ const AdminProfilePage: React.FC = () => {
                     label="Email"
                     name="email"
                     rules={[
-                      { required: true, message: 'Please enter email' },
-                      { type: 'email', message: 'Invalid email' }
+                      { required: true, message: 'Vui lòng nhập email' },
+                      { type: 'email', message: 'Email không hợp lệ' }
                     ]}
                   >
                     <Input prefix={<MailOutlined />} size="large" />
                   </Form.Item>
 
                   <Form.Item
-                    label="Phone"
+                    label="Số điện thoại"
                     name="phone"
-                    rules={[{ required: true, message: 'Please enter phone number' }]}
+                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
                   >
                     <Input prefix={<PhoneOutlined />} size="large" />
                   </Form.Item>
 
                   <Form.Item
-                    label="Department"
+                    label="Phòng ban"
                     name="department"
                   >
                     <Input size="large" />
@@ -300,10 +300,10 @@ const AdminProfilePage: React.FC = () => {
                 {editing && (
                   <div className="flex justify-end gap-2 pt-4 border-t">
                     <Button onClick={() => setEditing(false)}>
-                      Cancel
+                      Hủy
                     </Button>
                     <Button type="primary" htmlType="submit" loading={loading}>
-                      Save Changes
+                      Lưu thay đổi
                     </Button>
                   </div>
                 )}
@@ -312,17 +312,17 @@ const AdminProfilePage: React.FC = () => {
               {!editing && (
                 <>
                   <Divider />
-                  <Descriptions title="System Information" column={1}>
-                    <Descriptions.Item label="User ID">
+                  <Descriptions title="Thông tin hệ thống" column={1}>
+                    <Descriptions.Item label="ID người dùng">
                       {profile.id}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Role">
+                    <Descriptions.Item label="Vai trò">
                       <Tag color="red">{profile.role}</Tag>
                     </Descriptions.Item>
-                    <Descriptions.Item label="Department">
+                    <Descriptions.Item label="Phòng ban">
                       {profile.department}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Account Created">
+                    <Descriptions.Item label="Tài khoản tạo lúc">
                       {new Date(profile.createdAt).toLocaleString('vi-VN')}
                     </Descriptions.Item>
                   </Descriptions>
@@ -330,24 +330,24 @@ const AdminProfilePage: React.FC = () => {
               )}
             </TabPane>
 
-            {/* Security Tab */}
+            {/* Tab Bảo mật */}
             <TabPane
               tab={
                 <span className="flex items-center gap-2">
                   <SafetyOutlined />
-                  Security
+                  Bảo mật
                 </span>
               }
               key="security"
             >
               <div className="space-y-6">
-                {/* Two-Factor Authentication */}
-                <Card title="Two-Factor Authentication" className="!shadow-sm">
+                {/* Xác thực hai yếu tố */}
+                <Card title="Xác thực hai yếu tố" className="!shadow-sm">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h4 className="font-medium">Two-Factor Authentication</h4>
+                      <h4 className="font-medium">Xác thực hai yếu tố</h4>
                       <p className="text-gray-600 text-sm">
-                        Add an extra layer of security to your account
+                        Thêm một lớp bảo mật bổ sung cho tài khoản của bạn
                       </p>
                     </div>
                     <Switch
@@ -358,30 +358,30 @@ const AdminProfilePage: React.FC = () => {
                   {profile.twoFactorEnabled && (
                     <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
                       <p className="text-green-800 text-sm">
-                        ✅ Two-factor authentication is enabled for your account.
+                        ✅ Xác thực hai yếu tố đã được bật cho tài khoản của bạn.
                       </p>
                     </div>
                   )}
                 </Card>
 
-                {/* Password Change */}
-                <Card title="Password" className="!shadow-sm">
+                {/* Đổi mật khẩu */}
+                <Card title="Mật khẩu" className="!shadow-sm">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h4 className="font-medium">Change Password</h4>
+                      <h4 className="font-medium">Đổi mật khẩu</h4>
                       <p className="text-gray-600 text-sm">
-                        Update your password regularly to keep your account secure
+                        Cập nhật mật khẩu thường xuyên để giữ cho tài khoản của bạn an toàn
                       </p>
                     </div>
                     <Button type="primary" icon={<LockOutlined />}>
-                      Change Password
+                      Đổi mật khẩu
                     </Button>
                   </div>
                 </Card>
 
-                {/* Permissions */}
-                <Card title="Permissions" className="!shadow-sm">
-                  <h4 className="font-medium mb-3">Your Permissions</h4>
+                {/* Quyền */}
+                <Card title="Quyền" className="!shadow-sm">
+                  <h4 className="font-medium mb-3">Quyền của bạn</h4>
                   <div className="flex flex-wrap gap-2">
                     {profile.permissions.map(permission => (
                       <Tag key={permission} color="blue">
@@ -393,24 +393,24 @@ const AdminProfilePage: React.FC = () => {
               </div>
             </TabPane>
 
-            {/* Notifications Tab */}
+            {/* Tab Thông báo */}
             <TabPane
               tab={
                 <span className="flex items-center gap-2">
                   <BellOutlined />
-                  Notifications
+                  Thông báo
                 </span>
               }
               key="notifications"
             >
               <Card className="!shadow-sm">
-                <h3 className="text-lg font-medium mb-4">Notification Preferences</h3>
+                <h3 className="text-lg font-medium mb-4">Tùy chọn thông báo</h3>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center p-4 border rounded-lg">
                     <div>
-                      <h4 className="font-medium">Email Notifications</h4>
+                      <h4 className="font-medium">Thông báo Email</h4>
                       <p className="text-gray-600 text-sm">
-                        Receive important updates via email
+                        Nhận các cập nhật quan trọng qua email
                       </p>
                     </div>
                     <Switch
@@ -421,9 +421,9 @@ const AdminProfilePage: React.FC = () => {
 
                   <div className="flex justify-between items-center p-4 border rounded-lg">
                     <div>
-                      <h4 className="font-medium">Push Notifications</h4>
+                      <h4 className="font-medium">Thông báo đẩy</h4>
                       <p className="text-gray-600 text-sm">
-                        Get instant notifications in your browser
+                        Nhận thông báo tức thì trong trình duyệt của bạn
                       </p>
                     </div>
                     <Switch
@@ -434,9 +434,9 @@ const AdminProfilePage: React.FC = () => {
 
                   <div className="flex justify-between items-center p-4 border rounded-lg">
                     <div>
-                      <h4 className="font-medium">SMS Notifications</h4>
+                      <h4 className="font-medium">Thông báo SMS</h4>
                       <p className="text-gray-600 text-sm">
-                        Receive critical alerts via SMS
+                        Nhận các cảnh báo quan trọng qua SMS
                       </p>
                     </div>
                     <Switch
@@ -448,47 +448,47 @@ const AdminProfilePage: React.FC = () => {
               </Card>
             </TabPane>
 
-            {/* System Settings Tab */}
+            {/* Tab Cài đặt hệ thống */}
             <TabPane
               tab={
                 <span className="flex items-center gap-2">
                   <SettingOutlined />
-                  System Settings
+                  Cài đặt hệ thống
                 </span>
               }
               key="settings"
             >
               <Card className="!shadow-sm">
-                <h3 className="text-lg font-medium mb-4">Admin System Settings</h3>
+                <h3 className="text-lg font-medium mb-4">Cài đặt hệ thống quản trị</h3>
                 <div className="space-y-4">
                   <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium mb-2">Dashboard Preferences</h4>
+                    <h4 className="font-medium mb-2">Tùy chọn bảng điều khiển</h4>
                     <p className="text-gray-600 text-sm mb-3">
-                      Customize your admin dashboard view
+                      Tùy chỉnh chế độ xem bảng điều khiển quản trị viên của bạn
                     </p>
                     <Button type="primary" size="small">
-                      Configure Dashboard
+                      Cấu hình bảng điều khiển
                     </Button>
                   </div>
 
                   <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium mb-2">Data Export</h4>
+                    <h4 className="font-medium mb-2">Xuất dữ liệu</h4>
                     <p className="text-gray-600 text-sm mb-3">
-                      Export system data and reports
+                      Xuất dữ liệu hệ thống và báo cáo
                     </p>
                     <Space>
-                      <Button size="small">Export Users</Button>
-                      <Button size="small">Export Orders</Button>
-                      <Button size="small">Export Products</Button>
+                      <Button size="small">Xuất người dùng</Button>
+                      <Button size="small">Xuất đơn hàng</Button>
+                      <Button size="small">Xuất sản phẩm</Button>
                     </Space>
                   </div>
 
                   <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium mb-2">System Logs</h4>
+                    <h4 className="font-medium mb-2">Nhật ký hệ thống</h4>
                     <p className="text-gray-600 text-sm mb-3">
-                      View and manage system activity logs
+                      Xem và quản lý nhật ký hoạt động hệ thống
                     </p>
-                    <Button size="small">View Logs</Button>
+                    <Button size="small">Xem nhật ký</Button>
                   </div>
                 </div>
               </Card>

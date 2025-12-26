@@ -28,6 +28,7 @@ import {
 import apiClient from '../../utils/apiClient';
 import { toast } from 'sonner';
 import { createCategory, getCategories, updateCategory } from '../../services/categoryService';
+import type { MenuProps } from 'antd';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -66,8 +67,8 @@ const AdminCategories: React.FC = () => {
   }, [])
 
   const buildTree = (list: Category[]) => {
-    const map = {};
-    const roots = [];
+    const map: Record<string, Category & { children: Category[] }> = {};
+    const roots: (Category & { children: Category[] })[] = [];
 
     list.forEach(item => {
       map[item.id] = { ...item, children: [] };
@@ -122,7 +123,7 @@ const AdminCategories: React.FC = () => {
 
       if (editingCategory) {
         await updateCategory(editingCategory.id, values)
-        toast.success('Category updated successfully!');
+        toast.success('Cập nhật danh mục thành công!');
         getCategories({})
       } else {
         // Add new category
@@ -140,7 +141,7 @@ const AdminCategories: React.FC = () => {
             return [...prev, newCategory];
           }
         });
-        toast.success('Category created successfully!');
+        toast.success('Tạo danh mục thành công!');
       }
 
       setIsModalVisible(false);
@@ -159,11 +160,11 @@ const AdminCategories: React.FC = () => {
 
   const handleDeleteCategory = (categoryId: string, isSubcategory: boolean = false) => {
     Modal.confirm({
-      title: 'Delete Category',
-      content: 'Are you sure you want to delete this category? Products in this category will be moved to uncategorized.',
-      okText: 'Delete',
+      title: 'Xóa danh mục',
+      content: 'Bạn có chắc chắn muốn xóa danh mục này không? Các sản phẩm trong danh mục này sẽ được chuyển sang danh mục chưa phân loại.',
+      okText: 'Xóa',
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: 'Hủy',
       onOk() {
         setCategories(prev => {
           if (isSubcategory) {
@@ -177,7 +178,7 @@ const AdminCategories: React.FC = () => {
             return prev.filter(cat => cat.id !== categoryId);
           }
         });
-        message.success('Category deleted successfully!');
+        message.success('Danh mục đã được xóa thành công!');
       },
     });
   };
@@ -186,42 +187,42 @@ const AdminCategories: React.FC = () => {
     setCategories(prev => prev.map(cat =>
       cat.id === categoryId ? { ...cat, status: currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' } : cat
     ));
-    message.success(`Category ${currentStatus === 'ACTIVE' ? 'deactivated' : 'activated'}!`);
+    message.success(`Danh mục đã được ${currentStatus === 'ACTIVE' ? 'vô hiệu hóa' : 'kích hoạt'}!`);
   };
 
   const handleToggleFeatured = (categoryId: string, currentFeatured: boolean) => {
     setCategories(prev => prev.map(cat =>
       cat.id === categoryId ? { ...cat, featured: !currentFeatured } : cat
     ));
-    message.success(`Category ${currentFeatured ? 'removed from' : 'added to'} featured!`);
+    message.success(`Danh mục đã được ${currentFeatured ? 'gỡ khỏi' : 'thêm vào'} nổi bật!`);
   };
 
   // Action dropdown menu
-  const getActionMenu = (category: Category, isSubcategory: boolean = false) => ({
+  const getActionMenu = (category: Category, isSubcategory: boolean = false): MenuProps => ({
     items: [
       {
         key: 'edit',
-        label: 'Edit Category',
+        label: 'Sửa danh mục',
         icon: <EditOutlined />,
         onClick: () => showModal(category, isSubcategory),
       },
       {
         key: 'add-subcategory',
-        label: 'Add Subcategory',
+        label: 'Thêm danh mục con',
         icon: <PlusOutlined />,
         onClick: () => showModal(null, true),
         disabled: isSubcategory // Subcategory không thể có subcategory con
       },
       {
         key: 'toggle-status',
-        label: category.status === 'ACTIVE' ? 'Deactivate' : 'Activate',
+        label: category.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt',
         icon: category.status === 'ACTIVE' ? <DeleteOutlined /> : <PlusOutlined />,
         onClick: () => handleToggleStatus(category.id, category.status),
       },
       { type: 'divider' },
       {
         key: 'delete',
-        label: 'Delete Category',
+        label: 'Xóa danh mục',
         icon: <DeleteOutlined />,
         danger: true,
         onClick: () => handleDeleteCategory(category.id, isSubcategory),
@@ -245,14 +246,14 @@ const AdminCategories: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-gray-900">{category.name}</span>
             {isSubcategory && (
-              <Tag color="blue">Subcategory</Tag>
+              <Tag color="blue">Danh mục con</Tag>
             )}
           </div>
           <p className="text-gray-600 text-sm mt-1">{category.description}</p>
           <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-            <span>{category.productCount} products</span>
+            <span>{category.productCount} sản phẩm</span>
             {!isSubcategory && category.children && category.children.length > 0 && (
-              <span>{category.children.length} children</span>
+              <span>{category.children.length} danh mục con</span>
             )}
           </div>
         </div>
@@ -261,7 +262,7 @@ const AdminCategories: React.FC = () => {
       {/* Status and Featured Tags */}
       <div className="flex items-center gap-3">
         <Tag color={category.status === 'ACTIVE' ? 'green' : 'red'} className="m-0">
-          {category.status === 'ACTIVE' ? 'Active' : 'INACTIVE'}
+          {category.status === 'ACTIVE' ? 'Kích hoạt' : 'Vô hiệu'}
         </Tag>
 
         <Switch
@@ -287,8 +288,8 @@ const AdminCategories: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
-          <p className="text-gray-600">Manage product categories and organization</p>
+          <h1 className="text-2xl font-bold text-gray-900">Danh mục</h1>
+          <p className="text-gray-600">Quản lý danh mục sản phẩm và tổ chức</p>
         </div>
         <Button
           type="primary"
@@ -296,7 +297,7 @@ const AdminCategories: React.FC = () => {
           onClick={() => showModal()}
           size="large"
         >
-          Add Category
+          Thêm danh mục
         </Button>
       </div>
 
@@ -305,7 +306,7 @@ const AdminCategories: React.FC = () => {
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <Space>
             <Input
-              placeholder="Search categories..."
+              placeholder="Tìm kiếm danh mục..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -313,31 +314,31 @@ const AdminCategories: React.FC = () => {
               size="large"
             />
             <Select
-              placeholder="Status"
+              placeholder="Trạng thái"
               value={statusFilter}
               onChange={setStatusFilter}
               style={{ width: 120 }}
               size="large"
             >
-              <Option value="all">All Status</Option>
-              <Option value="ACTIVE">Active</Option>
-              <Option value="INACTIVE">INACTIVE</Option>
+              <Option value="all">Tất cả trạng thái</Option>
+              <Option value="ACTIVE">Kích hoạt</Option>
+              <Option value="INACTIVE">Vô hiệu</Option>
             </Select>
             <Select
-              placeholder="Featured"
+              placeholder="Nổi bật"
               value={featuredFilter}
               onChange={setFeaturedFilter}
               style={{ width: 120 }}
               size="large"
             >
-              <Option value="all">All</Option>
-              <Option value="featured">Featured</Option>
-              <Option value="regular">Regular</Option>
+              <Option value="all">Tất cả</Option>
+              <Option value="featured">Nổi bật</Option>
+              <Option value="regular">Thường</Option>
             </Select>
           </Space>
 
           <div className="text-sm text-gray-500">
-            {filteredMainCategories.length} main categories found
+            {filteredMainCategories.length} danh mục chính được tìm thấy
           </div>
         </div>
       </Card>
@@ -364,7 +365,7 @@ const AdminCategories: React.FC = () => {
                   <div>
                     <div className="font-semibold">{category.name}</div>
                     <div className="text-xs text-gray-500">
-                      {category.productCount} products • {category.children?.length || 0} children
+                      {category.productCount} sản phẩm • {category.children?.length || 0} danh mục con
                     </div>
                   </div>
                 </div>
@@ -372,7 +373,7 @@ const AdminCategories: React.FC = () => {
               extra={
                 <div className="flex items-center gap-2">
                   <Tag color={category.status === 'ACTIVE' ? 'green' : 'red'}>
-                    {category.status === 'ACTIVE' ? 'Active' : 'INACTIVE'}
+                    {category.status === 'ACTIVE' ? 'Kích hoạt' : 'Vô hiệu'}
                   </Tag>
                 </div>
               }
@@ -393,7 +394,7 @@ const AdminCategories: React.FC = () => {
                   onClick={() => showModal(null, true)}
                   block
                 >
-                  Add Subcategory to {category.name}
+                  Thêm danh mục con cho {category.name}
                 </Button>
               </div>
             </Panel>
@@ -403,19 +404,19 @@ const AdminCategories: React.FC = () => {
         {/* Empty State */}
         {filteredMainCategories.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            No categories found. Create your first category!
+            Không tìm thấy danh mục nào. Tạo danh mục đầu tiên của bạn!
           </div>
         )}
       </Card>
 
       {/* Add/Edit Category Modal */}
       <Modal
-        title={editingCategory ? 'Edit Category' : 'Add New Category'}
+        title={editingCategory ? 'Sửa danh mục' : 'Thêm danh mục mới'}
         open={isModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
         width={500}
-        okText={editingCategory ? 'Update Category' : 'Create Category'}
+        okText={editingCategory ? 'Cập nhật danh mục' : 'Tạo danh mục'}
       >
         <Form
           form={form}
@@ -427,19 +428,19 @@ const AdminCategories: React.FC = () => {
         >
           <Form.Item
             name="name"
-            label="Category Name"
-            rules={[{ required: true, message: 'Please enter category name' }]}
+            label="Tên danh mục"
+            rules={[{ required: true, message: 'Vui lòng nhập tên danh mục' }]}
           >
-            <Input placeholder="e.g., Electronics, Clothing..." />
+            <Input placeholder="ví dụ: Điện tử, Quần áo..." />
           </Form.Item>
 
           <Form.Item
             name="parent_id"
-            label="Parent Category"
-            help={editingCategory?.parent_id ? "This is a subcategory" : "Select parent category to create subcategory"}
+            label="Danh mục cha"
+            help={editingCategory?.parent_id ? "Đây là danh mục con" : "Chọn danh mục cha để tạo danh mục con"}
           >
             <Select
-              placeholder="Select parent category (optional)"
+              placeholder="Chọn danh mục cha (tùy chọn)"
               allowClear
             >
               {mainCategories
@@ -455,11 +456,11 @@ const AdminCategories: React.FC = () => {
 
           <Form.Item
             name="description"
-            label="Description"
+            label="Mô tả"
           >
             <TextArea
               rows={3}
-              placeholder="Describe this category..."
+              placeholder="Mô tả danh mục này..."
               maxLength={200}
               showCount
             />
@@ -467,30 +468,30 @@ const AdminCategories: React.FC = () => {
 
           <Form.Item
             name="icon"
-            label="Icon"
+            label="Biểu tượng"
           >
-            <Input placeholder="e.g., 🛍️, 👕, 🏠" />
+            <Input placeholder="ví dụ: 🛍️, 👕, 🏠" />
           </Form.Item>
 
           <div className="flex gap-4">
             <Form.Item
               name="status"
-              label="Status"
+              label="Trạng thái"
               className="flex-1"
             >
               <Select>
-                <Option value="ACTIVE">Active</Option>
-                <Option value="INACTIVE">INACTIVE</Option>
+                <Option value="ACTIVE">Kích hoạt</Option>
+                <Option value="INACTIVE">Vô hiệu</Option>
               </Select>
             </Form.Item>
 
             <Form.Item
               name="featured"
-              label="Featured"
+              label="Nổi bật"
               valuePropName="checked"
               className="flex-1"
             >
-              <Switch checkedChildren="Yes" unCheckedChildren="No" />
+              <Switch checkedChildren="Có" unCheckedChildren="Không" />
             </Form.Item>
           </div>
         </Form>
