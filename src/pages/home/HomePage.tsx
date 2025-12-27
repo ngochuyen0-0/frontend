@@ -53,7 +53,7 @@ const HomePage = () => {
                 <Carousel slides={slides} autoplay />
 
                 <div className="mt-5">
-                    <h4 className="" style={{ fontWeight: '700' }}>Top Brands</h4>
+                    <h4 className="" style={{ fontWeight: '700' }}>Thương hiệu nổi bật</h4>
                 </div>
 
                 <div className="mt-3">
@@ -84,7 +84,7 @@ const HomePage = () => {
 
                 <div className="mt-8">
                     <div className="mb-3">
-                        <h4 style={{ fontWeight: '700' }}>New Products</h4>
+                        <h4 style={{ fontWeight: '700' }}>Sản phẩm mới</h4>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                         {newProducts.map((p) => {
@@ -93,7 +93,7 @@ const HomePage = () => {
                             let index = 0;
                             let min = Infinity;
                             variants.forEach((v, i) => {
-                                if (v.price < min) {
+                                if (v.price && v.price < min) {
                                     min = v.price;
                                     index = i;
                                 }
@@ -117,7 +117,7 @@ const HomePage = () => {
 
                 <div className="mt-8">
                     <div className="mb-3">
-                        <h4 style={{ fontWeight: '700', fontSize: '21px' }}>Features Products</h4>
+                        <h4 style={{ fontWeight: '700', fontSize: '21px' }}>Sản phẩm nổi bật</h4>
                     </div>
                     <div className="flex flex-col lg:flex-row gap-6">
                         {/* Banner Section */}
@@ -129,10 +129,10 @@ const HomePage = () => {
                                     className="absolute bottom-0 right-0 w-[65%] h-auto object-contain"
                                 />
                                 <div className="relative z-10 p-6 h-full  text-gray-800">
-                                    <div className="text-2xl font-bold mb-5 text-[#EA580C]">New Collection</div>
+                                    <div className="text-2xl font-bold mb-5 text-[#EA580C]">Bộ sưu tập mới</div>
                                     <p className="text-base mb-4">Khám phá bộ sưu tập túi xách mới nhất của chúng tôi với chất lượng cao cấp và thiết kế hiện đại.</p>
                                     <button className="bg-white text-black px-4 py-2 rounded-[60px] font-semibold hover:bg-blue-300 transition-colors w-fit text-sm">
-                                        Shop Now
+                                        Mua ngay
                                     </button>
                                 </div>
                                 <div className="absolute top-3 right-3 z-10">
@@ -152,7 +152,7 @@ const HomePage = () => {
                                     let index = 0;
                                     let min = Infinity;
                                     variants.forEach((v, i) => {
-                                        if (v.price < min) {
+                                        if (v.price && v.price < min) {
                                             min = v.price;
                                             index = i;
                                         }

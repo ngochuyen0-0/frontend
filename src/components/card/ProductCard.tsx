@@ -35,9 +35,9 @@ const ProductCard: React.FC<ProductCardProps> = ({id, name, imageUrl, price, rat
                         e.stopPropagation();
                         setIsAddToWishlist(!isAddToWishlist);
                         toast.success(!isAddToWishlist ? <div>
-                            Add to wishlist successfully. <a href="/wishlist" className="underline">Go to wishlist products</a>
+                            Thêm vào danh sách yêu thích thành công. <a href="/wishlist" className="underline">Đi đến sản phẩm yêu thích</a>
                         </div> : <div>
-                            Removed to wishlist successfully.
+                            Xóa khỏi danh sách yêu thích thành công.
                         </div>)
                     }}
                 >
@@ -53,19 +53,19 @@ const ProductCard: React.FC<ProductCardProps> = ({id, name, imageUrl, price, rat
 
                 <div className="mt-3">
                     <div className="my-2 flex items-center gap-2">
-                        <Rate disabled allowHalf defaultValue={rating} style={{ fontSize: '12px' }} />
-                        <span className="text-xs text-[#6B7280]">{rating.toFixed(1)}</span>
+                        <Rate disabled allowHalf defaultValue={rating || 0} style={{ fontSize: '12px' }} />
+                        <span className="text-xs text-[#6B7280]">{(rating || 0).toFixed(1)}</span>
                     </div>
-                    <div className="text-[14px] text-[#111827] line-clamp-2 min-h-[40px]">{name}</div>
+                    <div className="text-[14px] text-[#111827] line-clamp-2 min-h-[40px]">{name || ''}</div>
                     <div className=" flex items-center gap-2 text-[12px]">
                         {/* {salePrice !== undefined ? (
                             <>
-                                <span className="text-red-600 font-semibold text-[15px]">{formatCurrency(price)}</span>
+                                <span className="text-red-600 font-semibold text-[15px]">{formatCurrency(price || 0)}</span>
                                 <span className="text-[#9CA3AF] line-through">{formatCurrency(salePrice)}</span>
                             </>
                         ) : (
                         )} */}
-                        <span className="text-[#111827] font-semibold text-[15px]">{formatCurrency(price)}</span>
+                        <span className="text-[#111827] font-semibold text-[15px]">{formatCurrency(price || 0)}</span>
                     </div>
 
                 </div>

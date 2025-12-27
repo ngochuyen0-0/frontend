@@ -1,4 +1,4 @@
-// components/admin/VariantForm.tsx
+// components/admin/VariantForm.tsx (Form Biến Thể Sản Phẩm)
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, InputNumber, Select, Switch, Button, message, Card } from 'antd';
 import { ProductVariant } from '../../types/product';
@@ -56,7 +56,7 @@ const VariantForm: React.FC<VariantFormProps> = ({
                     price: form.getFieldValue("price"),
                     stock_quantity: form.getFieldValue("stock_quantity"),
                 })
-                toast.success('Variant created successfully');
+                toast.success('Biến thể được tạo thành công');
                 useProduct.getProductVariants({ product_id: form.getFieldValue('product_id') });
 
             } else {
@@ -67,12 +67,12 @@ const VariantForm: React.FC<VariantFormProps> = ({
                     price: form.getFieldValue("price"),
                     stock_quantity: form.getFieldValue("stock_quantity"),
                 })
-                toast.success('Variant updated successfully');
+                toast.success('Biến thể được cập nhật thành công');
                 useProduct.getProductVariants({ product_id: form.getFieldValue('product_id') });
             }
             onSuccess();
         } catch (error) {
-            toast.error('Operation failed');
+            toast.error('Thao tác thất bại');
         } finally {
             setLoading(false);
         }
@@ -80,7 +80,7 @@ const VariantForm: React.FC<VariantFormProps> = ({
 
     return (
         <Modal
-            title={type === 'create' ? 'Create New Variant' : 'Edit Variant'}
+            title={type === 'create' ? 'Tạo Biến Thể Mới' : 'Chỉnh Sửa Biến Thể'}
             open={visible}
             onCancel={onClose}
             footer={null}
@@ -95,10 +95,10 @@ const VariantForm: React.FC<VariantFormProps> = ({
                 <Form.Item
                     label="SKU"
                     name="sku"
-                    rules={[{ required: true, message: 'Please enter SKU' }]}
+                    rules={[{ required: true, message: 'Vui lòng nhập SKU' }]}
 
                 >
-                    <Input placeholder="Enter SKU (e.g. NAF1)"
+                    <Input placeholder="Nhập SKU (ví dụ: NAF1)"
                         addonAfter={
                             <Button
                                 type="link"
@@ -107,7 +107,7 @@ const VariantForm: React.FC<VariantFormProps> = ({
                                     width: '50px'
                                 }}
                             >
-                                Gen Auto
+                                Tạo tự động
                             </Button>
                         }
                     />
@@ -115,53 +115,53 @@ const VariantForm: React.FC<VariantFormProps> = ({
 
                 {/* Color */}
                 <Form.Item
-                    label="Color"
+                    label="Màu sắc"
                     name="color"
-                    rules={[{ required: true, message: 'Please enter color' }]}
+                    rules={[{ required: true, message: 'Vui lòng nhập màu sắc' }]}
                 >
-                    <Input placeholder="Enter color (e.g. red)" />
+                    <Input placeholder="Nhập màu sắc (ví dụ: đỏ)" />
                 </Form.Item>
 
                 {/* Size */}
                 <div className='flex gap-1'>
                     <Form.Item
-                        label="Size"
+                        label="Kích thước"
                         name="size"
-                        rules={[{ required: true, message: 'Please enter size' }]}
+                        rules={[{ required: true, message: 'Vui lòng nhập kích thước' }]}
                     >
-                        <Input placeholder="Enter size (e.g. 32)" />
+                        <Input placeholder="Nhập kích thước (ví dụ: 32)" />
                     </Form.Item>
 
                     {/* Price */}
                     <Form.Item
-                        label="Price ($)"
+                        label="Giá ($)"
                         name="price"
-                        rules={[{ required: true, message: 'Please enter price' }]}
+                        rules={[{ required: true, message: 'Vui lòng nhập giá' }]}
                     >
                         <InputNumber
                             className="w-full"
                             min={0}
                             formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                            parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
-                            placeholder="Enter price"
+                            parser={(value) => value?.replace(/\$\s?|(,*)/g, '') as any}
+                            placeholder="Nhập giá"
                         />
                     </Form.Item>
                     <Form.Item
-                        label="Stock Quantity"
+                        label="Số lượng tồn kho"
                         name="stock_quantity"
-                        rules={[{ required: true, message: 'Please enter stock quantity' }]}
+                        rules={[{ required: true, message: 'Vui lòng nhập số lượng tồn kho' }]}
                     >
-                        <InputNumber className="w-full" min={0} placeholder="Enter stock quantity" />
+                        <InputNumber className="w-full" min={0} placeholder="Nhập số lượng tồn kho" />
                     </Form.Item>
                 </div>
 
                 {/* Product ID */}
                 <Form.Item
-                    label="Product"
+                    label="Sản phẩm"
                     name="product_id"
-                    rules={[{ required: true, message: 'Please select Product' }]}
+                    rules={[{ required: true, message: 'Vui lòng chọn sản phẩm' }]}
                 >
-                    <Select placeholder="Select product" style={{ height: "auto" }}>
+                    <Select placeholder="Chọn sản phẩm" style={{ height: "auto" }}>
                         {useProduct?.products?.map((p, i) => {
                             const thumbnail = p.images?.find(i => i.is_thumbnail == true);
                             return (
@@ -177,21 +177,21 @@ const VariantForm: React.FC<VariantFormProps> = ({
 
                 {/* Active status */}
                 <Form.Item
-                    label="Active Status"
+                    label="Trạng thái hoạt động"
                     name="is_active"
                     valuePropName="checked"
                 >
-                    <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
+                    <Switch checkedChildren="Hoạt động" unCheckedChildren="Không hoạt động" />
                 </Form.Item>
 
                 {/* Buttons */}
                 <Form.Item>
                     <div className="flex justify-end gap-2">
                         <Button onClick={onClose}>
-                            Cancel
+                            Hủy
                         </Button>
                         <Button type="primary" htmlType="submit" loading={loading}>
-                            {type === 'create' ? 'Create' : 'Update'}
+                            {type === 'create' ? 'Tạo' : 'Cập nhật'}
                         </Button>
                     </div>
                 </Form.Item>

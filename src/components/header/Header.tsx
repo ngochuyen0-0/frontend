@@ -47,13 +47,13 @@ const Header: React.FC = () => {
             items={[
                 {
                     key: "profile",
-                    label: "My Profile",
+                    label: "Hồ sơ của tôi",
                     icon: <SettingOutlined />,
                     onClick: () => navigate("/my-profile"),
                 },
                 {
                     key: "logout",
-                    label: "Logout",
+                    label: "Đăng xuất",
                     icon: <LogoutOutlined />,
                     onClick: () => {
                         logout()
@@ -66,12 +66,12 @@ const Header: React.FC = () => {
     );
 
     const menuItems: MenuProps["items"] = [
-        { key: "home", label: "Home", onClick: () => { navigate("/") } },
+        { key: "home", label: "Trang chủ", onClick: () => { navigate("/") } },
         {
             key: "shop",
             label: (
                 <span className="inline-flex items-center gap-1">
-                    Shop <DownOutlined style={{ fontSize: 10 }} />
+                    Cửa hàng <DownOutlined style={{ fontSize: 10 }} />
                 </span>
             ),
             children: categories?.map((e) => {
@@ -82,7 +82,7 @@ const Header: React.FC = () => {
             key: "brands",
             label: (
                 <span className="inline-flex items-center gap-1">
-                    Brands <ArrowDownIcon />
+                    Thương hiệu <ArrowDownIcon />
                 </span>
             ),
             children: brands?.map((e) => {
@@ -93,16 +93,16 @@ const Header: React.FC = () => {
             key: "pages",
             label: (
                 <span className="inline-flex items-center gap-1">
-                    Pages <DownOutlined style={{ fontSize: 10 }} />
+                    Trang <DownOutlined style={{ fontSize: 10 }} />
                 </span>
             ),
             children: [
-                { key: "pages:about", label: "About" },
+                { key: "pages:about", label: "Giới thiệu" },
                 { key: "pages:blog", label: "Blog", onClick: () => navigate("/blogs") },
-                { key: "pages:contact", label: "Contact" },
+                { key: "pages:contact", label: "Liên hệ" },
             ],
         },
-        { key: "sale", label: "Sale" },
+        { key: "sale", label: "Khuyến mãi" },
     ];
 
     const handleCoinClick = () => {
@@ -124,26 +124,26 @@ const Header: React.FC = () => {
                                 className="flex items-center gap-4 border-r pr-4 "
                                 style={{ marginBottom: "0" }}
                             >
-                                <li className="cursor-pointer">About Us</li>
-                                <li className="cursor-pointer">My Account</li>
-                                <li className="cursor-pointer">Wishlist</li>
+                                <li className="cursor-pointer">Giới thiệu</li>
+                                <li className="cursor-pointer">Tài khoản của tôi</li>
+                                <li className="cursor-pointer">Danh sách yêu thích</li>
                             </ul>
                             <div className="pl-4">
                                 <p
                                     className="text-[#6B7280]"
                                     style={{ marginBottom: "0" }}
                                 >
-                                    We deliver to you every day from{" "}
+                                    Chúng tôi giao hàng cho bạn mỗi ngày từ{" "}
                                     <span className="font-bold text-red-500">
-                                        7:00 to 23:00
+                                        7:00 đến 23:00
                                     </span>
                                 </p>
                             </div>
                         </div>
                         <div className="flex items-center gap-5">
-                            <div>English</div>
-                            <div>USD</div>
-                            <div>Order Tracking</div>
+                            <div>Tiếng Việt</div>
+                            <div>VND</div>
+                            <div>Theo dõi đơn hàng</div>
                         </div>
                     </div>
                 </div>
@@ -172,7 +172,7 @@ const Header: React.FC = () => {
 
                         <Input.Search
                             onClick={() => setForcusSearchBar(true)}
-                            placeholder="Search for products..."
+                            placeholder="Tìm kiếm sản phẩm..."
                             size="large"
                             className="bg-gray-100 rounded-lg [&_.ant-input]:bg-gray-100 [&_.ant-input]:focus:shadow-none [&_.ant-input]:focus:border-gray-300 [&_.ant-input]:border-gray-300"
                         />
@@ -219,7 +219,7 @@ const Header: React.FC = () => {
                                 onClick={() => navigate("/auth/login")}
                             >
                                 <UserOutlined style={{ fontSize: "24px" }} />
-                                <div className="text-[14px]">Sign in</div>
+                                <div className="text-[14px]">Đăng nhập</div>
                             </div>
                         )}
                         {<Badge count={getCart().length} size="small">

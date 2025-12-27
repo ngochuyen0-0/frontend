@@ -38,7 +38,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   return (
     <Modal
-      title="User Details"
+      title="Chi tiết người dùng"
       open={visible}
       onCancel={onClose}
       footer={null}
@@ -47,16 +47,16 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
       <div className="space-y-6">
         {/* User Info */}
         <Descriptions bordered column={2}>
-          <Descriptions.Item label="Username">
+          <Descriptions.Item label="Tên người dùng">
             {user.username}
           </Descriptions.Item>
           <Descriptions.Item label="Email">
             {user.email}
           </Descriptions.Item>
-          <Descriptions.Item label="Phone">
+          <Descriptions.Item label="Điện thoại">
             {user.user_info?.phone}
           </Descriptions.Item>
-          <Descriptions.Item label="Role">
+          <Descriptions.Item label="Vai trò">
             <Tag color={
               user.role === 'ADMIN' ? 'red' :
                 user.role === 'MODERATOR' ? 'blue' : 'green'
@@ -64,7 +64,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               {user?.role}
             </Tag>
           </Descriptions.Item>
-          <Descriptions.Item label="Status">
+          <Descriptions.Item label="Trạng thái">
             <Tag color={
               user.status === 'ACTIVE' ? 'green' :
                 user.status === 'BANNED' ? 'red' : 'orange'
@@ -72,7 +72,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               {user.status}
             </Tag>
           </Descriptions.Item>
-          <Descriptions.Item label="Registration Date">
+          <Descriptions.Item label="Ngày đăng ký">
             {new Date(user.created_at || "").toLocaleDateString('vi-VN')}
           </Descriptions.Item>
           {/* <Descriptions.Item label="Last Login">
@@ -84,13 +84,13 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
         <Row gutter={16}>
           <Col span={6}>
             <Card size="small">
-              <Statistic title="Total Orders" value={ordersData?.total} />
+              <Statistic title="Tổng đơn hàng" value={ordersData?.total} />
             </Card>
           </Col>
           <Col span={6}>
             <Card size="small">
               <Statistic
-                title="Total Spent"
+                title="Tổng chi tiêu"
                 value={totalOrderValue}
                 precision={0}
                 prefix="$"
@@ -99,13 +99,13 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           </Col>
           <Col span={6}>
             <Card size="small">
-              <Statistic title="Coins" value={user.loyalty_points?.find(p => p.source == "daily_login")?.points} suffix="xu" />
+              <Statistic title="Điểm xu" value={user.loyalty_points?.find(p => p.source == "daily_login")?.points} suffix="xu" />
             </Card>
           </Col>
           <Col span={6}>
             <Card size="small">
               <Statistic
-                title="Avg. Order Value"
+                title="Giá trị đơn hàng TB"
                 value={(ordersData?.total || 0) > 0 ? totalOrderValue / (ordersData?.total || 0) : 0}
                 precision={0}
                 prefix="$"

@@ -31,29 +31,29 @@ const { TextArea } = Input;
 const AppFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
-  // Quick links data
-  const shopLinks = [
-    { label: 'About Us', href: '/about' },
-    { label: 'Our Story', href: '/story' },
-    { label: 'Careers', href: '/careers' },
-    { label: 'Press', href: '/press' },
-    { label: 'Sustainability', href: '/sustainability' }
-  ];
-
-  const customerServiceLinks = [
-    { label: 'Contact Us', href: '/contact' },
-    { label: 'Shipping Policy', href: '/shipping' },
-    { label: 'Returns & Exchanges', href: '/returns' },
-    { label: 'Size Guide', href: '/size-guide' },
-    { label: 'FAQ', href: '/faq' }
-  ];
-
-  const policyLinks = [
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Terms of Service', href: '/terms' },
-    { label: 'Cookie Policy', href: '/cookies' },
-    { label: 'Payment Methods', href: '/payment-methods' }
-  ];
+  // Dữ liệu liên kết nhanh
+    const shopLinks = [
+      { label: 'Về chúng tôi', href: '/about' },
+      { label: 'Câu chuyện của chúng tôi', href: '/story' },
+      { label: 'Tuyển dụng', href: '/careers' },
+      { label: 'Báo chí', href: '/press' },
+      { label: 'Bền vững', href: '/sustainability' }
+    ];
+  
+    const customerServiceLinks = [
+      { label: 'Liên hệ với chúng tôi', href: '/contact' },
+      { label: 'Chính sách vận chuyển', href: '/shipping' },
+      { label: 'Đổi trả & Hoàn tiền', href: '/returns' },
+      { label: 'Hướng dẫn chọn size', href: '/size-guide' },
+      { label: 'Câu hỏi thường gặp', href: '/faq' }
+    ];
+  
+    const policyLinks = [
+      { label: 'Chính sách bảo mật', href: '/privacy' },
+      { label: 'Điều khoản dịch vụ', href: '/terms' },
+      { label: 'Chính sách cookie', href: '/cookies' },
+      { label: 'Phương thức thanh toán', href: '/payment-methods' }
+    ];
 
   return (
     <Footer className="bg-gray-900 text-white">
@@ -66,8 +66,8 @@ const AppFooter: React.FC = () => {
               Hapas
             </Title>
             <Text className="text-gray-300 text-lg">
-              Your trusted partner in authentic fashion and lifestyle products. 
-              We bring you the best quality items with exceptional customer service.
+              Đối tác đáng tin cậy của bạn trong các sản phẩm thời trang và lối sống chính hãng.
+              Chúng tôi mang đến cho bạn những mặt hàng chất lượng tốt nhất với dịch vụ khách hàng xuất sắc.
             </Text>
             
             <Space size="middle" className="mt-6">
@@ -106,7 +106,7 @@ const AppFooter: React.FC = () => {
               <div className="flex items-center gap-3">
                 <EnvironmentOutlined className="text-gray-400" />
                 <Text className="text-gray-300">
-                  123 Fashion Street, District 1, Ho Chi Minh City, Vietnam
+                  123 Đường Thời Trang, Quận 1, TP. Hồ Chí Minh, Việt Nam
                 </Text>
               </div>
               <div className="flex items-center gap-3">
@@ -133,7 +133,7 @@ const AppFooter: React.FC = () => {
           {/* Quick Links */}
           <Col xs={12} md={4}>
             <Title level={4} className="text-white mb-6">
-              Shop
+              Cửa hàng
             </Title>
             <List
               dataSource={shopLinks}
@@ -153,7 +153,7 @@ const AppFooter: React.FC = () => {
           {/* Customer Service */}
           <Col xs={12} md={4}>
             <Title level={4} className="text-white mb-6">
-              Customer Service
+              Dịch vụ khách hàng
             </Title>
             <List
               dataSource={customerServiceLinks}
@@ -173,7 +173,7 @@ const AppFooter: React.FC = () => {
           {/* Policies */}
           <Col xs={12} md={4}>
             <Title level={4} className="text-white mb-6">
-              Policies
+              Chính sách
             </Title>
             <List
               dataSource={policyLinks}
@@ -193,15 +193,15 @@ const AppFooter: React.FC = () => {
           {/* Newsletter */}
           <Col xs={24} md={4}>
             <Title level={4} className="text-white mb-6">
-              Newsletter
+              Bản tin
             </Title>
             <Text className="text-gray-300 block mb-4">
-              Subscribe to get special offers, free giveaways, and exclusive deals.
+              Đăng ký để nhận được các ưu đãi đặc biệt, quà tặng miễn phí và các chương trình độc quyền.
             </Text>
             
             <Space.Compact className="w-full mb-2">
-              <Input 
-                placeholder="Enter your email" 
+              <Input
+                placeholder="Nhập email của bạn"
                 size="large"
                 className="bg-gray-800 border-gray-600 text-white"
               />
@@ -211,18 +211,18 @@ const AppFooter: React.FC = () => {
                 icon={<SendOutlined />}
                 className="bg-blue-600 hover:bg-blue-700 border-blue-600"
               >
-                Subscribe
+                Đăng ký
               </Button>
             </Space.Compact>
             
             <Text className="text-gray-400 text-xs">
-              By subscribing, you agree to our Privacy Policy and consent to receive updates from our company.
+              Bằng cách đăng ký, bạn đồng ý với Chính sách bảo mật của chúng tôi và đồng ý nhận các cập nhật từ công ty chúng tôi.
             </Text>
 
             {/* Payment Methods */}
             <div className="mt-6">
               <Text strong className="text-white block mb-3">
-                We Accept:
+                Chúng tôi chấp nhận:
               </Text>
               <div className="flex flex-wrap gap-2">
                 <div className="bg-white rounded px-2 py-1 text-xs font-bold">VISA</div>
@@ -241,19 +241,19 @@ const AppFooter: React.FC = () => {
         <Row justify="space-between" align="middle">
           <Col>
             <Text className="text-gray-400">
-              © {currentYear} Hapas. All rights reserved.
+              © {currentYear} Hapas. Tất cả quyền được bảo lưu.
             </Text>
           </Col>
           <Col>
             <Space size="middle">
               <Link href="/privacy" className="text-gray-400 hover:text-white">
-                Privacy Policy
+                Chính sách bảo mật
               </Link>
               <Link href="/terms" className="text-gray-400 hover:text-white">
-                Terms of Service
+                Điều khoản dịch vụ
               </Link>
               <Link href="/sitemap" className="text-gray-400 hover:text-white">
-                Sitemap
+                Sơ đồ trang web
               </Link>
             </Space>
           </Col>
@@ -283,7 +283,7 @@ const AppFooter: React.FC = () => {
         <Row justify="center" className="mt-6">
           <Col>
             <Text className="text-gray-500 text-sm">
-              Made with <HeartOutlined className="text-red-400" /> in Vietnam
+              Được tạo ra với <HeartOutlined className="text-red-400" /> tại Việt Nam
             </Text>
           </Col>
         </Row>
