@@ -102,30 +102,48 @@ const mockWishlistItems = [
 ];
 
 type WishlistItem = {
-  id: string;
-  productId: string;
-  name: string;
-  imageUrl: string;
-  price: number;
-  salePrice?: number;
-  rating: number;
-  stock: number;
-  addedAt: Date;
-  category: string;
+    id: string;
+    productId: string;
+    name: string;
+    imageUrl: string;
+    price: number;
+    salePrice?: number;
+    rating: number;
+    stock: number;
+    addedAt: Date | string; // Có thể là string nếu lưu từ localStorage
+    category: string;
 };
 
 const WishlistPage: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<string>('newest');
-  const [items] = useState<WishlistItem[]>(mockWishlistItems);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [selectedItems, setSelectedItems] = useState<string[]>([]);
+    const [sortBy, setSortBy] = useState<string>('newest');
+    const [items, setItems] = useState<WishlistItem[]>(() => {
+        // Đọc dữ liệu từ localStorage khi component mount
+        const savedWishlist = localStorage.getItem('wishlist');
+        if (savedWishlist) {
+            try {
+                const parsedItems = JSON.parse(savedWishlist);
+                // Chuyển đổi addedAt từ string sang Date nếu cần
+                return parsedItems.map((item: any) => ({
+                    ...item,
+                    addedAt: typeof item.addedAt === 'string' ? new Date(item.addedAt) : item.addedAt
+                }));
+            } catch (error) {
+                console.error('Error parsing wishlist from localStorage:', error);
+                return [];
+            }
+        }
+        return [];
+    });
 
   // Format currency
   const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
+      return new Intl.NumberFormat('vi-VN', {
+          style: 'currency',
+          currency: 'VND',
+          minimumFractionDigits: 0,
+      }).format(value);
   };
 
   // Handle selection
@@ -144,33 +162,49 @@ const WishlistPage: React.FC = () => {
   // Handle actions
   const handleAddToCart = (item: WishlistItem, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    message.success(`Added ${item.name} to cart`);
+    message.success(`Đã thêm ${item.name} vào giỏ hàng`);
   };
 
   const handleRemoveItem = (itemId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    message.success('Item removed from wishlist');
+      e?.stopPropagation();
+      
+      // Cập nhật state
+      const updatedItems = items.filter(item => item.id !== itemId);
+      setItems(updatedItems);
+      
+      // Cập nhật localStorage
+      localStorage.setItem('wishlist', JSON.stringify(updatedItems));
+      
+      message.success('Đã xóa sản phẩm khỏi danh sách yêu thích');
   };
 
   const handleRemoveSelected = () => {
-    if (selectedItems.length === 0) return;
-    message.success(`Removed ${selectedItems.length} items from wishlist`);
-    setSelectedItems([]);
+      if (selectedItems.length === 0) return;
+      
+      // Lọc các mục không được chọn
+      const updatedItems = items.filter(item => !selectedItems.includes(item.id));
+      setItems(updatedItems);
+      
+      // Cập nhật localStorage
+      localStorage.setItem('wishlist', JSON.stringify(updatedItems));
+      
+      setSelectedItems([]);
+      message.success(`Đã xóa ${selectedItems.length} sản phẩm khỏi danh sách yêu thích`);
   };
 
   const handleAddSelectedToCart = () => {
     if (selectedItems.length === 0) return;
-    message.success(`Added ${selectedItems.length} items to cart`);
+    message.success(`Đã thêm ${selectedItems.length} sản phẩm vào giỏ hàng`);
   };
 
   // Stock status component
   const renderStockStatus = (stock: number) => {
     if (stock === 0) {
-      return <Tag color="red">Out of Stock</Tag>;
+      return <Tag color="red">Hết hàng</Tag>;
     } else if (stock < 5) {
-      return <Tag color="orange">Only {stock} left</Tag>;
+      return <Tag color="orange">Chỉ còn {stock} sản phẩm</Tag>;
     } else {
-      return <Tag color="green">In Stock</Tag>;
+      return <Tag color="green">Còn hàng</Tag>;
     }
   };
 
@@ -268,7 +302,7 @@ const WishlistPage: React.FC = () => {
             disabled={item.stock === 0}
             className="mt-2"
           >
-            {item.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+            {item.stock === 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
           </Button>
         </div>
       </Card>
@@ -316,7 +350,7 @@ const WishlistPage: React.FC = () => {
                 <div className="flex items-center gap-4 mb-2">
                   {renderRating(item.rating)}
                   <span className="text-sm text-gray-500">
-                    Added: {item.addedAt.toLocaleDateString()}
+                    Added: {typeof item.addedAt === 'string' ? new Date(item.addedAt).toLocaleDateString() : item.addedAt.toLocaleDateString()}
                   </span>
                   <Tag color="blue">{item.category}</Tag>
                 </div>
@@ -341,7 +375,7 @@ const WishlistPage: React.FC = () => {
                   onClick={(e) => handleAddToCart(item, e)}
                   disabled={item.stock === 0}
                 >
-                  {item.stock === 0 ? 'Notify Me' : 'Add to Cart'}
+                  {item.stock === 0 ? 'Thông báo khi có hàng' : 'Thêm vào giỏ'}
                 </Button>
                 <Button
                   icon={<DeleteOutlined />}
@@ -358,30 +392,30 @@ const WishlistPage: React.FC = () => {
 
   // Empty state
   if (items.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <Empty
-            image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
-            imageStyle={{ height: 120 }}
-            description={
-              <span className="text-gray-600 text-lg">
-                Your wishlist is empty
-              </span>
-            }
-          >
-            <div className="text-center space-y-4">
-              <p className="text-gray-500">
-                Save items you love to see them here later
-              </p>
-              <Button type="primary" size="large" icon={<ShoppingCartOutlined />}>
-                Continue Shopping
-              </Button>
-            </div>
-          </Empty>
-        </div>
-      </div>
-    );
+      return (
+          <div className="min-h-screen bg-gray-50 py-8">
+              <div className="max-w-4xl mx-auto px-4">
+                  <Empty
+                      image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+                      imageStyle={{ height: 120 }}
+                      description={
+                          <span className="text-gray-600 text-lg">
+                              Danh sách yêu thích trống
+                          </span>
+                      }
+                  >
+                      <div className="text-center space-y-4">
+                          <p className="text-gray-500">
+                              Lưu các sản phẩm bạn yêu thích để xem sau
+                          </p>
+                          <Button type="primary" size="large" icon={<ShoppingCartOutlined />}>
+                              Tiếp tục mua sắm
+                          </Button>
+                      </div>
+                  </Empty>
+              </div>
+          </div>
+      );
   }
 
   return (
@@ -390,14 +424,14 @@ const WishlistPage: React.FC = () => {
         {/* Page Header */}
         <div className="mb-6">
           <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-            <span>Home</span>
+            <span>Trang chủ</span>
             <span>/</span>
-            <span className="text-gray-900 font-medium">Wishlist</span>
+            <span className="text-gray-900 font-medium">Danh sách yêu thích</span>
           </div>
           <div className="flex items-center gap-3">
             <HeartFilled className="text-red-500 text-2xl" />
             <h1 className="text-3xl font-bold text-gray-900">
-              My Wishlist ({items.length} items)
+                Danh sách yêu thích ({items.length} sản phẩm)
             </h1>
           </div>
         </div>
@@ -411,7 +445,7 @@ const WishlistPage: React.FC = () => {
                 indeterminate={selectedItems.length > 0 && selectedItems.length < items.length}
                 onChange={(e) => handleSelectAll(e.target.checked)}
               >
-                Select All ({selectedItems.length})
+                Chọn tất cả ({selectedItems.length})
               </Checkbox>
 
               <Select
@@ -420,11 +454,11 @@ const WishlistPage: React.FC = () => {
                 suffixIcon={<SortAscendingOutlined />}
                 style={{ width: 160 }}
               >
-                <Option value="newest">Newest First</Option>
-                <Option value="price-low">Price: Low to High</Option>
-                <Option value="price-high">Price: High to Low</Option>
-                <Option value="name">Name: A-Z</Option>
-                <Option value="rating">Highest Rated</Option>
+                <Option value="newest">Mới nhất trước</Option>
+                <Option value="price-low">Giá: Thấp đến Cao</Option>
+                <Option value="price-high">Giá: Cao đến Thấp</Option>
+                <Option value="name">Tên: A-Z</Option>
+                <Option value="rating">Đánh giá cao nhất</Option>
               </Select>
             </div>
 
@@ -451,14 +485,14 @@ const WishlistPage: React.FC = () => {
                     icon={<ShoppingCartOutlined />}
                     onClick={handleAddSelectedToCart}
                   >
-                    Add Selected to Cart ({selectedItems.length})
+                    Thêm các mục đã chọn vào giỏ ({selectedItems.length})
                   </Button>
                   <Button
                     danger
                     icon={<DeleteOutlined />}
                     onClick={handleRemoveSelected}
                   >
-                    Remove
+                    Xóa
                   </Button>
                 </div>
               )}
@@ -490,7 +524,7 @@ const WishlistPage: React.FC = () => {
             showSizeChanger
             showQuickJumper
             showTotal={(total, range) => 
-              `${range[0]}-${range[1]} of ${total} items`
+              `${range[0]}-${range[1]} của ${total} sản phẩm`
             }
           />
         </div>

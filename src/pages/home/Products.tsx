@@ -33,7 +33,7 @@ import { getBrands } from '../../services/brandService';
 import { getCategories } from '../../services/categoryService';
 import { Brand } from '../../types/brand';
 import { Category } from '../../types/category';
-import { Product } from '../../types/product';
+import { Product, ProductVariant } from '../../types/product';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -46,13 +46,14 @@ interface ProductImage {
     is_thumbnail: boolean;
 }
 
-interface ProductVariant {
-    id: string;
-    price: number;
-    size?: string;
-    color?: string;
-    stock: number;
-}
+// Sử dụng interface ProductVariant từ types/product thay vì định nghĩa lại
+// interface ProductVariant {
+//     id: string;
+//     price: number;
+//     size?: string;
+//     color?: string;
+//     stock: number;
+// }
 
 
 interface ProductCardProps {
@@ -62,23 +63,23 @@ interface ProductCardProps {
 }
 
 // Product Card Component
-const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetail }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onViewDetail }) => {
     const thumbnail = product.images?.find(img => img.is_thumbnail);
     const variants = product.variants || [];
 
     // Find minimum price variant
-    let minPrice = Infinity;
-    let minPriceVariant: ProductVariant | null = null;
-
-    variants.forEach(variant => {
-        if (variant.price < minPrice) {
-            minPrice = variant.price;
-            minPriceVariant = variant;
-        }
-    });
-
-    const hasMultiplePrices = variants.length > 1 && variants.some(v => v.price !== minPrice);
-    const maxPrice = Math.max(...variants.map(v => v.price));
+        let minPrice = Infinity;
+        let minPriceVariant: ProductVariant | null = null;
+    
+        variants.forEach(variant => {
+            if (variant.price !== undefined && variant.price < minPrice) {
+                minPrice = variant.price;
+                minPriceVariant = variant;
+            }
+        });
+    
+        const hasMultiplePrices = variants.length > 1 && variants.some(v => v.price !== undefined && v.price !== minPrice);
+        const maxPrice = variants.length > 0 ? Math.max(...variants.map(v => v.price !== undefined ? v.price : 0)) : 0;
 
     return (
         <Card
@@ -94,11 +95,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetail }) => {
                         }}
                     />
                     <div className="absolute top-2 left-2">
-                        {product.is_new && (
-                            <Tag color="green" className="m-0">NEW</Tag>
+                        {(product as any).is_new && (
+                            <Tag color="green" className="m-0">MỚI</Tag>
                         )}
-                        {product.is_featured && (
-                            <Tag color="red" className="m-0">HOT</Tag>
+                        {(product as any).is_featured && (
+                            <Tag color="red" className="m-0">NỔI BẬT</Tag>
                         )}
                     </div>
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -116,7 +117,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetail }) => {
                     icon={<EyeOutlined />}
                     onClick={() => onViewDetail(product)}
                 >
-                    View
+                    Xem
                 </Button>,
             ]}
         >
@@ -142,16 +143,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetail }) => {
 
                         <div className="flex items-center gap-2">
                             <Text strong className="text-lg text-red-600">
-                                ${minPrice.toFixed(2)}
+                                {minPrice.toFixed(2)} ₫
                             </Text>
                             {hasMultiplePrices && (
                                 <Text type="secondary" className="text-sm line-through">
-                                    ${maxPrice.toFixed(2)}
+                                    {maxPrice.toFixed(2)} ₫
                                 </Text>
                             )}
                             {hasMultiplePrices && (
                                 <Tag color="orange" className="m-0">
-                                    From ${minPrice.toFixed(2)}
+                                    Từ {minPrice.toFixed(2)} ₫
                                 </Tag>
                             )}
                         </div>
@@ -169,7 +170,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetail }) => {
                                 ))}
                                 {variants.length > 3 && (
                                     <Tag className="m-0">
-                                        +{variants.length - 3} more
+                                        +{variants.length - 3} thêm
                                     </Tag>
                                 )}
                             </div>
@@ -257,26 +258,35 @@ const ProductsPage: React.FC = () => {
         }
 
         // Price range filter
-        filtered = filtered.filter(product => {
-            const minPrice = Math.min(...product.variants.map(v => v.price));
-            return minPrice >= priceRange[0] && minPrice <= priceRange[1];
-        });
+                filtered = filtered.filter(product => {
+                    if (!product.variants) return false;
+                    const minPrice = Math.min(...product.variants.map(v => v.price !== undefined ? v.price : Infinity));
+                    return minPrice >= priceRange[0] && minPrice <= priceRange[1] && minPrice !== Infinity;
+                });
 
         // Sort products
-        filtered.sort((a, b) => {
-            switch (sortBy) {
-                case 'price-low':
-                    return Math.min(...a.variants.map(v => v.price)) - Math.min(...b.variants.map(v => v.price));
-                case 'price-high':
-                    return Math.min(...b.variants.map(v => v.price)) - Math.min(...a.variants.map(v => v.price));
-                case 'rating':
-                    return b.rating - a.rating;
-                case 'newest':
-                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-                default:
-                    return 0;
-            }
-        });
+                filtered.sort((a, b) => {
+                    switch (sortBy) {
+                        case 'price-low':
+                            const aMinPrice = a.variants && a.variants.length > 0 ? Math.min(...a.variants.map(v => v.price !== undefined ? v.price : Infinity)) : Infinity;
+                            const bMinPrice = b.variants && b.variants.length > 0 ? Math.min(...b.variants.map(v => v.price !== undefined ? v.price : Infinity)) : Infinity;
+                            return aMinPrice - bMinPrice;
+                        case 'price-high':
+                            const aMaxPrice = a.variants && a.variants.length > 0 ? Math.min(...a.variants.map(v => v.price !== undefined ? v.price : Infinity)) : Infinity;
+                            const bMaxPrice = b.variants && b.variants.length > 0 ? Math.min(...b.variants.map(v => v.price !== undefined ? v.price : Infinity)) : Infinity;
+                            return bMaxPrice - aMaxPrice;
+                        case 'rating':
+                            const aRating = (a as any).rating || 0;
+                                                const bRating = (b as any).rating || 0;
+                                                return bRating - aRating;
+                        case 'newest':
+                            const aDate = a.created_at ? new Date(a.created_at).getTime() : 0;
+                            const bDate = b.created_at ? new Date(b.created_at).getTime() : 0;
+                            return bDate - aDate;
+                        default:
+                            return 0;
+                    }
+                });
 
         setFilteredProducts(filtered);
         setTotalProducts(filtered.length);
@@ -311,23 +321,23 @@ const ProductsPage: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4">
                 {/* Breadcrumb */}
                 <Breadcrumb className="mb-6">
-                    <Breadcrumb.Item>Home</Breadcrumb.Item>
-                    <Breadcrumb.Item>Products</Breadcrumb.Item>
+                    <Breadcrumb.Item>Trang chủ</Breadcrumb.Item>
+                    <Breadcrumb.Item>Sản phẩm</Breadcrumb.Item>
                 </Breadcrumb>
 
                 {/* Header */}
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
                     <div>
-                        <Title level={2} className="mb-2">Our Products</Title>
+                        <Title level={2} className="mb-2">Sản phẩm của chúng tôi</Title>
                         <Text type="secondary">
-                            Showing {filteredProducts?.length} of {products?.length} products
+                            Hiển thị {filteredProducts?.length} trong số {products?.length} sản phẩm
                         </Text>
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
                         {/* Search */}
                         <Input
-                            placeholder="Search products..."
+                            placeholder="Tìm kiếm sản phẩm..."
                             prefix={<SearchOutlined />}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -342,10 +352,10 @@ const ProductsPage: React.FC = () => {
                             className="w-full lg:w-48"
                             size="large"
                         >
-                            <Option value="newest">Newest First</Option>
-                            <Option value="price-low">Price: Low to High</Option>
-                            <Option value="price-high">Price: High to Low</Option>
-                            <Option value="rating">Highest Rated</Option>
+                            <Option value="newest">Mới nhất trước</Option>
+                            <Option value="price-low">Giá: Thấp đến cao</Option>
+                            <Option value="price-high">Giá: Cao đến thấp</Option>
+                            <Option value="rating">Đánh giá cao nhất</Option>
                         </Select>
                     </div>
                 </div>
@@ -358,29 +368,29 @@ const ProductsPage: React.FC = () => {
                             title={
                                 <Space>
                                     <FilterOutlined />
-                                    Filters
+                                    Bộ lọc
                                 </Space>
                             }
                             extra={
                                 <Button type="link" onClick={clearAllFilters} size="small">
-                                    Clear All
+                                    Xóa tất cả
                                 </Button>
                             }
                         >
                             {/* Price Range Filter */}
                             <div className="mb-6">
-                                <Title level={5}>Price Range</Title>
+                                <Title level={5}>Khoảng giá</Title>
                                 <Slider
                                     range
                                     min={0}
                                     max={1000}
                                     value={priceRange}
-                                    onChange={setPriceRange}
+                                        onChange={(value) => setPriceRange(value as [number, number])}
                                     className="mb-2"
                                 />
                                 <div className="flex justify-between">
-                                    <Text type="secondary">${priceRange[0]}</Text>
-                                    <Text type="secondary">${priceRange[1]}</Text>
+                                    <Text type="secondary">{priceRange[0]} ₫</Text>
+                                    <Text type="secondary">{priceRange[1]} ₫</Text>
                                 </div>
                             </div>
 
@@ -388,7 +398,7 @@ const ProductsPage: React.FC = () => {
 
                             {/* Brands Filter */}
                             <div className="mb-6">
-                                <Title level={5}>Brands</Title>
+                                <Title level={5}>Thương hiệu</Title>
                                 <Checkbox.Group
                                     value={selectedBrands}
                                     onChange={setSelectedBrands}
@@ -410,7 +420,7 @@ const ProductsPage: React.FC = () => {
 
                             {/* Categories Filter */}
                             <div className="mb-6">
-                                <Title level={5}>Categories</Title>
+                                <Title level={5}>Danh mục</Title>
                                 <Checkbox.Group
                                     value={selectedCategories}
                                     onChange={setSelectedCategories}
@@ -448,7 +458,7 @@ const ProductsPage: React.FC = () => {
                                                     closable
                                                     onClose={() => setSelectedBrands(prev => prev.filter(b => b !== brand))}
                                                 >
-                                                    Brand: {brand}
+                                                    Thương hiệu: {brand}
                                                 </Tag>
                                             ))}
                                             {selectedCategories.map(category => (
@@ -457,7 +467,7 @@ const ProductsPage: React.FC = () => {
                                                     closable
                                                     onClose={() => setSelectedCategories(prev => prev.filter(c => c !== category))}
                                                 >
-                                                    Category: {category}
+                                                    Danh mục: {category}
                                                 </Tag>
                                             ))}
                                             {(priceRange[0] > 0 || priceRange[1] < 1000) && (
@@ -465,7 +475,7 @@ const ProductsPage: React.FC = () => {
                                                     closable
                                                     onClose={() => setPriceRange([0, 1000])}
                                                 >
-                                                    Price: ${priceRange[0]} - ${priceRange[1]}
+                                                    Giá: {priceRange[0]} ₫ - {priceRange[1]} ₫
                                                 </Tag>
                                             )}
                                         </Space>
@@ -480,6 +490,7 @@ const ProductsPage: React.FC = () => {
                                                 return (<Col xs={12} md={8} lg={6} key={product.id}>
                                                     <ProductCard
                                                         product={product}
+                                                        onAddToCart={handleAddToCart}
                                                         onViewDetail={handleViewDetail}
                                                     />
                                                 </Col>)
@@ -499,7 +510,7 @@ const ProductsPage: React.FC = () => {
                                                 showSizeChanger
                                                 showQuickJumper
                                                 showTotal={(total, range) =>
-                                                    `${range[0]}-${range[1]} of ${total} items`
+                                                    `${range[0]}-${range[1]} trên ${total} sản phẩm`
                                                 }
                                                 pageSizeOptions={['12', '24', '36', '48']}
                                             />
@@ -507,11 +518,11 @@ const ProductsPage: React.FC = () => {
                                     </>
                                 ) : (
                                     <Empty
-                                        description="No products found matching your criteria"
+                                        description="Không tìm thấy sản phẩm nào phù hợp với tiêu chí của bạn"
                                         className="py-20"
                                     >
                                         <Button type="primary" onClick={clearAllFilters}>
-                                            Clear Filters
+                                            Xóa bộ lọc
                                         </Button>
                                     </Empty>
                                 )}

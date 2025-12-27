@@ -49,44 +49,62 @@ const HomePage = () => {
 
     return (
         <>
-            <div className="px-[10%] py-5">
-                <Carousel slides={slides} autoplay />
-
-                <div className="mt-5">
-                    <h4 className="" style={{ fontWeight: '700' }}>Thương hiệu nổi bật</h4>
+            <div className="px-[5%] py-8 max-w-[1400px] mx-auto">
+                {/* Carousel Section with Modern Design */}
+                <div className="relative rounded-2xl overflow-hidden shadow-xl mb-12 transition-all duration-300 hover:shadow-2xl">
+                    <Carousel slides={slides} autoplay />
                 </div>
 
-                <div className="mt-3">
-                    {(() => {
-                        const chunkSize = 6;
-                        const chunks: typeof brands[] = [] as any;
-                        for (let i = 0; i < brands.length; i += chunkSize) {
-                            chunks.push(brands.slice(i, i + chunkSize));
-                        }
-                        return (
-                            <AntCarousel arrows dots autoplay>
-                                {chunks.map((group, idx) => (
-                                    <div key={idx}>
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                                            {group.map((b) => (
-                                                <div key={b.id} className="px-1">
-                                                    <BrandCard name={b.name} imageUrl={b.imageUrl} />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </AntCarousel>
-                        );
-                    })()}
-                </div>
-
-
-                <div className="mt-8">
-                    <div className="mb-3">
-                        <h4 style={{ fontWeight: '700' }}>Sản phẩm mới</h4>
+                {/* Brands Section with Enhanced Styling */}
+                <div className="mt-12">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-3xl font-bold text-gray-900 relative after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-orange-500 after:rounded-full">
+                            Thương hiệu nổi bật
+                        </h2>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div className="mt-6">
+                        {(() => {
+                            const chunkSize = 6;
+                            const chunks: typeof brands[] = [] as any;
+                            for (let i = 0; i < brands.length; i += chunkSize) {
+                                chunks.push(brands.slice(i, i + chunkSize));
+                            }
+                            return (
+                                <AntCarousel arrows dots autoplay>
+                                    {chunks.map((group, idx) => (
+                                        <div key={idx}>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
+                                                {group.map((b) => (
+                                                    <div 
+                                                        key={b.id} 
+                                                        className="flex justify-center items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                                                    >
+                                                        <BrandCard name={b.name} imageUrl={b.imageUrl} />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </AntCarousel>
+                            );
+                        })()}
+                    </div>
+                </div>
+
+                {/* New Products Section */}
+                <div className="mt-16">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-3xl font-bold text-gray-900 relative after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-orange-500 after:rounded-full">
+                            Sản phẩm mới
+                        </h2>
+                        <button 
+                            className="text-orange-500 hover:text-orange-600 font-medium transition-colors cursor-pointer"
+                            onClick={() => navigate('/products?sortBy=latest')}
+                        >
+                            Xem tất cả →
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
                         {newProducts.map((p) => {
                             const thumbnail = p.images?.find(p => p.is_thumbnail);
                             const variants = p.variants || [];
@@ -100,43 +118,58 @@ const HomePage = () => {
                             });
                             const minPriceVariant = variants[index];
                             return (
-                                <ProductCard
-                                    key={p.id}
-                                    id={p.id}
-                                    name={p.name || ""}
-                                    imageUrl={thumbnail?.image_url}
-                                    price={minPriceVariant?.price}
-                                    rating={4.3}
-                                    salePrice={0.4}
-                                    onAddToCart={() => console.log('Add to cart', p.id)}
-                                />
+                                <div 
+                                    key={p.id} 
+                                    className="transition-all duration-300 hover:-translate-y-1"
+                                >
+                                    <ProductCard
+                                        key={p.id}
+                                        id={p.id}
+                                        name={p.name || ""}
+                                        imageUrl={thumbnail?.image_url}
+                                        price={minPriceVariant?.price}
+                                        rating={4.3}
+                                        salePrice={0.4}
+                                        onAddToCart={() => console.log('Add to cart', p.id)}
+                                    />
+                                </div>
                             )
                         })}
                     </div>
                 </div>
 
-                <div className="mt-8">
-                    <div className="mb-3">
-                        <h4 style={{ fontWeight: '700', fontSize: '21px' }}>Sản phẩm nổi bật</h4>
+                {/* Featured Products Section with Enhanced Banner */}
+                <div className="mt-16 mb-16">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-3xl font-bold text-gray-900 relative after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-orange-500 after:rounded-full">
+                            Sản phẩm nổi bật
+                        </h2>
+                        <button 
+                            className="text-orange-500 hover:text-orange-600 font-medium transition-colors cursor-pointer"
+                            onClick={() => navigate('/products?sortBy=featured')}
+                        >
+                            Xem tất cả →
+                        </button>
                     </div>
-                    <div className="flex flex-col lg:flex-row gap-6">
-                        {/* Banner Section */}
-                        <div className="lg:w-1/4">
-                            <div className="relative h-80 bg-[#F4F1EC] rounded-lg overflow-hidden">
+                    <div className="flex flex-col lg:flex-row gap-8">
+                        {/* Enhanced Banner Section */}
+                        <div className="lg:w-1/3">
+                            <div className="relative h-[450px] bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl overflow-hidden shadow-lg group transition-all duration-500 hover:shadow-xl">
                                 <img
                                     src="/banner/Handbag-PNG-Picture.png"
                                     alt="Banner"
-                                    className="absolute bottom-0 right-0 w-[65%] h-auto object-contain"
+                                    className="absolute bottom-0 right-0 w-[70%] h-auto object-contain transition-transform duration-500 group-hover:scale-105"
                                 />
-                                <div className="relative z-10 p-6 h-full  text-gray-800">
-                                    <div className="text-2xl font-bold mb-5 text-[#EA580C]">Bộ sưu tập mới</div>
-                                    <p className="text-base mb-4">Khám phá bộ sưu tập túi xách mới nhất của chúng tôi với chất lượng cao cấp và thiết kế hiện đại.</p>
-                                    <button className="bg-white text-black px-4 py-2 rounded-[60px] font-semibold hover:bg-blue-300 transition-colors w-fit text-sm">
+                                <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent"></div>
+                                <div className="relative z-10 p-8 h-full flex flex-col justify-center text-gray-800">
+                                    <div className="text-3xl font-bold mb-4 text-[#EA580C]">Bộ sưu tập mới</div>
+                                    <p className="text-base mb-6 max-w-md">Khám phá bộ sưu tập túi xách mới nhất của chúng tôi với chất lượng cao cấp và thiết kế hiện đại.</p>
+                                    <button className="bg-orange-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-orange-600 transition-colors w-fit text-sm shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-transform">
                                         Mua ngay
                                     </button>
                                 </div>
-                                <div className="absolute top-3 right-3 z-10">
-                                    <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                                <div className="absolute top-4 right-4 z-20">
+                                    <span className="bg-red-500 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-md">
                                         -30% OFF
                                     </span>
                                 </div>
@@ -144,9 +177,9 @@ const HomePage = () => {
                         </div>
 
                         {/* Products Section */}
-                        <div className="lg:w-3/4">
-                            <div className="grid grid-cols-4 gap-4 h-full">
-                                {newProducts?.map((p) => {
+                        <div className="lg:w-2/3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 h-full">
+                                {newProducts?.slice(0, 6).map((p) => {
                                     const thumbnail = p.images?.find(p => p.is_thumbnail);
                                     const variants = p.variants || [];
                                     let index = 0;
@@ -159,17 +192,22 @@ const HomePage = () => {
                                     });
                                     const minPriceVariant = variants[index];
                                     return (
-                                        <ProductCard
-                                            id={p.id}
-                                            key={p.id}
-                                            name={p.name || ""}
-                                            imageUrl={thumbnail?.image_url}
-                                            price={minPriceVariant?.price || 0}
-                                            rating={4.3}
-                                            onClick={() => navigate(`/product/${p.id}`)}
-                                            salePrice={3}
-                                            onAddToCart={() => console.log('Add to cart', p.id)}
-                                        />
+                                        <div 
+                                            key={p.id} 
+                                            className="transition-all duration-300 hover:-translate-y-1"
+                                        >
+                                            <ProductCard
+                                                id={p.id}
+                                                key={p.id}
+                                                name={p.name || ""}
+                                                imageUrl={thumbnail?.image_url}
+                                                price={minPriceVariant?.price || 0}
+                                                rating={4.3}
+                                                onClick={() => navigate(`/product/${p.id}`)}
+                                                salePrice={3}
+                                                onAddToCart={() => console.log('Add to cart', p.id)}
+                                            />
+                                        </div>
                                     )
                                 })}
                             </div>

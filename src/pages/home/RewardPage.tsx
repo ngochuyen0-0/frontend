@@ -75,7 +75,7 @@ const PointsAndVouchersPage: React.FC = () => {
   const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
   const [redeemModalVisible, setRedeemModalVisible] = useState(false);
   const [historyModalVisible, setHistoryModalVisible] = useState(false);
-  const [point, setPoint] = useState<Product>(0);
+  const [point, setPoint] = useState<number>(0);
   const [redeemForm] = Form.useForm();
   const [userInfo, setUserInfo] = useState<UserProfile>();
   const [pointHistory, setPointHistory] = useState<DailyRewardHistory>();
@@ -98,8 +98,8 @@ const PointsAndVouchersPage: React.FC = () => {
   const vouchers: Voucher[] = [
     {
       id: 'V001',
-      name: '10% Off All Orders',
-      description: 'Get 10% discount on your entire order',
+      name: 'Giảm 10% tất cả đơn hàng',
+      description: 'Giảm 10% cho toàn bộ đơn hàng của bạn',
       type: 'discount',
       discountValue: 10,
       discountType: 'percentage',
@@ -110,8 +110,8 @@ const PointsAndVouchersPage: React.FC = () => {
     },
     {
       id: 'V002',
-      name: 'Free Shipping',
-      description: 'Free shipping on orders over $50',
+      name: 'Miễn phí vận chuyển',
+      description: 'Miễn phí vận chuyển cho đơn hàng trên $50',
       type: 'shipping',
       discountValue: 0,
       discountType: 'fixed',
@@ -121,8 +121,8 @@ const PointsAndVouchersPage: React.FC = () => {
     },
     {
       id: 'V003',
-      name: '$20 Voucher',
-      description: '$20 off on minimum $100 purchase',
+      name: 'Phiếu giảm giá $20',
+      description: 'Giảm $20 cho đơn hàng tối thiểu $100',
       type: 'discount',
       discountValue: 20,
       discountType: 'fixed',
@@ -133,8 +133,8 @@ const PointsAndVouchersPage: React.FC = () => {
     },
     {
       id: 'V004',
-      name: '15% Electronics',
-      description: '15% off on electronics category',
+      name: 'Điện tử 15%',
+      description: 'Giảm 15% cho danh mục điện tử',
       type: 'discount',
       discountValue: 15,
       discountType: 'percentage',
@@ -144,8 +144,8 @@ const PointsAndVouchersPage: React.FC = () => {
     },
     {
       id: 'V005',
-      name: 'Birthday Special',
-      description: '20% off for birthday month',
+      name: 'Ưu đãi sinh nhật',
+      description: 'Giảm 20% trong tháng sinh nhật',
       type: 'discount',
       discountValue: 20,
       discountType: 'percentage',
@@ -155,8 +155,8 @@ const PointsAndVouchersPage: React.FC = () => {
     },
     {
       id: 'V006',
-      name: 'Flash Sale Voucher',
-      description: '25% off on flash sale items',
+      name: 'Phiếu giảm giá Flash Sale',
+      description: 'Giảm 25% cho các mặt hàng flash sale',
       type: 'discount',
       discountValue: 25,
       discountType: 'percentage',
@@ -173,7 +173,7 @@ const PointsAndVouchersPage: React.FC = () => {
       date: '2024-01-15 14:30',
       type: 'earned',
       amount: 156,
-      description: 'Order #ORD001 - 10% of $156.00',
+      description: 'Đơn hàng #ORD001 - 10% của $156.00',
       orderId: 'ORD001'
     },
     {
@@ -181,7 +181,7 @@ const PointsAndVouchersPage: React.FC = () => {
       date: '2024-01-14 11:20',
       type: 'spent',
       amount: -500,
-      description: 'Redeemed voucher: 10% Off All Orders',
+      description: 'Đổi phiếu giảm giá: Giảm 10% tất cả đơn hàng',
       voucherId: 'V001'
     },
     {
@@ -189,7 +189,7 @@ const PointsAndVouchersPage: React.FC = () => {
       date: '2024-01-10 09:15',
       type: 'earned',
       amount: 89,
-      description: 'Order #ORD002 - 10% of $89.99',
+      description: 'Đơn hàng #ORD002 - 10% của $89.99',
       orderId: 'ORD002'
     },
     {
@@ -197,7 +197,7 @@ const PointsAndVouchersPage: React.FC = () => {
       date: '2024-01-05 16:45',
       type: 'earned',
       amount: 234,
-      description: 'Order #ORD003 - 10% of $234.50',
+      description: 'Đơn hàng #ORD003 - 10% của $234.50',
       orderId: 'ORD003'
     },
     {
@@ -205,17 +205,17 @@ const PointsAndVouchersPage: React.FC = () => {
       date: '2024-01-01 10:00',
       type: 'expired',
       amount: -50,
-      description: 'Points expired',
+      description: 'Điểm hết hạn',
     }
   ];
 
   const pointRules = [
-    'Earn 10% of order value in points (1 point = $1)',
-    'Minimum $1 order to earn points',
-    'Points expire after 12 months of inactivity',
-    '100 points = $1 discount',
-    'Points cannot be combined with some promotions',
-    'Maximum points per order: 1000 points'
+    'Kiếm 10% giá trị đơn hàng dưới dạng điểm (1 điểm = $1)',
+    'Đơn hàng tối thiểu $1 để kiếm điểm',
+    'Điểm hết hạn sau 12 tháng không hoạt động',
+    '100 điểm = $1 giảm giá',
+    'Điểm không thể kết hợp với một số chương trình khuyến mãi',
+    'Số điểm tối đa mỗi đơn hàng: 1000 điểm'
   ];
 
   const handleRedeemVoucher = (voucher: Voucher) => {
@@ -272,12 +272,12 @@ const PointsAndVouchersPage: React.FC = () => {
         <div className="text-center mb-8">
           <Title level={1} className="mb-2">
             <StarOutlined className="text-yellow-500 mr-3" />
-            Hapas Rewards
-          </Title>
-          <Paragraph type="secondary" className="text-lg">
-            Earn points with every purchase and redeem for amazing vouchers!
-          </Paragraph>
-        </div>
+            Phần thưởng Hapas
+           </Title>
+           <Paragraph type="secondary" className="text-lg">
+             Kiếm điểm với mọi đơn hàng và đổi lấy các phiếu giảm giá tuyệt vời!
+           </Paragraph>
+         </div>
 
         <Row gutter={[24, 24]}>
           {/* Left Column - Points Overview */}
@@ -292,12 +292,12 @@ const PointsAndVouchersPage: React.FC = () => {
                     className="bg-gradient-to-r from-yellow-400 to-orange-500 mb-4"
                   />
                   <Statistic
-                    title="Your Points"
+                    title="Điểm của bạn"
                     value={point}
                     prefix={<StarOutlined className="text-yellow-500" />}
                     valueStyle={{ color: '#f59e0b', fontSize: '2.5rem' }}
                   />
-                  <Text type="secondary">≈ ${(point / 100).toFixed(2)} in discounts</Text>
+                  <Text type="secondary">≈ ${(point / 100).toFixed(2)} trong phiếu giảm giá</Text>
                 </div>
               </Badge.Ribbon>
 
@@ -305,16 +305,16 @@ const PointsAndVouchersPage: React.FC = () => {
 
               <Space direction="vertical" className="w-full" size="middle">
                 <div className="flex justify-between">
-                  <Text>Earned this month:</Text>
+                  <Text>Đã kiếm trong tháng này:</Text>
                   <Text strong type="success">+{pointsEarnedThisMonth}</Text>
                 </div>
                 <div className="flex justify-between">
-                  <Text>Expiring next month:</Text>
+                  <Text>Sắp hết hạn tháng tới:</Text>
                   <Text strong type="warning">-{pointsExpiringNextMonth}</Text>
                 </div>
                 <div className="flex justify-between">
-                  <Text>Next level ({nextLevel}):</Text>
-                  <Text strong>{pointsToNextLevel} points needed</Text>
+                  <Text>Cấp độ tiếp theo ({nextLevel}):</Text>
+                  <Text strong>{pointsToNextLevel} điểm cần thiết</Text>
                 </div>
               </Space>
 
@@ -333,32 +333,32 @@ const PointsAndVouchersPage: React.FC = () => {
               title={
                 <Space>
                   <QuestionCircleOutlined />
-                  How It Works
+                  Cách thức hoạt động
                 </Space>
               }
               className="mb-6"
             >
               <Timeline>
                 <Timeline.Item dot={<ShoppingOutlined className="text-blue-500" />}>
-                  <Text strong>Shop & Earn</Text>
+                  <Text strong>Mua sắm & Kiếm điểm</Text>
                   <br />
-                  <Text type="secondary">Get 10% of order value as points</Text>
+                  <Text type="secondary">Nhận 10% giá trị đơn hàng dưới dạng điểm</Text>
                 </Timeline.Item>
                 <Timeline.Item dot={<StarOutlined className="text-yellow-500" />}>
-                  <Text strong>Accumulate Points</Text>
+                  <Text strong>Tích lũy điểm</Text>
                   <br />
-                  <Text type="secondary">Points never expire with active account</Text>
+                  <Text type="secondary">Điểm không bao giờ hết hạn với tài khoản hoạt động</Text>
                 </Timeline.Item>
                 <Timeline.Item dot={<GiftOutlined className="text-green-500" />}>
-                  <Text strong>Redeem Rewards</Text>
+                  <Text strong>Đổi phần thưởng</Text>
                   <br />
-                  <Text type="secondary">Exchange points for vouchers</Text>
+                  <Text type="secondary">Trao đổi điểm lấy phiếu giảm giá</Text>
                 </Timeline.Item>
               </Timeline>
             </Card>
 
             {/* Quick Actions */}
-            <Card title="Quick Actions">
+            <Card title="Hành động nhanh">
               <Space direction="vertical" className="w-full">
                 <Button
                   icon={<HistoryOutlined />}
@@ -366,7 +366,7 @@ const PointsAndVouchersPage: React.FC = () => {
                   size="large"
                   onClick={() => setHistoryModalVisible(true)}
                 >
-                  Points History
+                  Lịch sử điểm
                 </Button>
                 <Button
                   icon={<ShoppingOutlined />}
@@ -375,7 +375,7 @@ const PointsAndVouchersPage: React.FC = () => {
                   size="large"
                   href="/products"
                 >
-                  Shop to Earn More
+                  Mua sắm để kiếm thêm
                 </Button>
               </Space>
             </Card>
@@ -388,8 +388,8 @@ const PointsAndVouchersPage: React.FC = () => {
               title={
                 <Space>
                   <GiftOutlined />
-                  Available Vouchers
-                  <Tag color="blue">{vouchers.length} available</Tag>
+                  Phiếu giảm giá có sẵn
+                  <Tag color="blue">{vouchers.length} có sẵn</Tag>
                 </Space>
               }
               className="mb-6"
@@ -431,7 +431,7 @@ const PointsAndVouchersPage: React.FC = () => {
 
                       <div className="flex justify-between items-center mb-3">
                         <Text type="secondary" className="text-xs">
-                          Valid for {voucher.validityDays} days
+                          Có hiệu lực trong {voucher.validityDays} ngày
                         </Text>
                         <Tag>{voucher.category}</Tag>
                       </div>
@@ -443,12 +443,12 @@ const PointsAndVouchersPage: React.FC = () => {
                         onClick={() => handleRedeemVoucher(voucher)}
                         icon={<GiftOutlined />}
                       >
-                        {point >= voucher.pointsRequired ? 'Redeem Now' : 'Not Enough Points'}
+                        {point >= voucher.pointsRequired ? 'Đổi ngay' : 'Không đủ điểm'}
                       </Button>
 
                       {point < voucher.pointsRequired && (
                         <Text type="secondary" className="text-xs block text-center mt-2">
-                          Need {voucher.pointsRequired - point} more points
+                          Cần thêm {voucher.pointsRequired - point} điểm
                         </Text>
                       )}
                     </Card>
@@ -458,10 +458,10 @@ const PointsAndVouchersPage: React.FC = () => {
             </Card>
 
             {/* Points Rules */}
-            <Card title="Points Rules & Information">
+            <Card title="Quy tắc & Thông tin điểm">
               <Alert
-                message="Important Information"
-                description="Points are earned at 10% of your order value and can be used for discounts on future purchases."
+                message="Thông tin quan trọng"
+                description="Điểm được kiếm với 10% giá trị đơn hàng của bạn và có thể được sử dụng để giảm giá cho các đơn hàng trong tương lai."
                 type="info"
                 showIcon
                 className="mb-4"
@@ -487,7 +487,7 @@ const PointsAndVouchersPage: React.FC = () => {
           title={
             <Space>
               <GiftOutlined />
-              Redeem Voucher
+              Đổi phiếu giảm giá
             </Space>
           }
           open={redeemModalVisible}
@@ -523,7 +523,7 @@ const PointsAndVouchersPage: React.FC = () => {
                 name="quantity"
                 label="Quantity"
                 initialValue={1}
-                rules={[{ required: true, message: 'Please select quantity' }]}
+                rules={[{ required: true, message: 'Vui lòng chọn số lượng' }]}
               >
                 <InputNumber
                   min={1}
@@ -535,14 +535,14 @@ const PointsAndVouchersPage: React.FC = () => {
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
                 <div className="flex justify-between">
-                  <Text>Total Cost:</Text>
+                  <Text>Tổng chi phí:</Text>
                   <Text strong className="text-yellow-600">
-                    {selectedVoucher.pointsRequired} points
+                    {selectedVoucher.pointsRequired} điểm
                   </Text>
                 </div>
                 <div className="flex justify-between">
-                  <Text>Remaining Balance:</Text>
-                  <Text strong>{point - selectedVoucher.pointsRequired} points</Text>
+                  <Text>Số dư còn lại:</Text>
+                  <Text strong>{point - selectedVoucher.pointsRequired} điểm</Text>
                 </div>
               </div>
 
@@ -554,7 +554,7 @@ const PointsAndVouchersPage: React.FC = () => {
                   size="large"
                   icon={<CheckCircleOutlined />}
                 >
-                  Confirm Redemption
+                  Xác nhận đổi điểm
                 </Button>
               </Form.Item>
             </Form>
@@ -566,7 +566,7 @@ const PointsAndVouchersPage: React.FC = () => {
           title={
             <Space>
               <HistoryOutlined />
-              Points History
+              Lịch sử điểm
             </Space>
           }
           open={historyModalVisible}
@@ -592,7 +592,7 @@ const PointsAndVouchersPage: React.FC = () => {
                     <Space>
                       <Text>{transaction.reason}</Text>
                       <Tag color={getTransactionColor(transaction.amount)}>
-                        {(transaction.amount > 0 ? "Earns" : "Expired")}
+                        {(transaction.amount > 0 ? "Kiếm" : "Hết hạn")}
                       </Tag>
                     </Space>
                   }
