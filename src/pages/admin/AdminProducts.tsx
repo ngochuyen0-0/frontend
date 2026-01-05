@@ -75,13 +75,13 @@ const AdminProducts: React.FC = () => {
     // Tính toán các thống kê
     const totalProducts = products.length;
     const inStockProducts = products.filter(product =>
-        product.variants && product.variants.some(variant => variant.stock > 0)
+        product.variants && Array.isArray(product.variants) && product.variants.some((variant: any) => variant.stock > 0)
     ).length;
     const lowStockProducts = products.filter(product =>
-        product.variants && product.variants.some(variant => variant.stock > 0 && variant.stock <= 5)
+        product.variants && Array.isArray(product.variants) && product.variants.some((variant: any) => variant.stock > 0 && variant.stock <= 5)
     ).length;
     const outOfStockProducts = products.filter(product =>
-        product.variants && product.variants.every(variant => variant.stock === 0)
+        product.variants && Array.isArray(product.variants) && product.variants.every((variant: any) => variant.stock === 0)
     ).length;
 
     // Columns definition
@@ -91,8 +91,8 @@ const AdminProducts: React.FC = () => {
             dataIndex: "id",
             key: "id",
             render: (id: string, record: any) => {
-                const thumbnail = record.images?.find(i => i.is_thumbnail) || "";
-                return (<img style={{ width: 70, height: 40, borderRadius: 6 }} src={thumbnail.image_url} />)
+                const thumbnail = record.images?.find((i: any) => i.is_thumbnail);
+                return thumbnail ? (<img style={{ width: 70, height: 40, borderRadius: 6 }} src={thumbnail.image_url} />) : <div className="w-[70px] h-[40px] bg-gray-200 rounded flex items-center justify-center">No Image</div>;
             },
         }, {
             title: "Thông tin sản phẩm",
@@ -104,7 +104,7 @@ const AdminProducts: React.FC = () => {
                         cursor: "pointer"
                     }} onClick={() => navigate(`/admin/v1/product/${record.id}`)}>{name}</div>
                     <div className="text-xs text-gray-400">
-                        {record.variants.length || 0} Biến thể
+                        {record.variants && Array.isArray(record.variants) ? record.variants.length : 0} Biến thể
                     </div>
                 </div>
             ),
@@ -129,25 +129,78 @@ const AdminProducts: React.FC = () => {
             onFilter: (value: any, record: any) => record.category.name === value,
         },
         {
-            title: "Trạng thái",
-            dataIndex: "status",
-            key: "status",
-            render: (status: string) => {
-                const statusConfig: any = {
-                    published: { color: "green", text: "Đã công bố" },
-                    draft: { color: "blue", text: "Bản nháp" },
-                    archived: { color: "gray", text: "Đã lưu trữ" },
-                };
-
-                const config = statusConfig[status] || statusConfig.draft;
-                return <Tag color={config.color}>{config.text}</Tag>;
+            title: "Giá thấp nhất",
+            key: "minPrice",
+            render: (_, record: any) => {
+                if (record.variants && record.variants.length > 0) {
+                    const minPrice = Math.min(...record.variants.map((v: any) => v.price || 0));
+                    return <div>{minPrice.toLocaleString()}đ</div>;
+                }
+                return <div>0đ</div>;
+            },
+            sorter: (a: any, b: any) => {
+                const minPriceA = a.variants && a.variants.length > 0 ? Math.min(...a.variants.map((v: any) => v.price || 0)) : 0;
+                const minPriceB = b.variants && b.variants.length > 0 ? Math.min(...b.variants.map((v: any) => v.price || 0)) : 0;
+                return minPriceA - minPriceB;
+            },
+        },
+        {
+            title: "Màu sắc",
+            key: "colors",
+            render: (_, record: any) => {
+                if (record.variants && record.variants.length > 0) {
+                    const colors = [...new Set(record.variants.map((v: any) => v.color).filter(Boolean))].slice(0, 3);
+                    return (
+                        <div>
+                            {colors.map((color: any, index: number) => (
+                                <Tag key={index} color="blue" className="mb-1">{color}</Tag>
+                            ))}
+                            {record.variants.length > 3 && <Tag>+{record.variants.length - 3}</Tag>}
+                        </div>
+                    );
+                }
+                return <div>Không có</div>;
+            },
+        },
+        {
+            title: "Kích thước",
+            key: "sizes",
+            render: (_, record: any) => {
+                if (record.variants && record.variants.length > 0) {
+                    const sizes = [...new Set(record.variants.map((v: any) => v.size).filter(Boolean))].slice(0, 3);
+                    return (
+                        <div>
+                            {sizes.map((size: any, index: number) => (
+                                <Tag key={index} color="green" className="mb-1">{size}</Tag>
+                            ))}
+                            {record.variants.length > 3 && <Tag>+{record.variants.length - 3}</Tag>}
+                        </div>
+                    );
+                }
+                return <div>Không có</div>;
+            },
+        },
+        {
+            title: "Trạng thái ",
+            dataIndex: "is_active",
+            key: "is_active",
+            render: (_, record: any) => {
+                // Kiểm tra xem sản phẩm có biến thể nào đang hoạt động không
+                const hasActiveVariant = record.variants && record.variants.some((v: any) => v.is_active);
+                const isActive = hasActiveVariant !== undefined ? hasActiveVariant : record.is_active;
+                const color = isActive ? "green" : "red";
+                const text = isActive ? "Hoạt động" : "Không hoạt động";
+                return <Tag color={color}>{text}</Tag>;
             },
             filters: [
-                { text: "Đã công bố", value: "published" },
-                { text: "Bản nháp", value: "draft" },
-                { text: "Đã lưu trữ", value: "archived" },
+                { text: "Hoạt động", value: true },
+                { text: "Không hoạt động", value: false },
             ],
-            onFilter: (value: any, record: any) => record.status === value,
+            onFilter: (value: any, record: any) => {
+                const hasActiveVariant = record.variants && record.variants.some((v: any) => v.is_active);
+                const isActive = hasActiveVariant !== undefined ? hasActiveVariant : record.is_active;
+                return isActive === value;
+            },
         },
         {
             title: "Hành động",
