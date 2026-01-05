@@ -230,7 +230,7 @@ const LoginPage: React.FC = () => {
                             fontSize: "1.8rem",
                         }}
                     >
-                        Welcome to Tadidas Store
+                        Welcome to HAPAS Store
                     </h1>
                     <p style={{ color: "#666" }}>
                         Đăng nhập hoặc đăng ký tài khoản
