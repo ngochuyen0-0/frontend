@@ -41,14 +41,56 @@ const AdminProducts: React.FC = () => {
     const [detailModalVisible, setDetailModalVisible] = useState(false);
     const [formModalVisible, setFormModalVisible] = useState(false);
     const [formType, setFormType] = useState<'create' | 'edit'>('create');
+    const [searchText, setSearchText] = useState('');
+    const [searchType, setSearchType] = useState<'all' | 'name' | 'category' | 'brand'>('all');
     useEffect(() => {
         getProducts();
     }, [])
+
+    // Get unique categories for the filter dropdowns
+    const categories = [...new Set(products.map(p => p.category?.name).filter(Boolean))];
+
+    // Filter products based on search text only
+    const filteredProducts = products.filter(product => {
+        let matchesSearch = true;
+        
+        if (searchText) {
+            switch (searchType) {
+                case 'name':
+                    matchesSearch = product.name?.toLowerCase().includes(searchText.toLowerCase()) || false;
+                    break;
+                case 'category':
+                    matchesSearch = product.category?.name?.toLowerCase().includes(searchText.toLowerCase()) || false;
+                    break;
+                case 'brand':
+                    matchesSearch = product.brand?.name?.toLowerCase().includes(searchText.toLowerCase()) || false;
+                    break;
+                case 'all':
+                default:
+                    matchesSearch = product.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+                        product.description?.toLowerCase().includes(searchText.toLowerCase()) ||
+                        product.id.toLowerCase().includes(searchText.toLowerCase()) ||
+                        product.category?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+                        product.brand?.name?.toLowerCase().includes(searchText.toLowerCase()) || false;
+                    break;
+            }
+        }
+        
+        return matchesSearch;
+    });
 
     const handleEdit = (product: Product) => {
         setSelectProduct(product);
         setFormType('edit');
         setFormModalVisible(true);
+    };
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchText(e.target.value);
+    };
+
+    const handleSearchTypeChange = (value: 'all' | 'name' | 'category' | 'brand') => {
+        setSearchType(value);
     };
 
     const handleCreate = () => {
@@ -72,15 +114,15 @@ const AdminProducts: React.FC = () => {
     };
 
 
-    // Tính toán các thống kê
-    const totalProducts = products.length;
-    const inStockProducts = products.filter(product =>
+    // Tính toán các thống kê dựa trên dữ liệu đã lọc
+    const totalProducts = filteredProducts.length;
+    const inStockProducts = filteredProducts.filter(product =>
         product.variants && Array.isArray(product.variants) && product.variants.some((variant: any) => variant.stock > 0)
     ).length;
-    const lowStockProducts = products.filter(product =>
+    const lowStockProducts = filteredProducts.filter(product =>
         product.variants && Array.isArray(product.variants) && product.variants.some((variant: any) => variant.stock > 0 && variant.stock <= 5)
     ).length;
-    const outOfStockProducts = products.filter(product =>
+    const outOfStockProducts = filteredProducts.filter(product =>
         product.variants && Array.isArray(product.variants) && product.variants.every((variant: any) => variant.stock === 0)
     ).length;
 
@@ -121,11 +163,10 @@ const AdminProducts: React.FC = () => {
             dataIndex: ["category", "name"],
             key: "category",
             render: (category: string) => <div>{category}</div>,
-            filters: [
-                { text: "Túi da", value: "leather" },
-                { text: "túi vải", value: "cloth" },
-                { text: "Bộ sưu tập", value: "limit" },
-            ],
+            filters: categories.map((name: any) => ({
+                text: name,
+                value: name
+            })),
             onFilter: (value: any, record: any) => record.category.name === value,
         },
         {
@@ -184,10 +225,15 @@ const AdminProducts: React.FC = () => {
             title: "Trạng thái ",
             dataIndex: "is_active",
             key: "is_active",
-            render: (_, record: any) => {
-                // Kiểm tra xem sản phẩm có biến thể nào đang hoạt động không
+            render: (is_active: boolean, record: any) => {
+                // Trạng thái sản phẩm là hoạt động nếu:
+                // Sản phẩm chính đang hoạt động HOẶC có ít nhất một biến thể đang hoạt động
+                const isProductActive = record.is_active;
                 const hasActiveVariant = record.variants && record.variants.some((v: any) => v.is_active);
-                const isActive = hasActiveVariant !== undefined ? hasActiveVariant : record.is_active;
+                
+                // Sản phẩm được coi là hoạt động nếu sản phẩm chính hoạt động hoặc có biến thể hoạt động
+                const isActive = isProductActive || hasActiveVariant;
+                
                 const color = isActive ? "green" : "red";
                 const text = isActive ? "Hoạt động" : "Không hoạt động";
                 return <Tag color={color}>{text}</Tag>;
@@ -197,8 +243,10 @@ const AdminProducts: React.FC = () => {
                 { text: "Không hoạt động", value: false },
             ],
             onFilter: (value: any, record: any) => {
+                const isProductActive = record.is_active;
                 const hasActiveVariant = record.variants && record.variants.some((v: any) => v.is_active);
-                const isActive = hasActiveVariant !== undefined ? hasActiveVariant : record.is_active;
+                
+                const isActive = isProductActive || hasActiveVariant;
                 return isActive === value;
             },
         },
@@ -355,27 +403,24 @@ const AdminProducts: React.FC = () => {
                 <Card>
                     <div className="flex flex-wrap gap-4 items-center justify-between">
                         <Space>
+                            <Select
+                                value={searchType}
+                                onChange={handleSearchTypeChange}
+                                style={{ width: 120 }}
+                            >
+                                <Option value="all">Tất cả</Option>
+                                <Option value="name">Tên SP</Option>
+                                <Option value="category">Danh mục</Option>
+                                <Option value="brand">Thương hiệu</Option>
+                            </Select>
                             <Input
                                 placeholder="Tìm kiếm sản phẩm..."
                                 prefix={<SearchOutlined />}
                                 style={{ width: 300 }}
+                                value={searchText}
+                                onChange={handleSearchChange}
+                                allowClear
                             />
-                            <Select
-                                placeholder="Tất cả danh mục"
-                                style={{ width: 150 }}
-                            >
-                                <Option value="leather">Túi da</Option>
-                                <Option value="cloth">Túi vải</Option>
-                                <Option value="limit">Bộ sưu tập</Option>
-                            </Select>
-                            <Select
-                                placeholder="Tất cả trạng thái"
-                                style={{ width: 150 }}
-                            >
-                                <Option value="published">Đã công bố</Option>
-                                <Option value="draft">Bản nháp</Option>
-                                <Option value="archived">Đã lưu trữ</Option>
-                            </Select>
                         </Space>
 
                         <Space>
@@ -398,11 +443,11 @@ const AdminProducts: React.FC = () => {
                     <Table
                         rowSelection={rowSelection}
                         columns={columns}
-                        dataSource={products}
+                        dataSource={filteredProducts}
                         rowKey="id"
                         loading={tableLoading}
                         pagination={{
-                            total: products.length,
+                            total: filteredProducts.length,
                             pageSize: 20,
                             showSizeChanger: true,
                             showQuickJumper: true,
