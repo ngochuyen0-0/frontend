@@ -93,3 +93,8 @@ export const getProductVariants = async (filters: any) => {
     const res = await apiClient.post(`/products/get-variant`, filters);
     return res.data;
 }
+
+export const deleteProduct = async (id: string) => {
+    const res = await apiClient.delete(`/products/delete/${id}`);
+    return res.data;
+}

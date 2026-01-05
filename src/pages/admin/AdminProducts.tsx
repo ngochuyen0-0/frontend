@@ -26,6 +26,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProductStore } from "../../store/useProductStore";
+import { deleteProduct } from "../../services/productService";
 import ProductForm from "../../components/admin/ProductFrom";
 import { Product } from "../../types/product";
 
@@ -33,7 +34,7 @@ const { Option } = Select;
 
 const AdminProducts: React.FC = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [tableLoading, setTableLoading] = useState(false);
     const navigate = useNavigate();
     const { products, getProducts } = useProductStore()
     const [selectProduct, setSelectProduct] = useState<Product | null>(null);
@@ -55,6 +56,33 @@ const AdminProducts: React.FC = () => {
         setFormType('create');
         setFormModalVisible(true);
     };
+
+    const handleDelete = async (product: Product) => {
+        if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}"?`)) {
+            try {
+                await deleteProduct(product.id);
+                // Cập nhật lại danh sách sản phẩm sau khi xóa
+                await getProducts();
+                console.log("Xóa sản phẩm thành công");
+            } catch (error) {
+                console.error("Error deleting product:", error);
+                alert("Xóa sản phẩm thất bại. Vui lòng thử lại.");
+            }
+        }
+    };
+
+
+    // Tính toán các thống kê
+    const totalProducts = products.length;
+    const inStockProducts = products.filter(product =>
+        product.variants && product.variants.some(variant => variant.stock > 0)
+    ).length;
+    const lowStockProducts = products.filter(product =>
+        product.variants && product.variants.some(variant => variant.stock > 0 && variant.stock <= 5)
+    ).length;
+    const outOfStockProducts = products.filter(product =>
+        product.variants && product.variants.every(variant => variant.stock === 0)
+    ).length;
 
     // Columns definition
     const columns = [
@@ -134,17 +162,12 @@ const AdminProducts: React.FC = () => {
                                 label: "Sửa",
                                 icon: <EditOutlined />,
                                 onClick: () => handleEdit(record)
-
-                            },
-                            {
-                                key: "quick-edit",
-                                label: "Sửa nhanh",
-                                icon: <FormOutlined />,
                             },
                             {
                                 key: "view",
                                 label: "Xem chi tiết",
                                 icon: <EyeOutlined />,
+                                onClick: () => navigate(`/admin/v1/product/${record.id}`)
                             },
                             {
                                 key: "duplicate",
@@ -157,6 +180,7 @@ const AdminProducts: React.FC = () => {
                                 label: "Xóa",
                                 icon: <DeleteOutlined />,
                                 danger: true,
+                                onClick: () => handleDelete(record)
                             },
                         ],
                     }}
@@ -169,10 +193,50 @@ const AdminProducts: React.FC = () => {
     ];
 
     const bulkActionItems = [
-        { key: "publish", label: "Công bố mục đã chọn" },
-        { key: "draft", label: "Chuyển sang bản nháp" },
-        { key: "archive", label: "Lưu trữ mục đã chọn" },
-        { key: "delete", label: "Xóa mục đã chọn", danger: true },
+        {
+            key: "publish",
+            label: "Công bố mục đã chọn",
+            onClick: () => {
+                // TODO: Implement bulk publish
+                getProducts();
+            }
+        },
+        {
+            key: "draft",
+            label: "Chuyển sang bản nháp",
+            onClick: () => {
+                // TODO: Implement bulk draft
+                getProducts();
+            }
+        },
+        {
+            key: "archive",
+            label: "Lưu trữ mục đã chọn",
+            onClick: () => {
+                // TODO: Implement bulk archive
+                getProducts();
+            }
+        },
+        {
+            key: "delete",
+            label: "Xóa mục đã chọn",
+            danger: true,
+            onClick: async () => {
+                if (window.confirm(`Bạn có chắc chắn muốn xóa ${selectedRowKeys.length} sản phẩm đã chọn?`)) {
+                    try {
+                        // Gọi API xóa từng sản phẩm
+                        await Promise.all(selectedRowKeys.map(id => deleteProduct(id.toString())));
+                        // Cập nhật lại danh sách sản phẩm sau khi xóa
+                        await getProducts();
+                        setSelectedRowKeys([]); // Xóa selections
+                        console.log("Xóa sản phẩm thành công");
+                    } catch (error) {
+                        console.error("Error deleting products:", error);
+                        alert("Xóa sản phẩm thất bại. Vui lòng thử lại.");
+                    }
+                }
+            }
+        },
     ];
 
     const rowSelection = {
@@ -193,7 +257,7 @@ const AdminProducts: React.FC = () => {
                     </div>
                     <Space>
                         <Button icon={<ExportOutlined />}>Xuất dữ liệu</Button>
-                        <Button type="primary" onClick={() => navigate('/admin/v1/products/add-products')} icon={<PlusOutlined />}>
+                        <Button type="primary" onClick={handleCreate} icon={<PlusOutlined />}>
                             Thêm sản phẩm mới
                         </Button>
                     </Space>
@@ -202,14 +266,14 @@ const AdminProducts: React.FC = () => {
                 <Row gutter={16}>
                     <Col span={6}>
                         <Card>
-                            <Statistic title="Tổng số sản phẩm" value={156} />
+                            <Statistic title="Tổng số sản phẩm" value={totalProducts} />
                         </Card>
                     </Col>
                     <Col span={6}>
                         <Card>
                             <Statistic
                                 title="Còn hàng"
-                                value={45}
+                                value={inStockProducts}
                                 valueStyle={{ color: "#3f8600" }}
                             />
                         </Card>
@@ -218,7 +282,7 @@ const AdminProducts: React.FC = () => {
                         <Card>
                             <Statistic
                                 title="Sắp hết hàng"
-                                value={12}
+                                value={lowStockProducts}
                                 valueStyle={{ color: "#faad14" }}
                             />
                         </Card>
@@ -227,7 +291,7 @@ const AdminProducts: React.FC = () => {
                         <Card>
                             <Statistic
                                 title="Hết hàng"
-                                value={3}
+                                value={outOfStockProducts}
                                 valueStyle={{ color: "#cf1322" }}
                             />
                         </Card>
@@ -283,8 +347,9 @@ const AdminProducts: React.FC = () => {
                         columns={columns}
                         dataSource={products}
                         rowKey="id"
+                        loading={tableLoading}
                         pagination={{
-                            total: 156,
+                            total: products.length,
                             pageSize: 20,
                             showSizeChanger: true,
                             showQuickJumper: true,
@@ -301,7 +366,7 @@ const AdminProducts: React.FC = () => {
                     onClose={() => setFormModalVisible(false)}
                     onSuccess={() => {
                         setFormModalVisible(false);
-
+                        getProducts(); // Cập nhật lại danh sách sản phẩm sau khi thành công
                     }}
                 />
             </div>
