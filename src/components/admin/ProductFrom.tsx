@@ -93,7 +93,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           name="name"
           rules={[{ required: true, message: 'Enter name for product' }]}
         >
-          <Input placeholder='e.g., Nike Air Force' />
+          <Input placeholder='e.g., Túi xách tay' />
         </Form.Item>
         <Form.Item
           label="Description"

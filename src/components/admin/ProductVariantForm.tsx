@@ -134,7 +134,7 @@ const VariantForm: React.FC<VariantFormProps> = ({
 
                     {/* Price */}
                     <Form.Item
-                        label="Giá ($)"
+                        label="Giá"
                         name="price"
                         rules={[{ required: true, message: 'Vui lòng nhập giá' }]}
                     >

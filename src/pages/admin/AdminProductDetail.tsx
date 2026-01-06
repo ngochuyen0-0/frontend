@@ -47,6 +47,7 @@ const AdminProductDetail: React.FC = () => {
     const [detailModalVisible, setDetailModalVisible] = useState(false);
     const [formModalVisible, setFormModalVisible] = useState(false);
     const [formType, setFormType] = useState<'create' | 'edit'>('create');
+    const [searchText, setSearchText] = useState('');
 
     useEffect(() => {
         getProductVariants({ product_id: product_id });
@@ -105,8 +106,48 @@ const AdminProductDetail: React.FC = () => {
             title: "Màu sắc",
             dataIndex: "color",
             key: "color",
-            render: (status: string) => {
-                return <Tag color={status.toLocaleLowerCase() == "white" ? "#CCC" : status.toLocaleLowerCase()}>{status}</Tag>;
+            render: (color: string) => {
+                // Chuyển đổi tên màu sang mã màu hex nếu cần
+                const getColorHex = (colorName: string) => {
+                    const colorMap: Record<string, string> = {
+                        "đỏ": "#EF4444",
+                        "xanh": "#3B82F6",
+                        "xanh lá": "#22C55E",
+                        "vàng": "#EAB308",
+                        "tím": "#A855F7",
+                        "cam": "#F97316",
+                        "hồng": "#EC4899",
+                        "nâu": "#92400E",
+                        "xám": "#6B7280",
+                        "đen": "#000000",
+                        "trắng": "#FFFFFF",
+                        "be": "#F5F5DC",
+                        "xanh navy": "#1E3A8A",
+                        "xanh ngọc": "#0F766E",
+                        // Thêm các màu thông dụng khác nếu cần
+                    };
+                    
+                    const normalizedColor = colorName.toLowerCase().trim();
+                    return colorMap[normalizedColor] || colorName;
+                };
+
+                const colorHex = getColorHex(color);
+                
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div
+                            style={{
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                backgroundColor: colorHex,
+                                border: colorHex === "#FFFFFF" ? '1px solid #D1D5DB' : 'none',
+                                display: 'inline-block'
+                            }}
+                        />
+                        <span>{color}</span>
+                    </div>
+                );
             },
             onFilter: (value: any, record: any) => record.status === value,
         },
@@ -143,17 +184,6 @@ const AdminProductDetail: React.FC = () => {
                                 icon: <EditOutlined />,
                                 onClick: () => handleEdit(record)
                             },
-                            {
-                                key: "view",
-                                label: "Xem chi tiết",
-                                icon: <EyeOutlined />,
-                            },
-                            {
-                                key: "duplicate",
-                                label: "Nhân bản",
-                                icon: <CopyOutlined />,
-                            },
-                            { type: "divider" },
                             {
                                 key: "delete",
                                 label: "Xóa",
@@ -230,21 +260,9 @@ const AdminProductDetail: React.FC = () => {
                                 <Input
                                     placeholder="Tìm kiếm sản phẩm..."
                                     prefix={<SearchOutlined />}
+                                    value={searchText}
+                                    onChange={(e) => setSearchText(e.target.value)}
                                 />
-                                <Select
-                                    placeholder="Tất cả danh mục"
-                                >
-                                    <Option value="leather">Túi da</Option>
-                                    <Option value="cloth">Túi vải</Option>
-                                    <Option value="limit">Bộ sưu tập</Option>
-                                </Select>
-                                <Select
-                                    placeholder="Tất cả trạng thái"
-                                >
-                                    <Option value="published">Đã xuất bản</Option>
-                                    <Option value="draft">Bản nháp</Option>
-                                    <Option value="archived">Đã lưu trữ</Option>
-                                </Select>
                             </Space>
 
                             <Space>
@@ -267,7 +285,10 @@ const AdminProductDetail: React.FC = () => {
                         <Table
                             rowSelection={rowSelection}
                             columns={columns}
-                            dataSource={variants}
+                            dataSource={variants.filter(variant =>
+                                !searchText ||
+                                (variant.sku && variant.sku.toLowerCase().includes(searchText.toLowerCase()))
+                            )}
                             rowKey="id"
                             pagination={{
                                 total: 156,
