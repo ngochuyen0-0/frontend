@@ -30,9 +30,14 @@ const VariantForm: React.FC<VariantFormProps> = ({
 
     React.useEffect(() => {
         if (visible && variant) {
-            form.setFieldsValue(variant);
+            form.setFieldsValue({
+                ...variant,
+                is_active: variant.is_active ?? false
+            });
         } else if (visible) {
             form.resetFields();
+            // Set default value for is_active when creating new variant
+            form.setFieldValue("is_active", false);
         }
     }, [visible, variant, form]);
     
@@ -54,7 +59,8 @@ const VariantForm: React.FC<VariantFormProps> = ({
                     color: form.getFieldValue("color"),
                     size: form.getFieldValue("size"),
                     price: form.getFieldValue("price"),
-                    stock_quantity: form.getFieldValue("stock_quantity"),
+                    stock: form.getFieldValue("stock_quantity"), // Sử dụng tên trường đúng theo interface
+                    is_active: form.getFieldValue("is_active") ?? false,
                 })
                 toast.success('Biến thể được tạo thành công');
                 useProduct.getProductVariants({ product_id: form.getFieldValue('product_id') });
@@ -65,7 +71,8 @@ const VariantForm: React.FC<VariantFormProps> = ({
                     color: form.getFieldValue("color"),
                     size: form.getFieldValue("size"),
                     price: form.getFieldValue("price"),
-                    stock_quantity: form.getFieldValue("stock_quantity"),
+                    stock: form.getFieldValue("stock_quantity"), // Sử dụng tên trường đúng theo interface
+                    is_active: form.getFieldValue("is_active"),
                 })
                 toast.success('Biến thể được cập nhật thành công');
                 useProduct.getProductVariants({ product_id: form.getFieldValue('product_id') });

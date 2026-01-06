@@ -22,6 +22,7 @@ import {
     Statistic,
     Table,
     Tag,
+    message,
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -40,6 +41,7 @@ const AdminProductDetail: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [product, setProduct] = useState<Product | undefined>(undefined);
     const navigate = useNavigate();
+    const [refreshKey, setRefreshKey] = useState(0);
     const { variants, getProductVariants } = useProductStore()
 
 
@@ -56,7 +58,7 @@ const AdminProductDetail: React.FC = () => {
         }).catch((err) => {
 
         })
-    }, [])
+    }, [refreshKey])
 
     const handleEdit = (product: ProductVariant) => {
         setSelectVariant(product);
@@ -69,6 +71,51 @@ const AdminProductDetail: React.FC = () => {
         setFormType('create');
         setFormModalVisible(true);
     };
+
+    const handleBulkActivate = async () => {
+        try {
+            // Call API to activate selected variants
+            for (const variantId of selectedRowKeys) {
+                const variant = variants.find(v => v.id === variantId);
+                if (variant) {
+                    await useProductStore.getState().updateProductVariant(String(variantId), {
+                        is_active: true
+                    });
+                }
+            }
+            message.success(`Đã kích hoạt ${selectedRowKeys.length} biến thể`);
+            // Refresh the variants list
+            setTimeout(() => {
+                setRefreshKey(prev => prev + 1);
+            }, 300);
+            setSelectedRowKeys([]);
+        } catch (error) {
+            message.error('Có lỗi khi kích hoạt biến thể');
+        }
+    };
+
+    const handleBulkDeactivate = async () => {
+        try {
+            // Call API to deactivate selected variants
+            for (const variantId of selectedRowKeys) {
+                const variant = variants.find(v => v.id === variantId);
+                if (variant) {
+                    await useProductStore.getState().updateProductVariant(String(variantId), {
+                        is_active: false
+                    });
+                }
+            }
+            message.success(`Đã vô hiệu hóa ${selectedRowKeys.length} biến thể`);
+            // Refresh the variants list
+            setTimeout(() => {
+                setRefreshKey(prev => prev + 1);
+            }, 300);
+            setSelectedRowKeys([]);
+        } catch (error) {
+            message.error('Có lỗi khi vô hiệu hóa biến thể');
+        }
+    };
+
     // Columns definition
     const columns = [
         {
@@ -171,6 +218,23 @@ const AdminProductDetail: React.FC = () => {
             onFilter: (value: any, record: any) => record.status === value,
         },
         {
+            title: "Trạng thái",
+            dataIndex: "is_active",
+            key: "is_active",
+            render: (isActive: boolean) => {
+                return (
+                    <Tag color={isActive ? "green" : "red"}>
+                        {isActive ? "Hoạt động" : "Không hoạt động"}
+                    </Tag>
+                );
+            },
+            filters: [
+                { text: 'Hoạt động', value: true },
+                { text: 'Không hoạt động', value: false },
+            ],
+            onFilter: (value: any, record: any) => record.is_active === value,
+        },
+        {
             title: "Hành động",
             key: "actions",
             width: 100,
@@ -201,8 +265,8 @@ const AdminProductDetail: React.FC = () => {
     ];
 
     const bulkActionItems = [
-        { key: "publish", label: "Xuất bản đã chọn" },
-        { key: "draft", label: "Chuyển sang bản nháp" },
+        { key: "activate", label: "Kích hoạt đã chọn" },
+        { key: "deactivate", label: "Vô hiệu hóa đã chọn" },
         { key: "archive", label: "Lưu trữ đã chọn" },
         { key: "delete", label: "Xóa đã chọn", danger: true },
     ];
@@ -267,7 +331,18 @@ const AdminProductDetail: React.FC = () => {
 
                             <Space>
                                 {selectedRowKeys.length > 0 && (
-                                    <Dropdown menu={{ items: bulkActionItems }}>
+                                    <Dropdown
+                                        menu={{
+                                            items: bulkActionItems,
+                                            onClick: (e) => {
+                                                if (e.key === 'activate') {
+                                                    handleBulkActivate();
+                                                } else if (e.key === 'deactivate') {
+                                                    handleBulkDeactivate();
+                                                }
+                                            }
+                                        }}
+                                    >
                                         <Button>
                                             Hành động hàng loạt ({selectedRowKeys.length})
                                         </Button>
@@ -283,6 +358,7 @@ const AdminProductDetail: React.FC = () => {
                     {/* Products Table */}
                     <Card>
                         <Table
+                            key={`variant-table-${refreshKey}`} // Thêm key để ép re-render khi refresh
                             rowSelection={rowSelection}
                             columns={columns}
                             dataSource={variants.filter(variant =>
@@ -309,7 +385,10 @@ const AdminProductDetail: React.FC = () => {
                     onClose={() => setFormModalVisible(false)}
                     onSuccess={() => {
                         setFormModalVisible(false);
-
+                        // Làm mới danh sách biến thể sau khi tạo hoặc cập nhật
+                        setTimeout(() => {
+                            setRefreshKey(prev => prev + 1);
+                        }, 300); // Thêm độ trễ nhỏ để đảm bảo cập nhật
                     }}
                 />
             </div>

@@ -26,7 +26,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProductStore } from "../../store/useProductStore";
-import { deleteProduct } from "../../services/productService";
+import { createProduct, deleteProduct } from "../../services/productService";
 import ProductForm from "../../components/admin/ProductFrom";
 import { Product } from "../../types/product";
 
@@ -87,6 +87,59 @@ const AdminProducts: React.FC = () => {
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchText(e.target.value);
+    };
+
+    const handleExportData = () => {
+        // Tạo một phiên bản JSON của dữ liệu sản phẩm để xuất
+        const dataToExport = filteredProducts.map(product => ({
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            brand: product.brand?.name || '',
+            category: product.category?.name || '',
+            variants: product.variants?.length || 0,
+            minPrice: product.variants && product.variants.length > 0
+                ? Math.min(...product.variants.map(v => v.price || 0)).toLocaleString() + 'đ'
+                : '0đ',
+            status: product.is_active ? 'Hoạt động' : 'Không hoạt động'
+        }));
+        
+        // Chuyển đổi dữ liệu sang định dạng JSON
+        const jsonString = JSON.stringify(dataToExport, null, 2);
+        
+        // Tạo Blob và tải xuống file
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `products_export_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleDuplicate = (product: Product) => {
+        // Tạo bản sao của sản phẩm với các trường cần thiết
+        const duplicatedProduct: Omit<Product, 'id'> & { id?: string } = {
+            ...product,
+            id: undefined, // Bỏ ID để tạo sản phẩm mới
+            name: `${product.name} (Bản sao)`, // Thêm tiền tố để phân biệt
+            variants: product.variants?.map(variant => ({
+                ...variant,
+                id: undefined, // Bỏ ID biến thể
+                product_id: undefined // Bỏ product_id vì sẽ được tạo mới
+            })) || [],
+            images: product.images?.map(image => ({
+                ...image,
+                id: undefined, // Bỏ ID hình ảnh
+                product_id: undefined // Bỏ product_id
+            })) || []
+        };
+        
+        setSelectProduct(duplicatedProduct as Product);
+        setFormType('create');
+        setFormModalVisible(true);
     };
 
     const handleSearchTypeChange = (value: 'all' | 'name' | 'category' | 'brand') => {
@@ -274,6 +327,7 @@ const AdminProducts: React.FC = () => {
                                 key: "duplicate",
                                 label: "Nhân bản",
                                 icon: <CopyOutlined />,
+                                onClick: () => handleDuplicate(record)
                             },
                             { type: "divider" },
                             {
@@ -357,7 +411,7 @@ const AdminProducts: React.FC = () => {
                         </p>
                     </div>
                     <Space>
-                        <Button icon={<ExportOutlined />}>Xuất dữ liệu</Button>
+                        <Button icon={<ExportOutlined />} onClick={() => handleExportData()}>Xuất dữ liệu</Button>
                         <Button type="primary" onClick={handleCreate} icon={<PlusOutlined />}>
                             Thêm sản phẩm mới
                         </Button>

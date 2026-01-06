@@ -153,6 +153,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
 
                 return {
                     products: updatedProducts,
+                    variants: [...state.variants, newVariant],
                     currentProduct: updatedCurrentProduct,
                     loading: false,
                 };
@@ -204,6 +205,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
                             variant.id === id ? updatedVariant : variant
                         ) || [],
                 })),
+                variants: state.variants.map((variant) =>
+                    variant.id === id ? updatedVariant : variant
+                ),
                 currentVariant:
                     state.currentVariant?.id === id
                         ? updatedVariant
