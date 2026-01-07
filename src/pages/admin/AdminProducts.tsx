@@ -24,7 +24,7 @@ import {
     Tag,
 } from "antd";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProductStore } from "../../store/useProductStore";
 import { createProduct, deleteProduct } from "../../services/productService";
 import ProductForm from "../../components/admin/ProductFrom";
@@ -36,6 +36,7 @@ const AdminProducts: React.FC = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [tableLoading, setTableLoading] = useState(false);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { products, getProducts } = useProductStore()
     const [selectProduct, setSelectProduct] = useState<Product | null>(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
@@ -43,9 +44,34 @@ const AdminProducts: React.FC = () => {
     const [formType, setFormType] = useState<'create' | 'edit'>('create');
     const [searchText, setSearchText] = useState('');
     const [searchType, setSearchType] = useState<'all' | 'name' | 'category' | 'brand'>('all');
+    
+    const [initialLoad, setInitialLoad] = useState(true);
+    
     useEffect(() => {
-        getProducts();
-    }, [])
+        // Lấy tham số brandId từ URL nếu có
+        const brandIdFromUrl = searchParams.get('brandId');
+        
+        const loadProducts = async () => {
+            // Gọi API với brandId nếu có trong URL
+            await getProducts({}, brandIdFromUrl || undefined, undefined);
+            
+            if (brandIdFromUrl) {
+                setSearchType('brand');
+                
+                // Cập nhật searchText với tên thương hiệu nếu có thể
+                // Tìm tên thương hiệu từ danh sách sản phẩm
+                setTimeout(() => {
+                    const brand = products.find(p => p.brand?.id === brandIdFromUrl)?.brand?.name;
+                    if (brand) {
+                        setSearchText(brand);
+                    }
+                }, 100);
+            }
+            setInitialLoad(false);
+        };
+        
+        loadProducts();
+    }, [searchParams, getProducts])
 
     // Get unique categories for the filter dropdowns
     const categories = [...new Set(products.map(p => p.category?.name).filter(Boolean))];

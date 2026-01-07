@@ -192,6 +192,7 @@ const AdminBrands: React.FC = () => {
     const handleViewProducts = (brandId: string) => {
         console.log(`View products for brand: ${brandId}`);
         // Navigate to products page filtered by brand
+        window.location.href = `/admin/v1/products?brandId=${brandId}`;
     };
 
     const handleDeleteBrand = (brandId: string) => {
