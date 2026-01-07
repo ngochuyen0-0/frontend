@@ -132,12 +132,12 @@ const AdminBrands: React.FC = () => {
             key: "status",
             render: (status: string) => (
                 <Tag color={status === "ACTIVE" ? "green" : "gray"}>
-                    {status === "ACTIVE" ? "Hoạt động" : "Nháp"}
+                    {status === "ACTIVE" ? "Hoạt động" : "Không hoạt động"}
                 </Tag>
             ),
             filters: [
                 { text: "Hoạt động", value: "active" },
-                { text: "Nháp", value: "draft" },
+                { text: "Không hoạt động", value: "draft" },
             ],
             onFilter: (value: any, record: any) => record.status === value,
         },
@@ -289,7 +289,7 @@ const AdminBrands: React.FC = () => {
                     <Card>
                         <Statistic
                             title="Thương hiệu đang hoạt động"
-                            value={brands.filter(b => b.is_active != true).length}
+                            value={brands.filter(b => b.status === "ACTIVE").length}
                             valueStyle={{ color: "#3f8600" }}
                         />
                     </Card>
@@ -298,7 +298,7 @@ const AdminBrands: React.FC = () => {
                     <Card>
                         <Statistic
                             title="Thương hiệu nổi bật"
-                            value={brands.length}
+                            value={brands.filter(b => b.featured === true).length}
                             valueStyle={{ color: "#cf1322" }}
                         />
                     </Card>
@@ -307,7 +307,7 @@ const AdminBrands: React.FC = () => {
                     <Card>
                         <Statistic
                             title="Tổng số sản phẩm"
-                            value={156}
+                            value={brands.reduce((total, brand) => total + (brand.products || 0), 0)}
                             valueStyle={{ color: "#1890ff" }}
                         />
                     </Card>
@@ -323,8 +323,8 @@ const AdminBrands: React.FC = () => {
                             style={{ width: 250 }}
                         />
                         <Select placeholder="Tất cả trạng thái" style={{ width: 150 }}>
-                            <Option value="active">Hoạt động</Option>
-                            <Option value="draft">Nháp</Option>
+                            <Option value="active">Hoạt Động</Option>
+                            <Option value="draft">Không Hoạt Động</Option>
                         </Select>
                         <Select placeholder="Nổi bật" style={{ width: 150 }}>
                             <Option value="true">Nổi bật</Option>
@@ -416,7 +416,7 @@ const AdminBrands: React.FC = () => {
                             <Form.Item label="Trạng thái">
                                 <Select defaultValue="active">
                                     <Option value="active">Hoạt động</Option>
-                                    <Option value="draft">Nháp</Option>
+                                    <Option value="draft">Không hoạt động</Option>
                                 </Select>
                             </Form.Item>
                         </Col>

@@ -12,7 +12,11 @@ interface Brand {
     description: string;
     logo?: string;
     website?: string;
+    logo_url?: string;
+    featured?: boolean;
     is_active: boolean;
+    status: string;
+    products?: number;
     created_at: string;
     updated_at: string;
 }
