@@ -196,7 +196,30 @@ const AdminProducts: React.FC = () => {
             key: "id",
             render: (id: string, record: any) => {
                 const thumbnail = record.images?.find((i: any) => i.is_thumbnail);
-                return thumbnail ? (<img style={{ width: 70, height: 40, borderRadius: 6 }} src={thumbnail.image_url} />) : <div className="w-[70px] h-[40px] bg-gray-200 rounded flex items-center justify-center">No Image</div>;
+                return (
+                    <div className="flex items-center justify-center w-[70px] h-[70px]">
+                        {thumbnail ? (
+                            <img
+                                style={{ width: 70, height: 70, objectFit: 'cover', borderRadius: 6 }}
+                                src={thumbnail.image_url}
+                                alt="Thumbnail"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.onerror = null;
+                                    target.style.display = 'none';
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                        parent.innerHTML = '<div class="w-[70px] h-[70px] bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs">No Image</div>';
+                                    }
+                                }}
+                            />
+                        ) : (
+                            <div className="w-[70px] h-[70px] bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs">
+                                No Image
+                            </div>
+                        )}
+                    </div>
+                );
             },
         }, {
             title: "Thông tin sản phẩm",
