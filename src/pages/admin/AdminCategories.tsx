@@ -431,7 +431,7 @@ const AdminCategories: React.FC = () => {
             label="Tên danh mục"
             rules={[{ required: true, message: 'Vui lòng nhập tên danh mục' }]}
           >
-            <Input placeholder="ví dụ: Điện tử, Quần áo..." />
+            <Input placeholder="ví dụ: Túi tote,..." />
           </Form.Item>
 
           <Form.Item
@@ -461,7 +461,7 @@ const AdminCategories: React.FC = () => {
             <TextArea
               rows={3}
               placeholder="Mô tả danh mục này..."
-              maxLength={200}
+              maxLength={500}
               showCount
             />
           </Form.Item>
