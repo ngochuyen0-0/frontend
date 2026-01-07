@@ -29,6 +29,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { OrdersData } from "../../types/order";
 import { getOrders } from "../../services/orderService";
+import { getOrderStatusStatistics } from "../../services/statisticalService";
 
 const { Option } = Select;
 
@@ -36,14 +37,23 @@ const AdminOrders: React.FC = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [loading, setLoading] = useState(false);
     const [ordersData, setOrdersData] = useState<OrdersData>()
+    const [orderStats, setOrderStats] = useState<any[]>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Lấy dữ liệu đơn hàng
         getOrders({}).then(res => {
             setOrdersData(res);
         }).catch(err => {
+            console.error("Lỗi khi lấy dữ liệu đơn hàng:", err);
+        });
 
-        })
+        // Lấy dữ liệu thống kê đơn hàng theo trạng thái
+        getOrderStatusStatistics().then(res => {
+            setOrderStats(res);
+        }).catch(err => {
+            console.error("Lỗi khi lấy dữ liệu thống kê:", err);
+        });
     }, [])
 
     // Status configurations
@@ -241,7 +251,7 @@ const AdminOrders: React.FC = () => {
                     <Card>
                         <Statistic
                             title="Tổng đơn hàng"
-                            value={156}
+                            value={orderStats.reduce((sum, stat) => sum + stat.count, 0)}
                             valueStyle={{ color: "#1890ff" }}
                         />
                     </Card>
@@ -250,7 +260,7 @@ const AdminOrders: React.FC = () => {
                     <Card>
                         <Statistic
                             title="Chờ xác nhận"
-                            value={23}
+                            value={orderStats.find(stat => stat.status === 'Unpaid' || stat.status === 'pending')?.count || 0}
                             valueStyle={{ color: "#faad14" }}
                         />
                     </Card>
@@ -259,7 +269,7 @@ const AdminOrders: React.FC = () => {
                     <Card>
                         <Statistic
                             title="Đang xử lý"
-                            value={45}
+                            value={orderStats.find(stat => stat.status === 'processing')?.count || 0}
                             valueStyle={{ color: "#1890ff" }}
                         />
                     </Card>
@@ -268,7 +278,7 @@ const AdminOrders: React.FC = () => {
                     <Card>
                         <Statistic
                             title="Hoàn thành"
-                            value={88}
+                            value={orderStats.find(stat => stat.status === 'Paid' || stat.status === 'completed')?.count || 0}
                             valueStyle={{ color: "#52c41a" }}
                         />
                     </Card>
@@ -319,7 +329,7 @@ const AdminOrders: React.FC = () => {
                     dataSource={ordersData?.data}
                     rowKey="id"
                     pagination={{
-                        total: 156,
+                        total: ordersData?.total || 0,
                         pageSize: 20,
                         showSizeChanger: true,
                         showQuickJumper: true,
