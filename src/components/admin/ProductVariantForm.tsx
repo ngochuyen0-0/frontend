@@ -32,6 +32,7 @@ const VariantForm: React.FC<VariantFormProps> = ({
         if (visible && variant) {
             form.setFieldsValue({
                 ...variant,
+                stock: variant.stock_quantity,
                 is_active: variant.is_active ?? false
             });
         } else if (visible) {
@@ -59,7 +60,7 @@ const VariantForm: React.FC<VariantFormProps> = ({
                     color: form.getFieldValue("color"),
                     size: form.getFieldValue("size"),
                     price: form.getFieldValue("price"),
-                    stock: form.getFieldValue("stock_quantity"), // Sử dụng tên trường đúng theo interface
+                    stock_quantity: form.getFieldValue("stock"),
                     is_active: form.getFieldValue("is_active") ?? false,
                 })
                 toast.success('Biến thể được tạo thành công');
@@ -71,7 +72,7 @@ const VariantForm: React.FC<VariantFormProps> = ({
                     color: form.getFieldValue("color"),
                     size: form.getFieldValue("size"),
                     price: form.getFieldValue("price"),
-                    stock: form.getFieldValue("stock_quantity"), // Sử dụng tên trường đúng theo interface
+                    stock_quantity: form.getFieldValue("stock"),
                     is_active: form.getFieldValue("is_active"),
                 })
                 toast.success('Biến thể được cập nhật thành công');
@@ -155,7 +156,7 @@ const VariantForm: React.FC<VariantFormProps> = ({
                     </Form.Item>
                     <Form.Item
                         label="Số lượng tồn kho"
-                        name="stock_quantity"
+                        name="stock"
                         rules={[{ required: true, message: 'Vui lòng nhập số lượng tồn kho' }]}
                     >
                         <InputNumber className="w-full" min={0} placeholder="Nhập số lượng tồn kho" />

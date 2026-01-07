@@ -4,7 +4,7 @@ export interface ProductVariant {
     sku?: string;
     size?: string;
     price?: number;
-    stock?: number;
+    stock_quantity?: number;
     attributes?: Record<string, any>;
     is_active?: boolean;
     created_at?: string;
@@ -18,7 +18,7 @@ export interface ProductVariantSingle {
     sku?: string;
     size?: string;
     price?: number;
-    stock?: number;
+    stock_quantity?: number;
     attributes?: Record<string, any>;
     is_active?: boolean;
     created_at?: string;
