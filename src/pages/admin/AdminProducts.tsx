@@ -98,6 +98,9 @@ const AdminProducts: React.FC = () => {
             brand: product.brand?.name || '',
             category: product.category?.name || '',
             variants: product.variants?.length || 0,
+            totalStock: product.variants && product.variants.length > 0
+                ? product.variants.reduce((sum, variant) => sum + (variant.stock_quantity || 0), 0)
+                : 0,
             minPrice: product.variants && product.variants.length > 0
                 ? Math.min(...product.variants.map(v => v.price || 0)).toLocaleString() + 'đ'
                 : '0đ',
@@ -170,14 +173,20 @@ const AdminProducts: React.FC = () => {
     // Tính toán các thống kê dựa trên dữ liệu đã lọc
     const totalProducts = filteredProducts.length;
     const inStockProducts = filteredProducts.filter(product =>
-        product.variants && Array.isArray(product.variants) && product.variants.some((variant: any) => variant.stock > 0)
+        product.variants && Array.isArray(product.variants) && product.variants.some((variant: any) => variant.stock_quantity > 0)
     ).length;
     const lowStockProducts = filteredProducts.filter(product =>
-        product.variants && Array.isArray(product.variants) && product.variants.some((variant: any) => variant.stock > 0 && variant.stock <= 5)
+        product.variants && Array.isArray(product.variants) && product.variants.some((variant: any) => variant.stock_quantity > 0 && variant.stock_quantity <= 5)
     ).length;
     const outOfStockProducts = filteredProducts.filter(product =>
-        product.variants && Array.isArray(product.variants) && product.variants.every((variant: any) => variant.stock === 0)
+        product.variants && Array.isArray(product.variants) && product.variants.every((variant: any) => variant.stock_quantity === 0)
     ).length;
+    const totalStock = filteredProducts.reduce((sum, product) => {
+        if (product.variants && Array.isArray(product.variants)) {
+            return sum + product.variants.reduce((variantSum, variant) => variantSum + (variant.stock_quantity || 0), 0);
+        }
+        return sum;
+    }, 0);
 
     // Columns definition
     const columns = [
@@ -272,6 +281,22 @@ const AdminProducts: React.FC = () => {
                     );
                 }
                 return <div>Không có</div>;
+            },
+        },
+        {
+            title: "Tổng số lượng",
+            key: "totalStock",
+            render: (_, record: any) => {
+                if (record.variants && record.variants.length > 0) {
+                    const totalStock = record.variants.reduce((sum: number, variant: any) => sum + (variant.stock_quantity || 0), 0);
+                    return <div>{totalStock}</div>;
+                }
+                return <div>0</div>;
+            },
+            sorter: (a: any, b: any) => {
+                const totalStockA = a.variants && a.variants.length > 0 ? a.variants.reduce((sum: number, v: any) => sum + (v.stock_quantity || 0), 0) : 0;
+                const totalStockB = b.variants && b.variants.length > 0 ? b.variants.reduce((sum: number, v: any) => sum + (v.stock_quantity || 0), 0) : 0;
+                return totalStockA - totalStockB;
             },
         },
         {
@@ -445,9 +470,9 @@ const AdminProducts: React.FC = () => {
                     <Col span={6}>
                         <Card>
                             <Statistic
-                                title="Hết hàng"
-                                value={outOfStockProducts}
-                                valueStyle={{ color: "#cf1322" }}
+                                title="Tổng số lượng tồn kho"
+                                value={totalStock}
+                                valueStyle={{ color: "#1890ff" }}
                             />
                         </Card>
                     </Col>
