@@ -20,7 +20,9 @@ import {
   UserOutlined,
   MailOutlined,
   PhoneOutlined,
-  EnvironmentOutlined
+  EnvironmentOutlined,
+  MinusOutlined,
+  PlusOutlined
 } from "@ant-design/icons";
 import { getCart } from "../../services/cartService";
 import { getProductVariantById } from "../../services/productService";
@@ -29,13 +31,15 @@ import { toast } from "sonner";
 import { createOrder } from "../../services/orderService";
 import { useNavigate } from "react-router-dom";
 import { vietnamProvinces, Province, District } from "../../utils/vietnam-provinces";
+import TrashIcon from "../../icons/TrashIcon";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 const { Step } = Steps;
 
 interface CartItem {
-  id: string;
+  id: string;        // ID của biến thể sản phẩm (product variant ID)
+  variant_id: string; // Thêm trường này để ánh xạ với giỏ hàng
   product_id: string;
   name: string;
   price: number;
@@ -80,31 +84,66 @@ const CheckoutPage: React.FC = () => {
   const [selectedDistrict, setSelectedDistrict] = useState<string>("");
 
 
+  const updateQuantity = (itemId: string, newQty: number) => {
+    if (newQty < 1) return; // Không cho phép số lượng nhỏ hơn 1
+    setOrderSummary(prev => {
+      const updatedItems = prev.items.map(item =>
+        item.id === itemId ? { ...item, qty: newQty } : item
+      );
+      const newSubtotal = updatedItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      return { ...prev, items: updatedItems, subtotal: newSubtotal };
+    });
+
+    // Cập nhật giỏ hàng trong localStorage
+    const cartItems = getCart();
+    const updatedCart = cartItems.map(item =>
+      item.variant_id === itemId ? { ...item, qty: newQty } : item
+    );
+    
+    // Lưu lại giỏ hàng đã cập nhật
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  };
+
+  const removeItem = (itemId: string) => {
+    setOrderSummary(prev => {
+      const updatedItems = prev.items.filter(item => item.id !== itemId);
+      const newSubtotal = updatedItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      return { ...prev, items: updatedItems, subtotal: newSubtotal };
+    });
+
+    // Cập nhật giỏ hàng trong localStorage
+    const cartItems = getCart();
+    const updatedCart = cartItems.filter(item => item.variant_id !== itemId);
+    
+    // Lưu lại giỏ hàng đã cập nhật
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  };
   useEffect(() => {
     const cartItems = getCart();
-    const fecth = async () => {
+    const fetch = async () => {
       const results = await Promise.all(cartItems.map(item => getProductVariantById(item.variant_id)));
-      const itemsFecth = [] as CartItem[];
+      const itemsFetch = [] as CartItem[];
       let subtotal = 0
       results.forEach((e: ProductVariantSingle) => {
         const cartInfo = cartItems.find(c => c.variant_id === e.id);
-        const avata = e.product.images?.find(i => i.is_thumbnail);
+        const avatar = e.product.images?.find(i => i.is_thumbnail);
         const cartItem = {
           id: e.id || "",
+          variant_id: e.id || "",  // Sử dụng cùng ID cho cả hai trường
           product_id: e.product_id || "",
           name: e.product.name || "",
           qty: cartInfo?.qty || 0,
           size: e?.size || "",
           color: e?.color || "",
           price: e?.price || 0,
-          image: avata?.image_url || ""
+          image: avatar?.image_url || ""
         }
         subtotal = subtotal + ((e.price || 0) * (cartInfo?.qty || 0));
-        itemsFecth.push(cartItem)
+        itemsFetch.push(cartItem)
       })
-      setOrderSummary({ ...orderSummary, items: itemsFecth, subtotal: subtotal })
+      setOrderSummary({ items: itemsFetch, subtotal: subtotal, shipping: 0, tax: 0, discount: 0, total: 0 });
     }
-    fecth();
+    fetch();
   }, [])
 
   const handleProvinceChange = (provinceId: string) => {
@@ -140,10 +179,10 @@ const CheckoutPage: React.FC = () => {
       province: selectedProvince,
       ward: selectedDistrict,
       specific_address: values.address,
-      items: getCart().map((e) => ({
-        variant_id: e.variant_id,
-        quantity: e.qty
-      }))
+      items: orderSummary.items.map((item) => ({
+        variant_id: item.variant_id,
+        quantity: item.qty
+      })).filter(item => item.quantity > 0) // Chỉ gửi những sản phẩm có số lượng > 0
     }
 
     createOrder(order_payload).then(res => {
@@ -463,22 +502,62 @@ const CheckoutPage: React.FC = () => {
               {/* Order Items */}
               <div className="space-y-3 mb-4">
                 {orderSummary.items.map(item => (
-                  <div>
-                    <Text strong>{item.name}</Text>
-                    <div key={item.id} className="flex justify-between items-center">
-                      <div className="flex gap-4 items-center">
-                        <Text type="secondary">Số lượng: {item.qty}</Text>
-                        <Tag>
-                          {item.size}
-                        </Tag>
-                        <Tag color={item.color}>
-                          {item.color}
-                        </Tag>
+                  <div key={item.id} className="border-b pb-3">
+                    <div className="flex items-start gap-3">
+                      {/* Product Image */}
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-16 h-16 object-cover rounded-md border"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/src/assets/no-image-available.jpg'; // Fallback image
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between">
+                          <Text strong className="block truncate">{item.name}</Text>
+                          <Button
+                            type="text"
+                            danger
+                            size="small"
+                            onClick={() => removeItem(item.id)}
+                            className="p-0 m-0"
+                          >
+                            <TrashIcon width={16} height={16} />
+                          </Button>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Tag color="blue">
+                            {item.size}
+                          </Tag>
+                          <Tag color="orange" className="capitalize">
+                            {item.color}
+                          </Tag>
+                        </div>
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center border rounded-md">
+                            <Button
+                              type="text"
+                              icon={<MinusOutlined />}
+                              size="small"
+                              onClick={() => updateQuantity(item.id, item.qty - 1)}
+                              className="p-1"
+                            />
+                            <span className="px-2">{item.qty}</span>
+                            <Button
+                              type="text"
+                              icon={<PlusOutlined />}
+                              size="small"
+                              onClick={() => updateQuantity(item.id, item.qty + 1)}
+                              className="p-1"
+                            />
+                          </div>
+                          <Text strong>{formatCurrency(item.price * item.qty)}</Text>
+                        </div>
                       </div>
-                      <Text>{formatCurrency(item.price * item.qty)}</Text>
                     </div>
                   </div>
-
                 ))}
               </div>
 
