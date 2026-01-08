@@ -32,8 +32,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [loading, setLoading] = React.useState(false);
   const [brands, setBrands] = useState<Brand[]>([])
   const [categories, setCategories] = useState<Category[]>([])
-  const [inputImageURLs, setinputImageURLs] = useState<Map<string, String>>();
-  const [images, setImages] = useState<{ id: string, is_thumbnail: boolean, image_url: string }[]>();
+  const [inputImageURLs, setinputImageURLs] = useState<Map<string, string>>(new Map());
+  const [images, setImages] = useState<{ id: string, is_thumbnail: boolean, image_url: string }[]>([]);
   const useProduct = useProductStore();
 
   useEffect(() => {
@@ -44,7 +44,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
   React.useEffect(() => {
     if (visible && product) {
       form.setFieldsValue(product);
-      setImages(product.images)
+      setImages(product.images?.map(img => ({
+        id: img.id || "",
+        is_thumbnail: img.is_thumbnail || false,
+        image_url: img.image_url || ""
+      })) || [])
     } else if (visible) {
       form.resetFields();
     }
@@ -53,19 +57,42 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const handleSubmit = async (values: any) => {
     setLoading(true);
     try {
+      let productId = "";
       if (type === 'create') {
-        await createProduct(values);
-        message.success('Product created successfully');
-        useProduct.getProducts();
+        const res = await createProduct(values);
+        productId = res.data.id; // Giả sử API trả về ID của sản phẩm mới tạo
+        message.success('Tạo sản phẩm thành công');
       } else {
         await updateProduct(product?.id || "", values);
-        message.success('Product updated successfully');
-        useProduct.getProducts();
-
+        productId = product?.id || "";
+        message.success('Cập nhật sản phẩm thành công');
       }
+      
+      // Thêm hình ảnh nếu có
+      if (inputImageURLs && inputImageURLs.size > 0) {
+        for (let [id, url] of inputImageURLs) {
+          if (url) {
+            const imageRes = await createProductImage({
+              image_url: url,
+              is_thumbnail: false,
+              product_id: productId
+            });
+            // Cập nhật danh sách hình ảnh ngay lập tức
+            setImages(prev => [...prev, {
+              id: imageRes.data.id || "",
+              is_thumbnail: imageRes.data.is_thumbnail || false,
+              image_url: imageRes.data.image_url || ""
+            }]);
+          }
+        }
+        // Xóa các URL hình ảnh đã được thêm
+        setinputImageURLs(new Map());
+      }
+      
+      useProduct.getProducts();
       onSuccess();
     } catch (error) {
-      message.error('Operation failed');
+      message.error('Thao tác thất bại');
     } finally {
       setLoading(false);
     }
@@ -77,7 +104,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   return (
     <Modal
-      title={type === 'create' ? 'Create New Product' : 'Edit Product'}
+      title={type === 'create' ? 'Tạo sản phẩm mới' : 'Chỉnh sửa sản phẩm'}
       open={visible}
       onCancel={onClose}
       footer={null}
@@ -89,27 +116,27 @@ const ProductForm: React.FC<ProductFormProps> = ({
         onFinish={handleSubmit}
       >
         <Form.Item
-          label="Name"
+          label="Tên"
           name="name"
-          rules={[{ required: true, message: 'Enter name for product' }]}
+          rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm' }]}
         >
-          <Input placeholder='e.g., Túi xách tay' />
+          <Input placeholder='ví dụ: Túi xách tay' />
         </Form.Item>
         <Form.Item
-          label="Description"
+          label="Mô tả"
           name="description"
-          rules={[{ required: true, message: 'Enter descriptinon' }]}
+          rules={[{ required: true, message: 'Vui lòng nhập mô tả' }]}
         >
-          <TextArea placeholder='Enter description for product' rows={4} />
+          <TextArea placeholder='Nhập mô tả cho sản phẩm' rows={4} />
         </Form.Item>
         <div className='flex gap-1 w-full'>
           <Form.Item
             className='w-full'
-            label="Brand"
+            label="Thương hiệu"
             name="brand_id"
-            rules={[{ required: true, message: 'Please select Product' }]}
+            rules={[{ required: true, message: 'Vui lòng chọn thương hiệu' }]}
           >
-            <Select placeholder="Select product" style={{ height: "auto" }}>
+            <Select placeholder="Chọn thương hiệu" style={{ height: "auto" }}>
               {brands?.map((e, i) => {
                 return (
                   <Select.Option key={i} value={e.id}>
@@ -122,13 +149,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </Select>
           </Form.Item>
           <Form.Item
-            label="Category"
+            label="Danh mục"
             name="category_id"
             className='w-full'
 
-            rules={[{ required: true, message: 'Please select Product' }]}
+            rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}
           >
-            <Select placeholder="Select product" style={{ height: "auto" }}>
+            <Select placeholder="Chọn danh mục" style={{ height: "auto" }}>
               {categories?.map((e, i) => {
                 return (
                   <Select.Option key={i} value={e.id}>
@@ -141,34 +168,47 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </Select>
           </Form.Item>
         </div>
-        <label>Images</label>
-        {inputImageURLs?.keys().map((id, i) => {
+        <label>Hình ảnh</label>
+        {Array.from(inputImageURLs.keys()).map((id, i) => {
           return (
             <Card>
               <div className='flex gap-1 w-full'>
-                <Input className='w-full' value={inputImageURLs.get(id)}
+                <Input className='w-full' value={inputImageURLs.get(id) || ''}
                   onChange={(e) => {
                     const updatedData = new Map(inputImageURLs);
                     updatedData.set(id, e.target.value);
                     setinputImageURLs(updatedData);
                   }}
-                  placeholder='e.g., https://hostname.image.service...'
+                  placeholder='ví dụ: https://hostname.image.service...'
                 />
                 <Button onClick={() => {
                   const inputValue = inputImageURLs.get(id);
-                  if (inputValue == "") return toast.error("Invalid URL!");
+                  if (!inputValue || inputValue == "") return toast.error("URL không hợp lệ!");
+                  
+                  // Kiểm tra nếu đang tạo sản phẩm mới mà chưa submit thì không thể thêm hình ảnh
+                  if (type === 'create' && !product?.id) {
+                    toast.error("Vui lòng tạo sản phẩm trước khi thêm hình ảnh!");
+                    return;
+                  }
+                  
                   const newImages = {
-                    image_url: inputImageURLs.get(id),
+                    image_url: inputImageURLs.get(id) || "",
                     is_thumbnail: false,
-                    product_id: product?.id
+                    product_id: product?.id || ""
                   }
                   createProductImage(newImages).then(res => {
-                    toast.success('Image create success!')
-                    setImages([...images, ...[res]]);
+                    toast.success('Tạo hình ảnh thành công!')
+                    setImages(prev => [...prev, {
+                      id: res.data.id || "",
+                      is_thumbnail: res.data.is_thumbnail || false,
+                      image_url: res.data.image_url || ""
+                    }]);
                     const updatedData = new Map(inputImageURLs);
                     updatedData.delete(id);
                     setinputImageURLs(updatedData);
-                  }).catch();
+                  }).catch(err => {
+                    toast.error("Tạo hình ảnh thất bại!");
+                  });
                 }}><CheckOutlined /></Button>
                 <Button onClick={() => {
                   const updatedData = new Map(inputImageURLs);
@@ -239,8 +279,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   <DeleteOutlined
                     key="delete"
                     onClick={() => {
-                      // handleRemove(image)
-
+                      const updatedImages = images.filter(img => img.id !== image.id);
+                      setImages(updatedImages);
                     }
                     }
                     className="hover:text-red-500"
@@ -293,10 +333,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
         <Form.Item>
           <div className="flex justify-end gap-2">
             <Button onClick={onClose}>
-              Cancel
+              Hủy
             </Button>
             <Button type="primary" htmlType="submit" loading={loading}>
-              {type === 'create' ? 'Create' : 'Update'}
+              {type === 'create' ? 'Tạo' : 'Cập nhật'}
             </Button>
           </div>
         </Form.Item>

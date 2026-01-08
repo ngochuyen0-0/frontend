@@ -52,6 +52,7 @@ const AdminProducts: React.FC = () => {
         const brandIdFromUrl = searchParams.get('brandId');
         
         const loadProducts = async () => {
+            setTableLoading(true); // Bật loading trước khi tải dữ liệu
             // Gọi API với brandId nếu có trong URL
             await getProducts({}, brandIdFromUrl || undefined, undefined);
             
@@ -68,6 +69,7 @@ const AdminProducts: React.FC = () => {
                 }, 100);
             }
             setInitialLoad(false);
+            setTableLoading(false); // Tắt loading sau khi tải xong
         };
         
         loadProducts();
@@ -179,6 +181,9 @@ const AdminProducts: React.FC = () => {
         setSelectProduct(null);
         setFormType('create');
         setFormModalVisible(true);
+        // Đảm bảo xóa các bộ lọc tìm kiếm để sản phẩm mới không bị ẩn
+        setSearchText('');
+        setSearchType('all');
     };
 
     const handleDelete = async (product: Product) => {
@@ -585,7 +590,7 @@ const AdminProducts: React.FC = () => {
                         loading={tableLoading}
                         pagination={{
                             total: filteredProducts.length,
-                            pageSize: 20,
+                            pageSize: 100, // Tăng kích thước trang để hiển thị nhiều sản phẩm hơn
                             showSizeChanger: true,
                             showQuickJumper: true,
                             showTotal: (total, range) =>
@@ -599,9 +604,12 @@ const AdminProducts: React.FC = () => {
                     type={formType}
                     visible={formModalVisible}
                     onClose={() => setFormModalVisible(false)}
-                    onSuccess={() => {
+                    onSuccess={async () => {
                         setFormModalVisible(false);
-                        getProducts(); // Cập nhật lại danh sách sản phẩm sau khi thành công
+                        // Đặt lại các bộ lọc tìm kiếm để sản phẩm mới không bị ẩn
+                        setSearchText('');
+                        setSearchType('all');
+                        await getProducts(); // Cập nhật lại danh sách sản phẩm sau khi thành công
                     }}
                 />
             </div>

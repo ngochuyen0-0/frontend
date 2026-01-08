@@ -33,15 +33,22 @@ export const createProductImage = async (data: any) => {
 
 
 export const getProducts = async (
-    filters: any, 
-    brandId?: string, 
+    filters: any,
+    brandId?: string,
     categoryId?: string
 ) => {
+    // Đảm bảo gửi thông tin phân trang để lấy nhiều sản phẩm hơn
+    const defaultFilters = {
+        page: 1,
+        row: 100,  // Tăng số lượng sản phẩm mỗi trang
+        ...filters  // Ghi đè bằng các bộ lọc được cung cấp
+    };
+    
     const params = new URLSearchParams();
     if (brandId) params.append('brand_id', brandId);
     if (categoryId) params.append('category_id', categoryId);
     
-    const res = await apiClient.post(`/products/get?${params.toString()}`, filters);
+    const res = await apiClient.post(`/products/get?${params.toString()}`, defaultFilters);
     return res.data;
 }
 
@@ -61,7 +68,12 @@ export const getProductVariantById = async (
 
 
 export const searchProduct = async (keyword) => {
-    const res = await apiClient.post(`/products/search?keyword=${keyword}`);
+    // Gọi API tìm kiếm với phân trang
+    const filters = {
+        page: 1,
+        page_size: 100,  // Tăng số lượng sản phẩm mỗi trang
+    };
+    const res = await apiClient.post(`/products/search?keyword=${keyword}`, filters);
     return res.data;
 }
 export const getDisabledProducts = async (
@@ -69,11 +81,18 @@ export const getDisabledProducts = async (
     brandId?: string,
     categoryId?: string
 ) => {
+    // Đảm bảo gửi thông tin phân trang để lấy nhiều sản phẩm hơn
+    const defaultFilters = {
+        page: 1,
+        row: 100,  // Tăng số lượng sản phẩm mỗi trang
+        ...filters  // Ghi đè bằng các bộ lọc được cung cấp
+    };
+    
     const params = new URLSearchParams();
     if (brandId) params.append('brand_id', brandId);
     if (categoryId) params.append('category_id', categoryId);
     
-    const res = await apiClient.post(`/product/get-disableds?${params.toString()}`, filters);
+    const res = await apiClient.post(`/product/get-disableds?${params.toString()}`, defaultFilters);
     return res.data;
 }
 
@@ -81,16 +100,30 @@ export const getProductPrices = async (
     filters: any,
     variantId?: string
 ) => {
+    // Đảm bảo gửi thông tin phân trang để lấy nhiều sản phẩm hơn
+    const defaultFilters = {
+        page: 1,
+        row: 100,  // Tăng số lượng sản phẩm mỗi trang
+        ...filters  // Ghi đè bằng các bộ lọc được cung cấp
+    };
+    
     const params = new URLSearchParams();
     if (variantId) params.append('variant_id', variantId);
     
-    const res = await apiClient.post(`/product/get-prices?${params.toString()}`, filters);
+    const res = await apiClient.post(`/product/get-prices?${params.toString()}`, defaultFilters);
     return res.data;
 }
 
 
 export const getProductVariants = async (filters: any) => {
-    const res = await apiClient.post(`/products/get-variant`, filters);
+    // Đảm bảo gửi thông tin phân trang để lấy nhiều sản phẩm hơn
+    const defaultFilters = {
+        page: 1,
+        row: 100,  // Tăng số lượng sản phẩm mỗi trang
+        ...filters  // Ghi đè bằng các bộ lọc được cung cấp
+    };
+    
+    const res = await apiClient.post(`/products/get-variant`, defaultFilters);
     return res.data;
 }
 
