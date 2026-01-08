@@ -492,13 +492,13 @@ const AdminProducts: React.FC = () => {
                     </Space>
                 </div>
 
-                <Row gutter={16}>
-                    <Col span={6}>
+                <Row gutter={16} justify="space-around">
+                    <Col flex="1">
                         <Card>
                             <Statistic title="Tổng số sản phẩm" value={totalProducts} />
                         </Card>
                     </Col>
-                    <Col span={6}>
+                    <Col flex="1">
                         <Card>
                             <Statistic
                                 title="Còn hàng"
@@ -507,7 +507,7 @@ const AdminProducts: React.FC = () => {
                             />
                         </Card>
                     </Col>
-                    <Col span={6}>
+                    <Col flex="1">
                         <Card>
                             <Statistic
                                 title="Sắp hết hàng"
@@ -516,7 +516,16 @@ const AdminProducts: React.FC = () => {
                             />
                         </Card>
                     </Col>
-                    <Col span={6}>
+                    <Col flex="1">
+                        <Card>
+                            <Statistic
+                                title="Hết hàng"
+                                value={outOfStockProducts}
+                                valueStyle={{ color: "#cf1322" }}
+                            />
+                        </Card>
+                    </Col>
+                    <Col flex="1">
                         <Card>
                             <Statistic
                                 title="Tổng số lượng tồn kho"
