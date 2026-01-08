@@ -1,5 +1,5 @@
 // components/admin/ProductForm.tsx
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Select, Upload, Button, message, Row, Col, Card, Image, Tag } from 'antd';
 import { CheckOutlined, DeleteOutlined, EyeOutlined, FileImageOutlined, PlusCircleFilled, PlusCircleOutlined, PlusSquareFilled, UploadOutlined } from '@ant-design/icons';
 import { Product } from '../../types/product';
@@ -51,6 +51,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       })) || [])
     } else if (visible) {
       form.resetFields();
+      setImages([]); // Reset danh sách hình ảnh khi mở form tạo mới
     }
   }, [visible, product, form]);
 
@@ -58,43 +59,96 @@ const ProductForm: React.FC<ProductFormProps> = ({
     setLoading(true);
     try {
       let productId = "";
+      
       if (type === 'create') {
+        // Đối với tạo sản phẩm mới
         const res = await createProduct(values);
-        productId = res.data.id; // Giả sử API trả về ID của sản phẩm mới tạo
+        productId = res.data.id;
+        
+        // Sau khi tạo sản phẩm thành công, thêm các hình ảnh chờ xử lý
+        if (inputImageURLs && inputImageURLs.size > 0) {
+          // Duyệt qua từng hình ảnh để thêm
+          for (let [id, url] of inputImageURLs) {
+            if (url) {
+              try {
+                const imageRes = await createProductImage({
+                  image_url: url,
+                  is_thumbnail: false,
+                  product_id: productId
+                });
+                
+                // Cập nhật danh sách hình ảnh ngay lập tức
+                setImages(prev => [...prev, {
+                  id: imageRes.data.id || "",
+                  is_thumbnail: imageRes.data.is_thumbnail || false,
+                  image_url: imageRes.data.image_url || ""
+                }]);
+              } catch (error) {
+                console.error("Lỗi khi tạo hình ảnh:", error);
+                // Không throw error ở đây để cho phép tiếp tục xử lý
+                toast.error(`Không thể thêm hình ảnh: ${url}`);
+              }
+            }
+          }
+          
+          // Xóa các URL hình ảnh đã được thêm
+          setinputImageURLs(new Map());
+        }
+        
         message.success('Tạo sản phẩm thành công');
       } else {
+        // Đối với chỉnh sửa sản phẩm
         await updateProduct(product?.id || "", values);
         productId = product?.id || "";
+        
+        // Thêm hình ảnh mới nếu có
+        if (inputImageURLs && inputImageURLs.size > 0) {
+          // Duyệt qua từng hình ảnh để thêm
+          for (let [id, url] of inputImageURLs) {
+            if (url) {
+              try {
+                const imageRes = await createProductImage({
+                  image_url: url,
+                  is_thumbnail: false,
+                  product_id: productId
+                });
+                
+                // Cập nhật danh sách hình ảnh ngay lập tức
+                setImages(prev => [...prev, {
+                  id: imageRes.data.id || "",
+                  is_thumbnail: imageRes.data.is_thumbnail || false,
+                  image_url: imageRes.data.image_url || ""
+                }]);
+              } catch (error) {
+                console.error("Lỗi khi tạo hình ảnh:", error);
+                // Không throw error ở đây để cho phép tiếp tục xử lý
+                toast.error(`Không thể thêm hình ảnh: ${url}`);
+              }
+            }
+          }
+          
+          // Xóa các URL hình ảnh đã được thêm
+          setinputImageURLs(new Map());
+        }
+        
         message.success('Cập nhật sản phẩm thành công');
       }
       
-      // Thêm hình ảnh nếu có
-      if (inputImageURLs && inputImageURLs.size > 0) {
-        for (let [id, url] of inputImageURLs) {
-          if (url) {
-            const imageRes = await createProductImage({
-              image_url: url,
-              is_thumbnail: false,
-              product_id: productId
-            });
-            // Cập nhật danh sách hình ảnh ngay lập tức
-            setImages(prev => [...prev, {
-              id: imageRes.data.id || "",
-              is_thumbnail: imageRes.data.is_thumbnail || false,
-              image_url: imageRes.data.image_url || ""
-            }]);
-          }
-        }
-        // Xóa các URL hình ảnh đã được thêm
-        setinputImageURLs(new Map());
-      }
-      
+      // Cập nhật lại danh sách sản phẩm
       useProduct.getProducts();
-      onSuccess();
+      
     } catch (error) {
-      message.error('Thao tác thất bại');
+      if (type === 'create') {
+        message.error('Tạo sản phẩm thất bại');
+      } else {
+        message.error('Cập nhật sản phẩm thất bại');
+      }
+      // Không throw error nữa để đảm bảo onSuccess luôn được gọi
+      return; // Thoát khỏi hàm nhưng vẫn tiếp tục gọi onSuccess trong finally
     } finally {
       setLoading(false);
+      // Luôn gọi onSuccess để đóng modal bất kể thành công hay thất bại
+      onSuccess();
     }
   };
 
@@ -109,6 +163,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
       onCancel={onClose}
       footer={null}
       width={600}
+      destroyOnClose={true}  /* Đảm bảo modal được hủy khi đóng */
+      maskClosable={false}   /* Ngăn người dùng đóng modal bằng cách click ra ngoài khi đang xử lý */
+      closable={!loading}    /* Ẩn nút đóng khi đang xử lý */
     >
       <Form
         form={form}
@@ -185,9 +242,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   const inputValue = inputImageURLs.get(id);
                   if (!inputValue || inputValue == "") return toast.error("URL không hợp lệ!");
                   
-                  // Kiểm tra nếu đang tạo sản phẩm mới mà chưa submit thì không thể thêm hình ảnh
+                  // Nếu đang tạo sản phẩm mới mà chưa submit thì lưu URL hình ảnh vào mảng chờ
                   if (type === 'create' && !product?.id) {
-                    toast.error("Vui lòng tạo sản phẩm trước khi thêm hình ảnh!");
+                    // Thêm URL vào danh sách chờ và sẽ xử lý sau khi tạo sản phẩm xong
+                    toast.info("Hình ảnh sẽ được thêm sau khi tạo sản phẩm!");
                     return;
                   }
                   
@@ -253,17 +311,29 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     key="thumbnail"
                     onClick={() => {
                       console.log(images)
-                      images.forEach(img => {
+                      // Cập nhật tất cả ảnh để không còn là ảnh đại diện
+                      const updatePromises = images.map(img => {
                         if (img.id != image.id) {
-                          updateProductImage(img.id, {
+                          return updateProductImage(img.id, {
                             is_thumbnail: false
-                          }).then(() => { }).catch(() => { })
+                          });
                         } else {
-                          updateProductImage(image.id, {
+                          return updateProductImage(image.id, {
                             is_thumbnail: true
-                          }).then(() => { toast.success("Update success!"); onSuccess(); }).catch(() => { })
+                          });
                         }
-                      })
+                      });
+
+                      // Chờ tất cả các yêu cầu cập nhật hoàn thành
+                      Promise.all(updatePromises)
+                        .then(() => {
+                          toast.success("Cập nhật ảnh đại diện thành công!");
+                          // Không gọi onSuccess ở đây để tránh đóng modal
+                        })
+                        .catch(error => {
+                          console.error("Lỗi khi cập nhật ảnh:", error);
+                          toast.error("Cập nhật ảnh đại diện thất bại!");
+                        });
                     }
                     }
                     className={
@@ -279,8 +349,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   <DeleteOutlined
                     key="delete"
                     onClick={() => {
+                      // Cập nhật giao diện để loại bỏ hình ảnh khỏi danh sách
                       const updatedImages = images.filter(img => img.id !== image.id);
                       setImages(updatedImages);
+                      toast.success("Xóa hình ảnh thành công!");
                     }
                     }
                     className="hover:text-red-500"
@@ -335,7 +407,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
             <Button onClick={onClose}>
               Hủy
             </Button>
-            <Button type="primary" htmlType="submit" loading={loading}>
+            <Button type="primary" htmlType="submit" loading={loading} disabled={loading}>
               {type === 'create' ? 'Tạo' : 'Cập nhật'}
             </Button>
           </div>
