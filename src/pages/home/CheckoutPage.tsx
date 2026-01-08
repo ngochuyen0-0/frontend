@@ -49,6 +49,12 @@ interface CartItem {
   color?: string;
 }
 
+interface PaymentMethod {
+  id: string;
+  name: string;
+  description: string;
+}
+
 interface orderSummary {
   items: CartItem[];
   subtotal: number;
@@ -64,10 +70,13 @@ const shippingMethods = [
   { id: "overnight", name: "Vận chuyển qua đêm", price: 250000, days: "Ngày làm việc tiếp theo" }
 ];
 
+const paymentMethods: PaymentMethod[] = [
+  { id: "cod", name: "Thanh toán khi nhận hàng", description: "Thanh toán tiền mặt khi nhận hàng" }
+];
+
 const CheckoutPage: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState<boolean>(false);
-  const [sameAsShipping, setSameAsShipping] = useState<boolean>(true);
   const navigate = useNavigate();
   const [orderSummary, setOrderSummary] = useState<orderSummary>({
     items: [],
@@ -242,7 +251,7 @@ const CheckoutPage: React.FC = () => {
                   <Title level={5} className="mb-4">
                     📧 Thông tin liên hệ
                   </Title>
-                  <Row gutter={12}>
+                  <Row gutter={16}>
                     <Col span={12}>
                       <Form.Item
                         name="firstName"
@@ -253,6 +262,7 @@ const CheckoutPage: React.FC = () => {
                           prefix={<UserOutlined />}
                           placeholder="Nhập tên"
                           size="large"
+                          className="w-full"
                         />
                       </Form.Item>
                     </Col>
@@ -265,12 +275,13 @@ const CheckoutPage: React.FC = () => {
                         <Input
                           placeholder="Nhập họ"
                           size="large"
+                          className="w-full"
                         />
                       </Form.Item>
                     </Col>
                   </Row>
 
-                  <Row gutter={12}>
+                  <Row gutter={16}>
                     <Col span={12}>
                       <Form.Item
                         name="email"
@@ -284,6 +295,7 @@ const CheckoutPage: React.FC = () => {
                           prefix={<MailOutlined />}
                           placeholder="Nhập email"
                           size="large"
+                          className="w-full"
                         />
                       </Form.Item>
                     </Col>
@@ -297,6 +309,7 @@ const CheckoutPage: React.FC = () => {
                           prefix={<PhoneOutlined />}
                           placeholder="Nhập số điện thoại"
                           size="large"
+                          className="w-full"
                         />
                       </Form.Item>
                     </Col>
@@ -318,10 +331,11 @@ const CheckoutPage: React.FC = () => {
                       prefix={<EnvironmentOutlined />}
                       placeholder="Nhập địa chỉ nhận hàng"
                       size="large"
+                      className="w-full"
                     />
                   </Form.Item>
 
-                  <Row gutter={8}>
+                  <Row gutter={16}>
                     <Col span={8}>
                       <Form.Item
                         name="province"
@@ -337,6 +351,7 @@ const CheckoutPage: React.FC = () => {
                             (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
                           }
                           optionFilterProp="label"
+                          className="w-full"
                         >
                           {provinces.map(province => (
                             <Option key={province.id} value={province.id} label={province.name}>
@@ -362,6 +377,7 @@ const CheckoutPage: React.FC = () => {
                             (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
                           }
                           optionFilterProp="label"
+                          className="w-full"
                         >
                           {districts.map(district => (
                             <Option key={district.id} value={district.id} label={district.name}>
@@ -377,7 +393,7 @@ const CheckoutPage: React.FC = () => {
                         label="Phường/Xã"
                         rules={[{ required: true, message: 'Phường/Xã là bắt buộc' }]}
                       >
-                        <Input placeholder="Phường/Xã" size="large" />
+                        <Input placeholder="Phường/Xã" size="large" className="w-full" />
                       </Form.Item>
                     </Col>
                   </Row>
@@ -387,7 +403,7 @@ const CheckoutPage: React.FC = () => {
                     label="Quốc gia"
                     rules={[{ required: true, message: 'Quốc gia là bắt buộc' }]}
                   >
-                    <Select size="large">
+                    <Select size="large" className="w-full">
                       <Option value="VN">Vietnam</Option>
                     </Select>
                   </Form.Item>
@@ -399,85 +415,44 @@ const CheckoutPage: React.FC = () => {
                     🚚 Phương thức vận chuyển
                   </Title>
                   <Card className="w-full">
-                    <Form.Item name="shippingMethod" className="w-full">
+                    <Form.Item name="shippingMethod" className="w-full" initialValue="free_delivery">
                       <Radio.Group
                         onChange={(e) => setSelectedShipping(e.target.value)}
                         className="w-full"
                       >
-                        <Space direction="vertical" className="w-full">
+                        <div className="w-full">
                           {shippingMethods.map(method => (
-                            <Radio key={method.id} value={method.id} className="w-full">
-                              <div className="w-90 bg-gray-10 p-3 border border-gray-300 rounded-lg">
-                                <div >
-                                  <Text strong>{method.name}</Text>
-                                  <br />
-                                  <Text type="secondary">{method.days}</Text>
+                            <Radio key={method.id} value={method.id} className="w-full mb-2">
+                              <Card className="w-full p-4 border border-gray-300 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 min-h-20">
+                                <div className="flex justify-between items-center h-full">
+                                  <div className="flex-1 min-w-0">
+                                    <Text strong className="text-base truncate">{method.name}</Text>
+                                    <br />
+                                    <Text type="secondary" className="text-sm truncate">{method.days}</Text>
+                                  </div>
+                                  <div className="text-right ml-4 flex-shrink-0">
+                                    <Text strong className="text-base">{formatCurrency(method.price)}</Text>
+                                  </div>
                                 </div>
-                                <Text strong>{formatCurrency(method.price)}</Text>
-                              </div>
+                              </Card>
                             </Radio>
                           ))}
-                        </Space>
+                        </div>
                       </Radio.Group>
                     </Form.Item>
                   </Card>
 
                 </div>
 
-                {/* Billing Address */}
-                <div className="mb-6">
-                  <Title level={5} className="mb-4">
-                    💳 Địa chỉ thanh toán
-                  </Title>
-                  <Form.Item>
-                    <Checkbox
-                      checked={sameAsShipping}
-                      onChange={(e) => setSameAsShipping(e.target.checked)}
-                    >
-                      Giống địa chỉ nhận hàng
-                    </Checkbox>
-                  </Form.Item>
 
-                  {!sameAsShipping && (
-                    <div className="space-y-4">
-                      <Form.Item
-                        name="billingAddress"
-                        label="Billing Address"
-                        rules={[{ required: true, message: 'Billing address is required' }]}
-                      >
-                        <Input placeholder="Billing Address" size="large" />
-                      </Form.Item>
-
-                      <Row gutter={12}>
-                        <Col span={12}>
-                          <Form.Item
-                            name="billingCity"
-                            label="City"
-                            rules={[{ required: true, message: 'City is required' }]}
-                          >
-                            <Input placeholder="City" size="large" />
-                          </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                          <Form.Item
-                            name="billingZip"
-                            label="ZIP Code"
-                            rules={[{ required: true, message: 'ZIP code is required' }]}
-                          >
-                            <Input placeholder="ZIP Code" size="large" />
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                    </div>
-                  )}
-                </div>
 
                 {/* Navigation Buttons */}
-                <div className="flex justify-between pt-6">
+                <div className="flex justify-between pt-6 gap-4">
                   <Button
                     type="default"
                     icon={<ArrowLeftOutlined />}
                     size="large"
+                    className="flex-1"
                   >
                     Quay lại giỏ hàng
                   </Button>
@@ -487,7 +462,7 @@ const CheckoutPage: React.FC = () => {
                     htmlType="submit"
                     size="large"
                     loading={loading}
-
+                    className="flex-1"
                   >
                     Tiếp tục thanh toán
                   </Button>
@@ -498,7 +473,7 @@ const CheckoutPage: React.FC = () => {
 
           {/* Right Column - Order Summary */}
           <Col xs={24} lg={10}>
-            <Card title="Tóm tắt đơn hàng" className="sticky top-4">
+            <Card title="Giỏ hàng" className="sticky top-4">
               {/* Order Items */}
               <div className="space-y-3 mb-4">
                 {orderSummary.items.map(item => (
@@ -565,7 +540,7 @@ const CheckoutPage: React.FC = () => {
 
               {/* Shipping Preview */}
               <div className="mb-4">
-                <Text strong className="block mb-2">Phương thức vận chuyển</Text>
+                <Text strong className="block mb-2">Tóm tắt đơn hàng</Text>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <Text strong>{getSelectedShipping()?.name}</Text>
                   <br />
@@ -582,12 +557,8 @@ const CheckoutPage: React.FC = () => {
                   <Text>{formatCurrency(orderSummary.subtotal)}</Text>
                 </div>
                 <div className="flex justify-between">
-                  <Text>Vận chuyển</Text>
+                  <Text>Phí Vận chuyển</Text>
                   <Text>{formatCurrency(getSelectedShipping()?.price || 0)}</Text>
-                </div>
-                <div className="flex justify-between">
-                  <Text>Thuế</Text>
-                  <Text>{formatCurrency(orderSummary.tax)}</Text>
                 </div>
                 {orderSummary.discount < 0 && (
                   <div className="flex justify-between text-green-500">
@@ -597,12 +568,11 @@ const CheckoutPage: React.FC = () => {
                 )}
                 <Divider className="my-2" />
                 <div className="flex justify-between text-lg">
-                  <Text strong>Tổng cộng</Text>
+                  <Text strong>Tổng thanh toán</Text>
                   <Text strong>
                     {formatCurrency(
                       orderSummary.subtotal +
                       (getSelectedShipping()?.price || 0) +
-                      orderSummary.tax +
                       orderSummary.discount
                     )}
                   </Text>
