@@ -143,22 +143,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onViewD
 
                         <div className="flex items-center gap-2">
                             <Text strong className="text-lg text-red-600">
-                                {minPrice.toFixed(2)} ₫
+                                {minPrice !== Infinity ? minPrice.toLocaleString() + ' ₫' : 'Liên hệ'}
                             </Text>
                             {hasMultiplePrices && (
                                 <Text type="secondary" className="text-sm line-through">
-                                    {maxPrice.toFixed(2)} ₫
+                                    {maxPrice !== 0 ? maxPrice.toLocaleString() + ' ₫' : ''}
                                 </Text>
                             )}
                             {hasMultiplePrices && (
                                 <Tag color="orange" className="m-0">
-                                    Từ {minPrice.toFixed(2)} ₫
+                                    Từ {minPrice !== Infinity ? minPrice.toLocaleString() + ' ₫' : 'Liên hệ'}
                                 </Tag>
                             )}
                         </div>
 
                         <Text type="secondary" className="text-xs block">
-                            {product.brand.name} • {product.category.name}
+                            {product.brand?.name || 'N/A'} • {product.category?.name || 'N/A'}
                         </Text>
 
                         {variants.length > 1 && (
@@ -191,6 +191,9 @@ const ProductsPage: React.FC = () => {
     const [productsData, setProductsData] = useState<any>();
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
     const queryParams = new URLSearchParams(location.search);
+    
+    // State để lưu giá trị max cho slider
+    const [maxPrice, setMaxPrice] = useState(1000);
 
     const brandId = queryParams.get("brand_id");
     const categoryId = queryParams.get("category_id");
@@ -199,8 +202,13 @@ const ProductsPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+    const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]); // Giá trị max sẽ được cập nhật sau khi có dữ liệu
     const [sortBy, setSortBy] = useState<string>('newest');
+    
+    // Cập nhật giá trị priceRange khi maxPrice thay đổi
+    useEffect(() => {
+        setPriceRange([0, maxPrice]);
+    }, [maxPrice]);
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
@@ -214,22 +222,45 @@ const ProductsPage: React.FC = () => {
     useEffect(() => {
         fetchProducts();
     }, []);
-
+    
     const fetchProducts = async () => {
         setLoading(true);
-
-        getBrands({}).then(res => { setBrands(res.data) });
-        getCategories({}).then(res => { setCategories(res.data) });
-
-        getProducts({}).then(res => {
-            setProductsData(res);
+    
+        try {
+            // Lấy dữ liệu brands và categories song song
+            const [brandsRes, categoriesRes, productsRes] = await Promise.all([
+                getBrands({}),
+                getCategories({}),
+                getProducts({})
+            ]);
+    
+            setBrands(brandsRes.data);
+            setCategories(categoriesRes.data);
+    
+            // Tính toán giá trị max từ dữ liệu sản phẩm
+            const allPrices: number[] = [];
+            productsRes.data.forEach((product: Product) => {
+                if (product.variants && product.variants.length > 0) {
+                    product.variants.forEach(variant => {
+                        if (variant.price !== undefined) {
+                            allPrices.push(variant.price);
+                        }
+                    });
+                }
+            });
+    
+            const calculatedMaxPrice = allPrices.length > 0 ? Math.max(...allPrices) : 1000;
+            setMaxPrice(calculatedMaxPrice);
+    
+            setProductsData(productsRes);
+            setProducts(productsRes.data);
+            setFilteredProducts(productsRes.data);
+            setTotalProducts(productsRes.data?.length);
+        } catch (error) {
+            console.error('Lỗi khi lấy dữ liệu:', error);
+        } finally {
             setLoading(false);
-            setProducts(res.data)
-            setFilteredProducts(res.data);
-            setTotalProducts(res.data?.length);
-        }).catch(() => {
-
-        })
+        }
     };
 
     // Apply filters
@@ -259,9 +290,19 @@ const ProductsPage: React.FC = () => {
 
         // Price range filter
                 filtered = filtered.filter(product => {
-                    if (!product.variants) return false;
-                    const minPrice = Math.min(...product.variants.map(v => v.price !== undefined ? v.price : Infinity));
-                    return minPrice >= priceRange[0] && minPrice <= priceRange[1] && minPrice !== Infinity;
+                    if (!product.variants || product.variants.length === 0) return true; // Nếu không có biến thể, vẫn hiển thị
+                    
+                    const prices = product.variants
+                        .filter(v => v.price !== undefined && v.price !== null)
+                        .map(v => v.price as number);
+                        
+                    if (prices.length === 0) return true; // Nếu không có giá hợp lệ, vẫn hiển thị
+                    
+                    const minPrice = Math.min(...prices);
+                    const maxPrice = Math.max(...prices);
+                    
+                    // Kiểm tra nếu có bất kỳ giá nào nằm trong khoảng
+                    return maxPrice >= priceRange[0] && minPrice <= priceRange[1];
                 });
 
         // Sort products
@@ -272,9 +313,9 @@ const ProductsPage: React.FC = () => {
                             const bMinPrice = b.variants && b.variants.length > 0 ? Math.min(...b.variants.map(v => v.price !== undefined ? v.price : Infinity)) : Infinity;
                             return aMinPrice - bMinPrice;
                         case 'price-high':
-                            const aMaxPrice = a.variants && a.variants.length > 0 ? Math.min(...a.variants.map(v => v.price !== undefined ? v.price : Infinity)) : Infinity;
-                            const bMaxPrice = b.variants && b.variants.length > 0 ? Math.min(...b.variants.map(v => v.price !== undefined ? v.price : Infinity)) : Infinity;
-                            return bMaxPrice - aMaxPrice;
+                            const aMinPriceHigh = a.variants && a.variants.length > 0 ? Math.min(...a.variants.map(v => v.price !== undefined ? v.price : Infinity)) : Infinity;
+                            const bMinPriceHigh = b.variants && b.variants.length > 0 ? Math.min(...b.variants.map(v => v.price !== undefined ? v.price : Infinity)) : Infinity;
+                            return bMinPriceHigh - aMinPriceHigh;
                         case 'rating':
                             const aRating = (a as any).rating || 0;
                                                 const bRating = (b as any).rating || 0;
@@ -306,7 +347,7 @@ const ProductsPage: React.FC = () => {
         setSearchTerm('');
         setSelectedBrands([]);
         setSelectedCategories([]);
-        setPriceRange([0, 1000]);
+        setPriceRange([0, maxPrice]);
         setSortBy('newest');
     };
 
@@ -330,7 +371,7 @@ const ProductsPage: React.FC = () => {
                     <div>
                         <Title level={2} className="mb-2">Sản phẩm của chúng tôi</Title>
                         <Text type="secondary">
-                            Hiển thị {filteredProducts?.length} trong số {products?.length} sản phẩm
+                            Hiển thị {filteredProducts?.length?.toLocaleString()} trong số {products?.length?.toLocaleString()} sản phẩm
                         </Text>
                     </div>
 
@@ -383,14 +424,14 @@ const ProductsPage: React.FC = () => {
                                 <Slider
                                     range
                                     min={0}
-                                    max={1000}
+                                    max={maxPrice}
                                     value={priceRange}
                                         onChange={(value) => setPriceRange(value as [number, number])}
                                     className="mb-2"
                                 />
                                 <div className="flex justify-between">
-                                    <Text type="secondary">{priceRange[0]} ₫</Text>
-                                    <Text type="secondary">{priceRange[1]} ₫</Text>
+                                    <Text type="secondary">{priceRange[0].toLocaleString()} ₫</Text>
+                                    <Text type="secondary">{priceRange[1].toLocaleString()} ₫</Text>
                                 </div>
                             </div>
 
@@ -449,7 +490,7 @@ const ProductsPage: React.FC = () => {
                         ) : (
                             <>
                                 {/* Active Filters */}
-                                {(selectedBrands.length > 0 || selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000) && (
+                                {(selectedBrands.length > 0 || selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < maxPrice) && (
                                     <div className="mb-6">
                                         <Space wrap>
                                             {selectedBrands.map(brand => (
@@ -470,12 +511,12 @@ const ProductsPage: React.FC = () => {
                                                     Danh mục: {category}
                                                 </Tag>
                                             ))}
-                                            {(priceRange[0] > 0 || priceRange[1] < 1000) && (
+                                            {(priceRange[0] > 0 || priceRange[1] < maxPrice) && (
                                                 <Tag
                                                     closable
-                                                    onClose={() => setPriceRange([0, 1000])}
+                                                    onClose={() => setPriceRange([0, maxPrice])}
                                                 >
-                                                    Giá: {priceRange[0]} ₫ - {priceRange[1]} ₫
+                                                    Giá: {priceRange[0].toLocaleString()} ₫ - {priceRange[1].toLocaleString()} ₫
                                                 </Tag>
                                             )}
                                         </Space>
