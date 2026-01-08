@@ -54,9 +54,9 @@ interface orderSummary {
 };
 
 const shippingMethods = [
-  { id: "standard", name: "Standard Shipping", price: 5, days: "5-7 business days" },
-  { id: "express", name: "Express Shipping", price: 15, days: "2-3 business days" },
-  { id: "overnight", name: "Overnight Shipping", price: 25, days: "Next business day" }
+  { id: "standard", name: "Vận chuyển tiêu chuẩn", price: 50000, days: "5-7 ngày làm việc" },
+  { id: "express", name: "Vận chuyển nhanh", price: 150000, days: "2-3 ngày làm việc" },
+  { id: "overnight", name: "Vận chuyển qua đêm", price: 250000, days: "Ngày làm việc tiếp theo" }
 ];
 
 const CheckoutPage: React.FC = () => {
@@ -133,11 +133,11 @@ const CheckoutPage: React.FC = () => {
   };
 
   const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
-  };
+      return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND'
+      }).format(value);
+    };
 
   const getSelectedShipping = () => {
     return shippingMethods.find(method => method.id === selectedShipping);
@@ -149,10 +149,10 @@ const CheckoutPage: React.FC = () => {
         {/* Checkout Steps */}
         <div className="mb-8">
           <Steps current={1} className="mb-8">
-            <Step title="Cart" description="Review items" />
-            <Step title="Information" description="Create order" />
-            <Step title="Payment" description="Payment method" />
-            <Step title="Review" description="Order setting" />
+            <Step title="Giỏ hàng" description="Xem lại sản phẩm" />
+            <Step title="Thông tin" description="Tạo đơn hàng" />
+            <Step title="Thanh toán" description="Phương thức thanh toán" />
+            <Step title="Xem lại" description="Cài đặt đơn hàng" />
           </Steps>
         </div>
 
@@ -161,7 +161,7 @@ const CheckoutPage: React.FC = () => {
           <Col xs={24} lg={14}>
             <Card>
               <Title level={3} className="mb-6">
-                Shipping Information
+                Thông tin vận chuyển
               </Title>
 
               <Form
@@ -176,14 +176,14 @@ const CheckoutPage: React.FC = () => {
                 {/* Contact Information */}
                 <div className="mb-6">
                   <Title level={5} className="mb-4">
-                    📧 Contact Information
+                    📧 Thông tin liên hệ
                   </Title>
                   <Row gutter={12}>
                     <Col span={12}>
                       <Form.Item
                         name="firstName"
-                        label="First Name"
-                        rules={[{ required: true, message: 'First name is required' }]}
+                        label="Tên"
+                        rules={[{ required: true, message: 'Tên là bắt buộc' }]}
                       >
                         <Input
                           prefix={<UserOutlined />}
@@ -195,8 +195,8 @@ const CheckoutPage: React.FC = () => {
                     <Col span={12}>
                       <Form.Item
                         name="lastName"
-                        label="Last Name"
-                        rules={[{ required: true, message: 'Last name is required' }]}
+                        label="Họ"
+                        rules={[{ required: true, message: 'Họ là bắt buộc' }]}
                       >
                         <Input
                           placeholder="Last Name"
@@ -210,10 +210,10 @@ const CheckoutPage: React.FC = () => {
                     <Col span={12}>
                       <Form.Item
                         name="email"
-                        label="Email Address"
+                        label="Địa chỉ Email"
                         rules={[
-                          { required: true, message: 'Email is required' },
-                          { type: 'email', message: 'Invalid email address' }
+                          { required: true, message: 'Email là bắt buộc' },
+                          { type: 'email', message: 'Địa chỉ email không hợp lệ' }
                         ]}
                       >
                         <Input
@@ -226,8 +226,8 @@ const CheckoutPage: React.FC = () => {
                     <Col span={12}>
                       <Form.Item
                         name="phone"
-                        label="Phone Number"
-                        rules={[{ required: true, message: 'Phone number is required' }]}
+                        label="Số điện thoại"
+                        rules={[{ required: true, message: 'Số điện thoại là bắt buộc' }]}
                       >
                         <Input
                           prefix={<PhoneOutlined />}
@@ -242,13 +242,13 @@ const CheckoutPage: React.FC = () => {
                 {/* Shipping Address */}
                 <div className="mb-6">
                   <Title level={5} className="mb-4">
-                    📦 Shipping Address
+                    📦 Địa chỉ nhận hàng
                   </Title>
 
                   <Form.Item
                     name="address"
-                    label="Street Address"
-                    rules={[{ required: true, message: 'Address is required' }]}
+                    label="Địa chỉ"
+                    rules={[{ required: true, message: 'Địa chỉ là bắt buộc' }]}
                   >
                     <Input
                       prefix={<EnvironmentOutlined />}
@@ -261,8 +261,8 @@ const CheckoutPage: React.FC = () => {
                     <Col span={8}>
                       <Form.Item
                         name="city"
-                        label="City"
-                        rules={[{ required: true, message: 'City is required' }]}
+                        label="Thành phố"
+                        rules={[{ required: true, message: 'Thành phố là bắt buộc' }]}
                       >
                         <Input placeholder="City" size="large" />
                       </Form.Item>
@@ -270,8 +270,8 @@ const CheckoutPage: React.FC = () => {
                     <Col span={8}>
                       <Form.Item
                         name="state"
-                        label="State/Province"
-                        rules={[{ required: true, message: 'State is required' }]}
+                        label="Tỉnh/Thành phố"
+                        rules={[{ required: true, message: 'Tỉnh/Thành phố là bắt buộc' }]}
                       >
                         <Input placeholder="State" size="large" />
                       </Form.Item>
@@ -279,8 +279,8 @@ const CheckoutPage: React.FC = () => {
                     <Col span={8}>
                       <Form.Item
                         name="zipCode"
-                        label="ZIP/Postal Code"
-                        rules={[{ required: true, message: 'ZIP code is required' }]}
+                        label="Mã bưu điện"
+                        rules={[{ required: true, message: 'Mã bưu điện là bắt buộc' }]}
                       >
                         <Input placeholder="ZIP Code" size="large" />
                       </Form.Item>
@@ -289,8 +289,8 @@ const CheckoutPage: React.FC = () => {
 
                   <Form.Item
                     name="country"
-                    label="Country"
-                    rules={[{ required: true, message: 'Country is required' }]}
+                    label="Quốc gia"
+                    rules={[{ required: true, message: 'Quốc gia là bắt buộc' }]}
                   >
                     <Select size="large">
                       <Option value="US">United States</Option>
@@ -305,7 +305,7 @@ const CheckoutPage: React.FC = () => {
                 {/* Shipping Method */}
                 <div className="mb-6">
                   <Title level={5} className="mb-4">
-                    🚚 Shipping Method
+                    🚚 Phương thức vận chuyển
                   </Title>
                   <Card className="w-full">
                     <Form.Item name="shippingMethod" className="w-full">
@@ -336,14 +336,14 @@ const CheckoutPage: React.FC = () => {
                 {/* Billing Address */}
                 <div className="mb-6">
                   <Title level={5} className="mb-4">
-                    💳 Billing Address
+                    💳 Địa chỉ thanh toán
                   </Title>
                   <Form.Item>
                     <Checkbox
                       checked={sameAsShipping}
                       onChange={(e) => setSameAsShipping(e.target.checked)}
                     >
-                      Same as shipping address
+                      Giống địa chỉ nhận hàng
                     </Checkbox>
                   </Form.Item>
 
@@ -388,7 +388,7 @@ const CheckoutPage: React.FC = () => {
                     icon={<ArrowLeftOutlined />}
                     size="large"
                   >
-                    Return to Cart
+                    Quay lại giỏ hàng
                   </Button>
 
                   <Button
@@ -398,7 +398,7 @@ const CheckoutPage: React.FC = () => {
                     loading={loading}
 
                   >
-                    Continue to Payment
+                    Tiếp tục thanh toán
                   </Button>
                 </div>
               </Form>
@@ -407,7 +407,7 @@ const CheckoutPage: React.FC = () => {
 
           {/* Right Column - Order Summary */}
           <Col xs={24} lg={10}>
-            <Card title="Order Summary" className="sticky top-4">
+            <Card title="Tóm tắt đơn hàng" className="sticky top-4">
               {/* Order Items */}
               <div className="space-y-3 mb-4">
                 {orderSummary.items.map(item => (
@@ -415,7 +415,7 @@ const CheckoutPage: React.FC = () => {
                     <Text strong>{item.name}</Text>
                     <div key={item.id} className="flex justify-between items-center">
                       <div className="flex gap-4 items-center">
-                        <Text type="secondary">Qty: {item.qty}</Text>
+                        <Text type="secondary">Số lượng: {item.qty}</Text>
                         <Tag>
                           {item.size}
                         </Tag>
@@ -434,7 +434,7 @@ const CheckoutPage: React.FC = () => {
 
               {/* Shipping Preview */}
               <div className="mb-4">
-                <Text strong className="block mb-2">Shipping Method</Text>
+                <Text strong className="block mb-2">Phương thức vận chuyển</Text>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <Text strong>{getSelectedShipping()?.name}</Text>
                   <br />
@@ -447,26 +447,26 @@ const CheckoutPage: React.FC = () => {
               {/* Price Breakdown */}
               <Space direction="vertical" className="w-full">
                 <div className="flex justify-between">
-                  <Text>Subtotal</Text>
+                  <Text>Tạm tính</Text>
                   <Text>{formatCurrency(orderSummary.subtotal)}</Text>
                 </div>
                 <div className="flex justify-between">
-                  <Text>Shipping</Text>
+                  <Text>Vận chuyển</Text>
                   <Text>{formatCurrency(getSelectedShipping()?.price || 0)}</Text>
                 </div>
                 <div className="flex justify-between">
-                  <Text>Tax</Text>
+                  <Text>Thuế</Text>
                   <Text>{formatCurrency(orderSummary.tax)}</Text>
                 </div>
                 {orderSummary.discount < 0 && (
                   <div className="flex justify-between text-green-500">
-                    <Text>Discount</Text>
+                    <Text>Giảm giá</Text>
                     <Text>{formatCurrency(orderSummary.discount)}</Text>
                   </div>
                 )}
                 <Divider className="my-2" />
                 <div className="flex justify-between text-lg">
-                  <Text strong>Total</Text>
+                  <Text strong>Tổng cộng</Text>
                   <Text strong>
                     {formatCurrency(
                       orderSummary.subtotal +
