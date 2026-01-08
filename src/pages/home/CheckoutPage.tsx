@@ -169,7 +169,7 @@ const CheckoutPage: React.FC = () => {
                 layout="vertical"
                 onFinish={handleSubmit}
                 initialValues={{
-                  country: "US",
+                  country: "VN",
                   shippingMethod: "standard"
                 }}
               >
@@ -293,10 +293,6 @@ const CheckoutPage: React.FC = () => {
                     rules={[{ required: true, message: 'Quốc gia là bắt buộc' }]}
                   >
                     <Select size="large">
-                      <Option value="US">United States</Option>
-                      <Option value="CA">Canada</Option>
-                      <Option value="UK">United Kingdom</Option>
-                      <Option value="AU">Australia</Option>
                       <Option value="VN">Vietnam</Option>
                     </Select>
                   </Form.Item>
