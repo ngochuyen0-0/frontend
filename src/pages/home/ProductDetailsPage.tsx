@@ -369,24 +369,27 @@ const ProductDetailsPage: React.FC = () => {
                                     <span className="mr-2 text-sm">📏</span> Kích thước
                                 </h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {product?.variants?.map((e, i) => {
-                                        const active = selectVariant?.size === e.size;
-                                        return (
-                                            <button
-                                                key={e.size}
-                                                type="button"
-                                                onClick={() => {
-                                                    setSelectVariant(e)
-                                                }}
-                                                className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-all duration-300 ${active
-                                                        ? "border-blue-500 text-blue-700 bg-blue-100"
-                                                        : "border-gray-300 text-gray-700 hover:border-blue-400 hover:bg-blue-50"
-                                                    }`}
-                                            >
-                                                {e.size}
-                                            </button>
-                                        );
-                                    })}
+                                    {Array.from(new Set(product?.variants?.map(v => v.size) || []))
+                                     .map((size, i) => {
+                                         const active = selectVariant?.size === size;
+                                         // Lấy variant đầu tiên có kích thước này để sử dụng khi chọn
+                                         const variant = product?.variants?.find(v => v.size === size);
+                                         return (
+                                             <button
+                                                 key={size}
+                                                 type="button"
+                                                 onClick={() => {
+                                                     if (variant) setSelectVariant(variant);
+                                                 }}
+                                                 className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-all duration-300 ${active
+                                                         ? "border-blue-500 text-blue-700 bg-blue-100"
+                                                         : "border-gray-300 text-gray-700 hover:border-blue-400 hover:bg-blue-50"
+                                                     }`}
+                                             >
+                                                 {size}
+                                             </button>
+                                         );
+                                     })}
                                 </div>
                             </div>
 
@@ -395,9 +398,12 @@ const ProductDetailsPage: React.FC = () => {
                                     <span className="mr-2 text-sm">🎨</span> Màu sắc
                                 </h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {product?.variants?.map((e, i) => {
-                                        const active = selectVariant?.color === e.color;
-                                        const getColorValue = (color: any) => {
+                                    {Array.from(new Set(product?.variants?.map(v => v.color) || []))
+                                     .map((color, i) => {
+                                         const active = selectVariant?.color === color;
+                                         // Lấy variant đầu tiên có màu này để sử dụng khi chọn
+                                         const variant = product?.variants?.find(v => v.color === color);
+                                         const getColorValue = (color: any) => {
                                             if (!color) return '#cccccc';
                                             
                                             // Nếu là chuỗi, áp dụng xử lý như trước
@@ -488,20 +494,20 @@ const ProductDetailsPage: React.FC = () => {
                                         };
                                         return (
                                             <div
-                                                key={e.size}
+                                                key={color || `color-${i}`}
                                                 onClick={() => {
-                                                    setSelectVariant(e)
+                                                    if (variant) setSelectVariant(variant);
                                                 }}
                                                 className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${active ? 'scale-105' : 'hover:scale-105'}`}
                                             >
                                                 <div
                                                     className={`w-10 h-10 rounded-full border-2 ${active ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300'}`}
                                                     style={{
-                                                        backgroundColor: getColorValue(e.color)
+                                                        backgroundColor: getColorValue(color)
                                                     }}
-                                                    title={e.color || 'Chưa có màu'}
+                                                    title={color || 'Chưa có màu'}
                                                 ></div>
-                                                <span className="mt-1 text-xs">{e.color}</span>
+                                                <span className="mt-1 text-xs">{color}</span>
                                             </div>
                                         );
                                     })}
