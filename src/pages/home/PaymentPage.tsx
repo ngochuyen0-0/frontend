@@ -40,7 +40,6 @@ import { getOrderById } from "../../services/orderService";
 import { toast } from "sonner";
 import { getProductVariantById } from "../../services/productService";
 import { ProductVariantSingle } from "../../types/product";
-import { payURLCreate } from "../../services/paymentService";
 import { Order, OrderItem } from "../../types/order";
 
 const { Title, Text } = Typography;
@@ -96,6 +95,7 @@ const PaymentPage: React.FC = () => {
     const [paymentMethod, setPaymentMethod] = useState<string>("credit");
     const [selectedBank, setSelectedBank] = useState<string>("Vietcombank");
     const [orderData, setOrderData] = useState<Order | null>(null);
+    const [variantImages, setVariantImages] = useState<Record<string, string>>({});
 
 
     useEffect(() => {
@@ -105,6 +105,18 @@ const PaymentPage: React.FC = () => {
                 navigate(`/order-info/${mockOrderData.id}`)
             }
             const results = await Promise.all(mockOrderData.items.map(item => getProductVariantById(item.variant_id)));
+            
+            // Tạo map ảnh sản phẩm
+            const imagesMap: Record<string, string> = {};
+            results.forEach((e: ProductVariantSingle) => {
+                if (e.product.images && e.product.images.length > 0) {
+                    imagesMap[e.id || ''] = e.product.images[0].image_url || '/placeholder-image.jpg';
+                } else {
+                    imagesMap[e.id || ''] = '/placeholder-image.jpg';
+                }
+            });
+            setVariantImages(imagesMap);
+            
             const itemsFecth = [] as OrderItem[];
             results.forEach((e: ProductVariantSingle) => {
                 const rawItem = mockOrderData.items.find(c => c.variant_id === e.id);
@@ -126,9 +138,9 @@ const PaymentPage: React.FC = () => {
     }, [])
 
     const formatCurrency = (value: number): string => {
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'VND'
         }).format(value);
     };
 
@@ -136,7 +148,7 @@ const PaymentPage: React.FC = () => {
         return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
             currency: 'VND'
-        }).format(value * 23000);
+        }).format(value);
     };
 
     const formatDate = (dateString: string): string => {
@@ -166,21 +178,25 @@ const PaymentPage: React.FC = () => {
                     cvv: values.cvv
                 } : null,
                 amount: orderData.total_amount,
-                currency: "USD"
+                currency: "VND"
             };
-            if (paymentMethod === "paypal"){
-                await payURLCreate("paypal", order_id || "").then(res=>{
-                    window.open(res.approve_url)
-                })
-            }else if (paymentMethod === "bank") {
-                toast.success("Order placed! Please complete bank transfer within 24 hours.");
+            if (paymentMethod === "bank") {
+                toast.success("Đơn hàng đã được tạo! Vui lòng hoàn tất chuyển khoản trong vòng 24 giờ.");
+            } else if (paymentMethod === "cod") {
+                toast.success("Đơn hàng đã được đặt thành công! Bạn sẽ thanh toán khi nhận hàng.");
+                setTimeout(() => {
+                    navigate(`/order-info/${orderData.id}`); // Điều hướng đến trang thông tin đơn hàng sau 2 giây
+                }, 2000);
             } else {
-                toast.success("Payment successful! Your order has been placed.");
+                toast.success("Thanh toán thành công! Đơn hàng của bạn đã được đặt.");
+                setTimeout(() => {
+                    navigate(`/order-info/${orderData.id}`); // Điều hướng đến trang thông tin đơn hàng sau 2 giây
+                }, 2000);
             }
 
         } catch (error) {
-            toast.error("An error occurred during payment processing.");
-            console.error("Payment error:", error);
+            toast.error("Đã xảy ra lỗi trong quá trình xử lý thanh toán.");
+            console.error("Lỗi thanh toán:", error);
         } finally {
             setLoading(false);
         }
@@ -192,7 +208,7 @@ const PaymentPage: React.FC = () => {
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        toast.success("Copied to clipboard!");
+        toast.success("Đã sao chép vào clipboard!");
     };
 
     const getSelectedBankAccount = () => {
@@ -202,44 +218,56 @@ const PaymentPage: React.FC = () => {
     // Columns cho bảng sản phẩm
     const productColumns = [
         {
-            title: 'Name',
-            dataIndex: 'product_name',
-            key: 'product_name'
+            title: 'Sản phẩm',
+            key: 'product',
+            render: (_, record) => {
+                // Sử dụng ảnh từ variantImages đã được fetch trước đó
+                const imageUrl = variantImages[record.variant_id] || '/placeholder-image.jpg';
+                
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '60px', height: '60px', backgroundColor: '#f5f5f5', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Image
+                                src={imageUrl}
+                                alt={record.product_name}
+                                width={60}
+                                height={60}
+                                style={{ objectFit: 'cover', borderRadius: '4px' }}
+                                fallback="/placeholder-image.jpg"
+                            />
+                        </div>
+                        <div>
+                            <div style={{ fontWeight: '500' }}>{record.product_name}</div>
+                            <div style={{ fontSize: '12px', color: '#666' }}>Kích thước: {record.size || 'N/A'} | Màu: {record.color || 'N/A'}</div>
+                        </div>
+                    </div>
+                );
+            },
+            width: '40%',
         },
         {
-            title: 'Price',
+            title: 'Đơn giá',
             dataIndex: 'price',
             key: 'price',
             render: (price: number) => formatCurrency(price),
-        },
-
-        {
-            title: 'Size',
-            dataIndex: 'size',
-            key: 'size',
-            render: (size: string) => <Tag>{size}</Tag>,
-        },
-
-        {
-            title: 'Color',
-            dataIndex: 'color',
-            key: 'color',
-            render: (color: string) => <Tag color={color}>{color}</Tag>,
+            width: '20%',
         },
         {
-            title: 'Quantity',
+            title: 'Số lượng',
             dataIndex: 'quantity',
             key: 'quantity',
+            width: '15%',
         },
         {
-            title: 'Total Price',
+            title: 'Tổng giá',
             key: 'total',
             render: (record: OrderItem) => formatCurrency(record.price * record.quantity),
+            width: '25%',
         },
     ];
 
     if (!orderData) {
-        return <div>Loading...</div>;
+        return <div>Đang tải...</div>;
     }
 
     return (
@@ -248,10 +276,10 @@ const PaymentPage: React.FC = () => {
                 {/* Checkout Steps */}
                 <div className="mb-8">
                     <Steps current={2} className="mb-8">
-                        <Step title="Cart" description="Review items" />
-                        <Step title="Information" description="Create order" />
-                        <Step title="Payment" description="Payment method" />
-                        <Step title="Review" description="Order setting" />
+                        <Step title="Giỏ hàng" description="Xem lại các mặt hàng" />
+                        <Step title="Thông tin" description="Tạo đơn hàng" />
+                        <Step title="Thanh toán" description="Phương thức thanh toán" />
+                        <Step title="Xem lại" description="Cài đặt đơn hàng" />
                     </Steps>
                 </div>
 
@@ -260,26 +288,26 @@ const PaymentPage: React.FC = () => {
                     <Col xs={24} lg={14}>
                         <Card>
                             <Title level={3} className="mb-6">
-                                <ShoppingOutlined /> Order Information
+                                <ShoppingOutlined /> Thông tin đơn hàng
                             </Title>
 
                             {/* Thông tin đơn hàng */}
                             <Descriptions
-                                title="Order Details"
+                                title="Chi tiết đơn hàng"
                                 bordered
                                 column={1}
                                 className="mb-6"
                             >
-                                <Descriptions.Item label="Order ID">
+                                <Descriptions.Item label="Mã đơn hàng">
                                     <Text strong>{orderData.id}</Text>
                                 </Descriptions.Item>
-                                <Descriptions.Item label="Order Date">
+                                <Descriptions.Item label="Ngày đặt hàng">
                                     {formatDate(orderData.created_at)}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="Status">
                                     <Badge status="processing" text={orderData.status} />
                                 </Descriptions.Item>
-                                <Descriptions.Item label="Total Amount">
+                                <Descriptions.Item label="Tổng tiền">
                                     <Text strong type="danger" className="text-lg">
                                         {formatCurrency(orderData.total_amount)}
                                     </Text>
@@ -287,58 +315,58 @@ const PaymentPage: React.FC = () => {
                             </Descriptions>
 
                             {/* Thông tin khách hàng */}
-                            <Card title="Customer Information" className="mb-6">
+                            <Card title="Thông tin khách hàng" className="mb-6">
                                 <Descriptions column={1}>
-                                    <Descriptions.Item label={<><UserOutlined /> Full Name</>}>
+                                    <Descriptions.Item label={<><UserOutlined /> Họ tên đầy đủ</>}>
                                         {orderData.fullname}
                                     </Descriptions.Item>
                                     <Descriptions.Item label={<><MailOutlined /> Email</>}>
                                         {orderData.email}
                                     </Descriptions.Item>
-                                    <Descriptions.Item label={<><PhoneOutlined /> Phone</>}>
+                                    <Descriptions.Item label={<><PhoneOutlined /> Điện thoại</>}>
                                         {orderData.phone}
                                     </Descriptions.Item>
                                 </Descriptions>
                             </Card>
 
                             {/* Thông tin giao hàng */}
-                            <Card title="Shipping Information" className="mb-6">
+                            <Card title="Thông tin giao hàng" className="mb-6">
                                 <Descriptions column={1}>
-                                    <Descriptions.Item label={<><EnvironmentOutlined /> Address</>}>
+                                    <Descriptions.Item label={<><EnvironmentOutlined /> Địa chỉ</>}>
                                         {orderData.specific_address}
                                     </Descriptions.Item>
-                                    <Descriptions.Item label="City/Province">
+                                    <Descriptions.Item label="Thành phố/Tỉnh">
                                         {orderData.city}, {orderData.province}
                                     </Descriptions.Item>
-                                    <Descriptions.Item label="Ward/District">
+                                    <Descriptions.Item label="Phường/Xã/Quận/Huyện">
                                         {orderData.ward}
                                     </Descriptions.Item>
-                                    <Descriptions.Item label="ZIP Code">
+                                    <Descriptions.Item label="Mã bưu điện">
                                         {orderData.zipcode}
                                     </Descriptions.Item>
-                                    <Descriptions.Item label="Country">
+                                    <Descriptions.Item label="Quốc gia">
                                         {orderData.country}
                                     </Descriptions.Item>
-                                    <Descriptions.Item label="Shipping Method">
+                                    <Descriptions.Item label="Phương thức vận chuyển">
                                         <Tag color="blue">{orderData.shipping_method.toUpperCase()}</Tag>
                                     </Descriptions.Item>
                                 </Descriptions>
                             </Card>
 
                             {/* Bảng sản phẩm */}
-                            <Card title="Order Items">
+                            <Card title="Các mặt hàng trong đơn">
                                 <Table
                                     columns={productColumns}
                                     dataSource={orderData.items.map(item => ({ ...item, key: item.id }))}
                                     pagination={false}
                                     summary={() => (
                                         <Table.Summary>
-                                            <Table.Summary.Row>
-                                                <Table.Summary.Cell index={0} colSpan={5}>
-                                                    <Text strong>Total</Text>
+                                            <Table.Summary.Row style={{ backgroundColor: '#fafafa' }}>
+                                                <Table.Summary.Cell index={0} colSpan={3} align="right">
+                                                    <Text strong>Tổng cộng</Text>
                                                 </Table.Summary.Cell>
-                                                <Table.Summary.Cell index={1}>
-                                                    <Text strong type="danger">
+                                                <Table.Summary.Cell index={1} align="left">
+                                                    <Text strong type="danger" style={{ fontSize: '16px' }}>
                                                         {formatCurrency(orderData.total_amount)}
                                                     </Text>
                                                 </Table.Summary.Cell>
@@ -352,7 +380,7 @@ const PaymentPage: React.FC = () => {
 
                     {/* Right Column - Payment Methods */}
                     <Col xs={24} lg={10}>
-                        <Card title="Payment Method" className="sticky top-4">
+                        <Card title="Phương thức thanh toán" className="sticky top-4">
                             <Form
                                 form={form}
                                 layout="vertical"
@@ -360,76 +388,67 @@ const PaymentPage: React.FC = () => {
                                 initialValues={{
                                     paymentMethod: "credit"
                                 }}
+                                className="space-y-6"
                             >
                                 {/* Payment Method Selection */}
                                 <div className="mb-6">
                                     <Title level={5} className="mb-4">
-                                        💳 Select Payment Method
+                                        💳 Chọn phương thức thanh toán
                                     </Title>
+<Form.Item
+    name="paymentMethod" className="w-full">
+    <Radio.Group
+        onChange={(e) => setPaymentMethod(e.target.value)}
+        className="w-full"
+    >
+        <Space direction="vertical" className="w-full" size="middle">
+            <Radio value="credit" className="w-full">
+                <div className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg w-full hover:border-blue-400 transition-colors">
+                    <CreditCardOutlined className="text-blue-500 text-lg" />
+                    <div className="flex-1">
+                        <Text strong>Thẻ tín dụng/Thẻ ghi nợ</Text>
+                        <br />
+                        <Text type="secondary" className="text-sm">Thanh toán bằng Visa, Mastercard hoặc American Express</Text>
+                    </div>
+                </div>
+            </Radio>
 
-                                    <Form.Item name="paymentMethod" className="w-full">
-                                        <Radio.Group
-                                            onChange={(e) => setPaymentMethod(e.target.value)}
-                                            className="w-full"
-                                        >
-                                            <Space direction="vertical" className="w-full">
-                                                <Radio value="credit" className="w-full">
-                                                    <div className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg w-full">
-                                                        <CreditCardOutlined className="text-blue-500 text-lg" />
-                                                        <div>
-                                                            <Text strong>Credit/Debit Card</Text>
-                                                            <br />
-                                                            <Text type="secondary">Pay with Visa, Mastercard, or American Express</Text>
-                                                        </div>
-                                                    </div>
-                                                </Radio>
+            <Radio value="bank" className="w-full">
+                <div className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg w-full hover:border-green-400 transition-colors">
+                    <BankOutlined className="text-green-500 text-lg" />
+                    <div className="flex-1">
+                        <Text strong>Chuyển khoản ngân hàng</Text>
+                        <br />
+                        <Text type="secondary" className="text-sm">Chuyển tiền qua internet banking</Text>
+                    </div>
+                </div>
+            </Radio>
 
-                                                <Radio value="bank" className="w-full">
-                                                    <div className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg w-full">
-                                                        <BankOutlined className="text-green-500 text-lg" />
-                                                        <div>
-                                                            <Text strong>Bank Transfer</Text>
-                                                            <br />
-                                                            <Text type="secondary">Transfer money via online banking</Text>
-                                                        </div>
-                                                    </div>
-                                                </Radio>
 
-                                                <Radio value="paypal" className="w-full">
-                                                    <div className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg w-full">
-                                                        <PayCircleOutlined className="text-blue-500 text-lg" />
-                                                        <div>
-                                                            <Text strong>PayPal</Text>
-                                                            <br />
-                                                            <Text type="secondary">Pay securely with your PayPal account</Text>
-                                                        </div>
-                                                    </div>
-                                                </Radio>
-
-                                                <Radio value="cod" className="w-full">
-                                                    <div className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg w-full">
-                                                        <SafetyCertificateOutlined className="text-green-500 text-lg" />
-                                                        <div>
-                                                            <Text strong>Cash on Delivery</Text>
-                                                            <br />
-                                                            <Text type="secondary">Pay when you receive your order</Text>
-                                                        </div>
-                                                    </div>
-                                                </Radio>
-                                            </Space>
-                                        </Radio.Group>
-                                    </Form.Item>
+            <Radio value="cod" className="w-full">
+                <div className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg w-full hover:border-green-400 transition-colors">
+                    <SafetyCertificateOutlined className="text-green-500 text-lg" />
+                    <div className="flex-1">
+                        <Text strong>Thanh toán khi nhận hàng</Text>
+                        <br />
+                        <Text type="secondary" className="text-sm">Thanh toán khi bạn nhận được đơn hàng</Text>
+                    </div>
+                </div>
+            </Radio>
+        </Space>
+    </Radio.Group>
+</Form.Item>
                                 </div>
 
                                 {/* Credit Card Form */}
                                 {paymentMethod === "credit" && (
                                     <div className="mb-6">
                                         <Title level={5} className="mb-4">
-                                            🔒 Card Information
+                                            🔒 Thông tin thẻ
                                         </Title>
 
                                         <Alert
-                                            message="Your payment information is secure and encrypted"
+                                            message="Thông tin thanh toán của bạn được bảo mật và mã hóa"
                                             type="info"
                                             icon={<LockOutlined />}
                                             className="mb-4"
@@ -437,21 +456,21 @@ const PaymentPage: React.FC = () => {
 
                                         <Form.Item
                                             name="cardHolder"
-                                            label="Cardholder Name"
-                                            rules={[{ required: true, message: 'Cardholder name is required' }]}
+                                            label="Tên chủ thẻ"
+                                            rules={[{ required: true, message: 'Tên chủ thẻ là bắt buộc' }]}
                                         >
                                             <Input
-                                                placeholder="Full name as shown on card"
+                                                placeholder="Họ tên đầy đủ như trên thẻ"
                                                 size="large"
                                             />
                                         </Form.Item>
 
                                         <Form.Item
                                             name="cardNumber"
-                                            label="Card Number"
+                                            label="Số thẻ"
                                             rules={[
-                                                { required: true, message: 'Card number is required' },
-                                                { pattern: /^\d{16}$/, message: 'Card number must be 16 digits' }
+                                                { required: true, message: 'Số thẻ là bắt buộc' },
+                                                { pattern: /^\d{16}$/, message: 'Số thẻ phải có 16 chữ số' }
                                             ]}
                                         >
                                             <Input
@@ -461,14 +480,14 @@ const PaymentPage: React.FC = () => {
                                             />
                                         </Form.Item>
 
-                                        <Row gutter={12}>
+                                        <Row gutter={16}>
                                             <Col span={12}>
                                                 <Form.Item
                                                     name="expiryDate"
-                                                    label="Expiry Date"
+                                                    label="Ngày hết hạn"
                                                     rules={[
-                                                        { required: true, message: 'Expiry date is required' },
-                                                        { pattern: /^(0[1-9]|1[0-2])\/\d{2}$/, message: 'Format: MM/YY' }
+                                                        { required: true, message: 'Ngày hết hạn là bắt buộc' },
+                                                        { pattern: /^(0[1-9]|1[0-2])\/\d{2}$/, message: 'Định dạng: MM/YY' }
                                                     ]}
                                                 >
                                                     <Input
@@ -481,10 +500,10 @@ const PaymentPage: React.FC = () => {
                                             <Col span={12}>
                                                 <Form.Item
                                                     name="cvv"
-                                                    label="CVV"
+                                                    label="Mã CVV"
                                                     rules={[
-                                                        { required: true, message: 'CVV is required' },
-                                                        { pattern: /^\d{3,4}$/, message: 'CVV must be 3 or 4 digits' }
+                                                        { required: true, message: 'Mã CVV là bắt buộc' },
+                                                        { pattern: /^\d{3,4}$/, message: 'Mã CVV phải có 3 hoặc 4 chữ số' }
                                                     ]}
                                                 >
                                                     <Input
@@ -503,32 +522,32 @@ const PaymentPage: React.FC = () => {
                                 {paymentMethod === "bank" && (
                                     <div className="mb-6">
                                         <Title level={5} className="mb-4">
-                                            🏦 Bank Transfer Information
+                                            🏦 Thông tin chuyển khoản ngân hàng
                                         </Title>
 
                                         <Alert
-                                            message="Please transfer the exact amount and include your order number in the transfer description"
+                                            message="Vui lòng chuyển đúng số tiền và ghi rõ mã đơn hàng trong nội dung chuyển khoản"
                                             type="warning"
                                             className="mb-4"
                                         />
 
                                         {/* Company Bank Account Information */}
                                         <Card
-                                            title="Transfer to Our Company Account"
+                                            title="Chuyển đến tài khoản công ty chúng tôi"
                                             className="mb-4"
                                             extra={
                                                 <Button
                                                     icon={<QrcodeOutlined />}
                                                     size="small"
-                                                    onClick={() => toast.info("QR Code would be displayed here")}
+                                                    onClick={() => toast.info("Mã QR sẽ được hiển thị ở đây")}
                                                 >
-                                                    Show QR
+                                                    Hiển thị QR
                                                 </Button>
                                             }
                                         >
                                             <div className="space-y-3">
                                                 <div className="flex justify-between items-center">
-                                                    <Text strong>Bank:</Text>
+                                                    <Text strong>Ngân hàng:</Text>
                                                     <Select
                                                         value={selectedBank}
                                                         onChange={setSelectedBank}
@@ -544,7 +563,7 @@ const PaymentPage: React.FC = () => {
                                                 </div>
 
                                                 <div className="flex justify-between items-center">
-                                                    <Text strong>Account Number:</Text>
+                                                    <Text strong>Số tài khoản:</Text>
                                                     <div className="flex items-center gap-2">
                                                         <Text strong className="text-lg">
                                                             {getSelectedBankAccount().accountNumber}
@@ -559,7 +578,7 @@ const PaymentPage: React.FC = () => {
                                                 </div>
 
                                                 <div className="flex justify-between items-center">
-                                                    <Text strong>Account Name:</Text>
+                                                    <Text strong>Tên tài khoản:</Text>
                                                     <div className="flex items-center gap-2">
                                                         <Text>{getSelectedBankAccount().accountName}</Text>
                                                         <Button
@@ -572,12 +591,12 @@ const PaymentPage: React.FC = () => {
                                                 </div>
 
                                                 <div className="flex justify-between">
-                                                    <Text strong>Branch:</Text>
+                                                    <Text strong>Chi nhánh:</Text>
                                                     <Text>{getSelectedBankAccount().branch}</Text>
                                                 </div>
 
                                                 <div className="flex justify-between text-lg font-bold">
-                                                    <Text strong>Amount:</Text>
+                                                    <Text strong>Số tiền:</Text>
                                                     <Text type="danger">
                                                         {formatCurrency(orderData.total_amount)} ({formatCurrencyVND(orderData.total_amount)})
                                                     </Text>
@@ -587,37 +606,37 @@ const PaymentPage: React.FC = () => {
 
                                         {/* Transfer Details Form */}
                                         <Title level={5} className="mb-4">
-                                            Your Transfer Details
+                                            Chi tiết chuyển khoản của bạn
                                         </Title>
 
                                         <Form.Item
                                             name="senderName"
-                                            label="Sender Name (as in bank account)"
-                                            rules={[{ required: true, message: 'Sender name is required' }]}
+                                            label="Tên người gửi (như trong tài khoản ngân hàng)"
+                                            rules={[{ required: true, message: 'Tên người gửi là bắt buộc' }]}
                                         >
                                             <Input
-                                                placeholder="Your full name as shown in bank account"
+                                                placeholder="Họ tên đầy đủ như hiển thị trong tài khoản ngân hàng"
                                                 size="large"
                                             />
                                         </Form.Item>
 
                                         <Form.Item
                                             name="senderAccount"
-                                            label="Your Account Number"
-                                            rules={[{ required: true, message: 'Your account number is required' }]}
+                                            label="Số tài khoản của bạn"
+                                            rules={[{ required: true, message: 'Số tài khoản của bạn là bắt buộc' }]}
                                         >
                                             <Input
-                                                placeholder="Your bank account number"
+                                                placeholder="Số tài khoản ngân hàng của bạn"
                                                 size="large"
                                             />
                                         </Form.Item>
 
-                                        <Row gutter={12}>
+                                        <Row gutter={16}>
                                             <Col span={12}>
                                                 <Form.Item
                                                     name="transferDate"
-                                                    label="Transfer Date"
-                                                    rules={[{ required: true, message: 'Transfer date is required' }]}
+                                                    label="Ngày chuyển khoản"
+                                                    rules={[{ required: true, message: 'Ngày chuyển khoản là bắt buộc' }]}
                                                 >
                                                     <Input
                                                         type="date"
@@ -628,11 +647,11 @@ const PaymentPage: React.FC = () => {
                                             <Col span={12}>
                                                 <Form.Item
                                                     name="transactionCode"
-                                                    label="Transaction Reference"
-                                                    rules={[{ required: true, message: 'Transaction reference is required' }]}
+                                                    label="Mã tham chiếu giao dịch"
+                                                    rules={[{ required: true, message: 'Mã tham chiếu giao dịch là bắt buộc' }]}
                                                 >
                                                     <Input
-                                                        placeholder="Bank transfer reference code"
+                                                        placeholder="Mã tham chiếu chuyển khoản ngân hàng"
                                                         size="large"
                                                     />
                                                 </Form.Item>
@@ -641,37 +660,20 @@ const PaymentPage: React.FC = () => {
                                     </div>
                                 )}
 
-                                {/* PayPal Info */}
-                                {paymentMethod === "paypal" && (
-                                    <div className="mb-6">
-                                        <Alert
-                                            message="You will be redirected to PayPal to complete your payment"
-                                            type="info"
-                                            className="mb-4"
-                                        />
-                                        <div className="text-center p-6 border-2 border-dashed border-gray-300 rounded-lg">
-                                            <PayCircleOutlined className="text-4xl text-blue-500 mb-2" />
-                                            <Title level={4}>PayPal</Title>
-                                            <Text type="secondary">
-                                                Click "Place Order" to be redirected to PayPal's secure payment page
-                                            </Text>
-                                        </div>
-                                    </div>
-                                )}
 
                                 {/* COD Info */}
                                 {paymentMethod === "cod" && (
                                     <div className="mb-6">
                                         <Alert
-                                            message="Pay with cash when your order is delivered"
+                                            message="Thanh toán bằng tiền mặt khi đơn hàng được giao"
                                             type="warning"
                                             className="mb-4"
                                         />
                                         <div className="text-center p-6 border-2 border-dashed border-gray-300 rounded-lg">
                                             <SafetyCertificateOutlined className="text-4xl text-green-500 mb-2" />
-                                            <Title level={4}>Cash on Delivery</Title>
+                                            <Title level={4}>Thanh toán khi nhận hàng</Title>
                                             <Text type="secondary">
-                                                You'll pay the delivery agent when you receive your order
+                                                Bạn sẽ thanh toán cho nhân viên giao hàng khi nhận được đơn hàng
                                             </Text>
                                         </div>
                                     </div>
@@ -688,8 +690,8 @@ const PaymentPage: React.FC = () => {
 
                                 >
                                     {paymentMethod === "bank"
-                                        ? `Confirm Transfer - ${formatCurrency(orderData.total_amount)}`
-                                        : `Pay Now - ${formatCurrency(orderData.total_amount)}`
+                                        ? `Xác nhận chuyển khoản - ${formatCurrency(orderData.total_amount)}`
+                                        : `Thanh toán ngay - ${formatCurrency(orderData.total_amount)}`
                                     }
                                 </Button>
 
@@ -697,7 +699,7 @@ const PaymentPage: React.FC = () => {
                                 <div className="text-center p-4 bg-gray-50 rounded-lg mt-4">
                                     <LockOutlined className="text-green-500 text-lg mr-2" />
                                     <Text type="secondary">
-                                        Your payment information is secure and encrypted
+                                        Thông tin thanh toán của bạn được bảo mật và mã hóa
                                     </Text>
                                 </div>
                             </Form>

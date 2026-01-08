@@ -65,9 +65,7 @@ interface orderSummary {
 };
 
 const shippingMethods = [
-  { id: "standard", name: "Vận chuyển tiêu chuẩn", price: 50000, days: "5-7 ngày làm việc" },
-  { id: "express", name: "Vận chuyển nhanh", price: 150000, days: "2-3 ngày làm việc" },
-  { id: "overnight", name: "Vận chuyển qua đêm", price: 250000, days: "Ngày làm việc tiếp theo" }
+  { id: "free_delivery", name: "Giao hàng tận nơi", price: 0, days: "3-5 ngày làm việc" }
 ];
 
 const paymentMethods: PaymentMethod[] = [
@@ -86,7 +84,7 @@ const CheckoutPage: React.FC = () => {
     discount: 0,
     total: 0
   });
-  const [selectedShipping, setSelectedShipping] = useState<string>("standard");
+  const [selectedShipping, setSelectedShipping] = useState<string>("free_delivery");
   const [provinces] = useState<Province[]>(vietnamProvinces);
   const [districts, setDistricts] = useState<District[]>([]);
   const [selectedProvince, setSelectedProvince] = useState<string>("");
@@ -184,7 +182,7 @@ const CheckoutPage: React.FC = () => {
       shipping_method: values.shippingMethod,
       country: values.country,
       city: selectedProvince, // Gửi tên tỉnh/thành phố đã chọn vào trường city
-      zipcode: "", // Không sử dụng mã bưu điện nữa
+      zipcode: values.zipcode, // Sử dụng mã bưu điện từ form
       province: selectedProvince,
       ward: selectedDistrict,
       specific_address: values.address,
@@ -241,9 +239,10 @@ const CheckoutPage: React.FC = () => {
                 onFinish={handleSubmit}
                 initialValues={{
                   country: "VN",
-                  shippingMethod: "standard",
+                  shippingMethod: "free_delivery",
                   province: "",
-                  district: ""
+                  district: "",
+                  zipcode: ""
                 }}
               >
                 {/* Contact Information */}
@@ -389,11 +388,11 @@ const CheckoutPage: React.FC = () => {
                     </Col>
                     <Col span={8}>
                       <Form.Item
-                        name="ward"
-                        label="Phường/Xã"
-                        rules={[{ required: true, message: 'Phường/Xã là bắt buộc' }]}
+                        name="zipcode"
+                        label="Mã bưu điện"
+                        rules={[{ required: true, message: 'Mã bưu điện là bắt buộc' }]}
                       >
-                        <Input placeholder="Phường/Xã" size="large" className="w-full" />
+                        <Input placeholder="Mã bưu điện" size="large" className="w-full" />
                       </Form.Item>
                     </Col>
                   </Row>
@@ -431,7 +430,7 @@ const CheckoutPage: React.FC = () => {
                                     <Text type="secondary" className="text-sm truncate">{method.days}</Text>
                                   </div>
                                   <div className="text-right ml-4 flex-shrink-0">
-                                    <Text strong className="text-base">{formatCurrency(method.price)}</Text>
+                                    <Text strong className="text-green-500 text-base">Miễn phí</Text>
                                   </div>
                                 </div>
                               </Card>
@@ -536,19 +535,6 @@ const CheckoutPage: React.FC = () => {
                 ))}
               </div>
 
-              <Divider />
-
-              {/* Shipping Preview */}
-              <div className="mb-4">
-                <Text strong className="block mb-2">Tóm tắt đơn hàng</Text>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <Text strong>{getSelectedShipping()?.name}</Text>
-                  <br />
-                  <Text type="secondary">{getSelectedShipping()?.days}</Text>
-                  <br />
-                  <Text strong>{formatCurrency(getSelectedShipping()?.price || 0)}</Text>
-                </div>
-              </div>
 
               {/* Price Breakdown */}
               <Space direction="vertical" className="w-full">
@@ -558,7 +544,7 @@ const CheckoutPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <Text>Phí Vận chuyển</Text>
-                  <Text>{formatCurrency(getSelectedShipping()?.price || 0)}</Text>
+                  <Text className="text-green-500">Miễn phí</Text>
                 </div>
                 {orderSummary.discount < 0 && (
                   <div className="flex justify-between text-green-500">

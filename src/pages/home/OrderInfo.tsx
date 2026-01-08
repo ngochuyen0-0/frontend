@@ -99,6 +99,7 @@ const OrderDetailPage: React.FC = () => {
                         size: e?.size || "",
                         color: e?.color || "",
                         price: e?.price || 0,
+                        product_image: e.product.images?.[0]?.image_url || "", // Lấy URL hình ảnh đầu tiên của sản phẩm
                     }
                     itemsFecth.push(orderItemFecth)
                 })
@@ -117,24 +118,24 @@ const OrderDetailPage: React.FC = () => {
 
     const getStatusColor = (status: string) => {
         const statusColors: { [key: string]: string } = {
-            'Unpaid': 'red',
-            'Paid': 'blue',
-            'Processing': 'orange',
-            'Shipped': 'purple',
-            'Delivered': 'green',
-            'Cancelled': 'gray',
-            'Refunded': 'volcano'
+           'Unpaid': 'red',
+           'Paid': 'blue',
+           'Processing': 'orange',
+           'Shipped': 'purple',
+           'Delivered': 'green',
+           'Cancelled': 'gray',
+           'Refunded': 'volcano'
         };
         return statusColors[status] || 'default';
     };
 
     const getStatusStep = (status: string) => {
         const statusSteps: { [key: string]: number } = {
-            'Unpaid': 0,
-            'Paid': 1,
-            'Processing': 2,
-            'Shipped': 3,
-            'Delivered': 4
+           'Unpaid': 0,
+           'Paid': 1,
+           'Processing': 2,
+           'Shipped': 3,
+           'Delivered': 4
         };
         return statusSteps[status] || 0;
     };
@@ -156,14 +157,27 @@ const OrderDetailPage: React.FC = () => {
     };
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'VND'
         }).format(amount);
     };
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleString('vi-VN');
+    };
+
+    const translateStatus = (status: string) => {
+        const statusTranslations: { [key: string]: string } = {
+            'Unpaid': 'Chưa thanh toán',
+            'Paid': 'Đã thanh toán',
+            'Processing': 'Đang xử lý',
+            'Shipped': 'Đã giao hàng',
+            'Delivered': 'Đã nhận hàng',
+            'Cancelled': 'Đã hủy',
+            'Refunded': 'Đã hoàn tiền'
+        };
+        return statusTranslations[status] || status;
     };
 
     const handlePayNow = () => {
@@ -186,9 +200,9 @@ const OrderDetailPage: React.FC = () => {
     const getShippingCost = () => {
         if (!order) return 0;
         const shippingMethods: { [key: string]: number } = {
-            'standard': 5,
-            'express': 15,
-            'overnight': 25
+            'standard': 0,
+            'express': 0,
+            'overnight': 0
         };
         return shippingMethods[order.shipping_method] || 0;
     };
@@ -196,7 +210,7 @@ const OrderDetailPage: React.FC = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div>Loading...</div>
+                <div>Đang tải...</div>
             </div>
         );
     }
@@ -205,8 +219,8 @@ const OrderDetailPage: React.FC = () => {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <Alert
-                    message="Order Not Found"
-                    description="The order you are looking for does not exist."
+                    message="Không tìm thấy đơn hàng"
+                    description="Đơn hàng bạn đang tìm kiếm không tồn tại."
                     type="error"
                     showIcon
                 />
@@ -216,7 +230,8 @@ const OrderDetailPage: React.FC = () => {
 
     const subtotal = calculateSubtotal();
     const shippingCost = getShippingCost();
-    const tax = subtotal * 0.08; // 8% tax
+    const tax = 0; // Không tính thuế
+    // Phí vận chuyển miễn phí cho tất cả các phương thức
     const total = subtotal + shippingCost + tax;
 
     return (
@@ -229,17 +244,17 @@ const OrderDetailPage: React.FC = () => {
                         onClick={() => navigate('/orders')}
                         className="mb-4"
                     >
-                        Back to Orders
+                        Quay lại đơn hàng
                     </Button>
 
                     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                         <div>
-                            <Title level={2} className="mb-2">Order Details</Title>
+                            <Title level={2} className="mb-2">Chi tiết đơn hàng</Title>
                             <Space>
-                                <Text strong>Order ID:</Text>
+                                <Text strong>Mã đơn hàng:</Text>
                                 <Text code>{order.id}</Text>
                                 <Tag color={getStatusColor(order.status)} className="text-sm">
-                                    {order.status}
+                                    {translateStatus(order.status)}
                                 </Tag>
                             </Space>
                         </div>
@@ -252,7 +267,7 @@ const OrderDetailPage: React.FC = () => {
                                     icon={<DollarOutlined />}
                                     onClick={handlePayNow}
                                 >
-                                    Pay Now
+                                    Thanh toán ngay
                                 </Button>
                             )}
                             {(order.status === 'Unpaid' || order.status === 'Processing') && (
@@ -261,14 +276,14 @@ const OrderDetailPage: React.FC = () => {
                                     size="large"
                                     onClick={() => setCancelModalVisible(true)}
                                 >
-                                    Cancel Order
+                                    Hủy đơn hàng
                                 </Button>
                             )}
                             <Button
                                 icon={<FileTextOutlined />}
                                 size="large"
                             >
-                                Invoice
+                                Hóa đơn
                             </Button>
                         </Space>
                     </div>
@@ -278,32 +293,32 @@ const OrderDetailPage: React.FC = () => {
                     {/* Left Column - Order Progress & Items */}
                     <Col xs={24} lg={16}>
                         {/* Order Progress */}
-                        <Card title="Order Status" className="mb-6">
+                        <Card title="Trạng thái đơn hàng" className="mb-6 shadow-sm">
                             <Steps
                                 current={getStatusStep(order.status)}
                                 status={order.status === 'Cancelled' ? 'error' : 'process'}
                             >
                                 <Step
-                                    title="Processing"
-                                    description="Preparing your order"
+                                    title="Đang xử lý"
+                                    description="Chuẩn bị đơn hàng của bạn"
                                     icon={<ClockCircleOutlined />}
                                 />
                                 <Step
-                                    title="Shipped"
-                                    description="Order is on the way"
+                                    title="Đã giao hàng"
+                                    description="Đơn hàng đang trên đường vận chuyển"
                                     icon={<TruckOutlined />}
                                 />
                                 <Step
-                                    title="Delivered"
-                                    description="Order has been delivered"
+                                    title="Đã nhận hàng"
+                                    description="Đơn hàng đã được giao thành công"
                                     icon={<CheckCircleOutlined />}
                                 />
                             </Steps>
 
                             {order.status === 'Unpaid' && (
                                 <Alert
-                                    message="Payment Required"
-                                    description="Please complete your payment to process the order."
+                                    message="Yêu cầu thanh toán"
+                                    description="Vui lòng hoàn tất thanh toán để xử lý đơn hàng."
                                     type="warning"
                                     showIcon
                                     className="mt-4"
@@ -312,23 +327,40 @@ const OrderDetailPage: React.FC = () => {
                         </Card>
 
                         {/* Order Items */}
-                        <Card title="Order Items">
+                        <Card title="Sản phẩm trong đơn hàng" className="shadow-sm">
                             <List
                                 dataSource={order.items}
                                 renderItem={(item) => (
-                                    <List.Item>
-                                        <div className="flex w-full">
-                                            <div className="flex-1 ml-4">
-                                                <Text strong className="text-lg block mb-1">
+                                    <List.Item className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200">
+                                        <div className="flex items-start gap-4 w-full">
+                                            {item.product_image ? (
+                                                <div className="flex-shrink-0">
+                                                    <Image
+                                                        src={item.product_image}
+                                                        alt={item.product_name}
+                                                        width={100}
+                                                        height={100}
+                                                        className="rounded object-cover border border-gray-200 shadow-sm"
+                                                        fallback="/src/assets/react.svg"
+                                                        preview={false}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="w-24 h-24 rounded bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0">
+                                                    <span className="text-gray-400 text-xs text-center">Chưa có ảnh</span>
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <Text strong className="text-base block mb-1 truncate">
                                                     {item.product_name}
                                                 </Text>
-                                                <Space size="small" className="mb-2">
-                                                    {item.size && <Tag>Size: {item.size}</Tag>}
-                                                    {item.color && <Tag color={item.color.toLowerCase()}>Color: {item.color}</Tag>}
-                                                </Space>
+                                                <div className="flex flex-wrap gap-2 mb-2">
+                                                    {item.size && <Tag className="text-xs px-2 py-0.5">Kích thước: {item.size}</Tag>}
+                                                    {item.color && <Tag color={['pink','red','yellow','orange','cyan','green','blue','purple','geekblue','magenta','volcano','gold','lime'].includes(item.color.toLowerCase()) ? item.color.toLowerCase() : 'default'} className="text-xs px-2 py-0.5">Màu sắc: {item.color}</Tag>}
+                                                </div>
                                                 <div className="flex justify-between items-center">
-                                                    <Text type="secondary">Quantity: {item.quantity}</Text>
-                                                    <Text strong className="text-lg">
+                                                    <Text type="secondary" className="text-sm">Số lượng: {item.quantity}</Text>
+                                                    <Text strong className="text-lg text-red-500">
                                                         {formatCurrency(item.price * item.quantity)}
                                                     </Text>
                                                 </div>
@@ -341,23 +373,19 @@ const OrderDetailPage: React.FC = () => {
                             <Divider />
 
                             {/* Order Summary */}
-                            <div className="space-y-3">
-                                <div className="flex justify-between">
-                                    <Text>Subtotal:</Text>
+                            <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+                                <div className="flex justify-between py-2">
+                                    <Text>Tạm tính:</Text>
                                     <Text>{formatCurrency(subtotal)}</Text>
                                 </div>
-                                <div className="flex justify-between">
-                                    <Text>Shipping:</Text>
-                                    <Text>{formatCurrency(shippingCost)}</Text>
+                                <div className="flex justify-between py-2">
+                                    <Text>Phí vận chuyển:</Text>
+                                    <Text className="text-green-500 font-medium">{shippingCost > 0 ? formatCurrency(shippingCost) : 'Miễn phí'}</Text>
                                 </div>
-                                <div className="flex justify-between">
-                                    <Text>Tax:</Text>
-                                    <Text>{formatCurrency(tax)}</Text>
-                                </div>
-                                <Divider />
-                                <div className="flex justify-between text-lg font-bold">
-                                    <Text>Total:</Text>
-                                    <Text type="danger">{formatCurrency(total)}</Text>
+                                <Divider className="my-1" />
+                                <div className="flex justify-between text-lg font-bold pt-2">
+                                    <Text>Tổng thanh toán:</Text>
+                                    <Text type="danger" className="text-xl">{formatCurrency(total)}</Text>
                                 </div>
                             </div>
                         </Card>
@@ -366,22 +394,22 @@ const OrderDetailPage: React.FC = () => {
                     {/* Right Column - Order Information */}
                     <Col xs={24} lg={8}>
                         {/* Customer Information */}
-                        <Card title="Customer Information" className="mb-6">
-                            <Descriptions column={1} size="small">
-                                <Descriptions.Item label={<><PhoneOutlined /> Phone</>}>
+                        <Card title="Thông tin khách hàng" className="mb-6 shadow-sm">
+                            <Descriptions column={1} size="small" className="py-2">
+                                <Descriptions.Item label={<><PhoneOutlined /> Điện thoại</>}>
                                     {order.phone}
                                 </Descriptions.Item>
                                 <Descriptions.Item label={<><MailOutlined /> Email</>}>
                                     {order.email}
                                 </Descriptions.Item>
-                                <Descriptions.Item label={<><UserOutlined /> Full Name</>}>
+                                <Descriptions.Item label={<><UserOutlined /> Họ tên</>}>
                                     {order.fullname}
                                 </Descriptions.Item>
                             </Descriptions>
                         </Card>
 
                         {/* Shipping Address */}
-                        <Card title="Shipping Address" className="mb-6">
+                        <Card title="Địa chỉ giao hàng" className="mb-6 shadow-sm">
                             <Space direction="vertical">
                                 <Text strong>{order.fullname}</Text>
                                 <Text>{order.specific_address}</Text>
@@ -392,43 +420,43 @@ const OrderDetailPage: React.FC = () => {
                                 <div className="flex items-center gap-2 mt-2">
                                     <EnvironmentOutlined className="text-gray-400" />
                                     <Text type="secondary">
-                                        Shipping: {order.shipping_method.toUpperCase()}
+                                        Vận chuyển: {order.shipping_method.toUpperCase()} - Miễn phí
                                     </Text>
                                 </div>
                             </Space>
                         </Card>
 
                         {/* Payment Information */}
-                        <Card title="Payment Information" className="mb-6">
+                        <Card title="Thông tin thanh toán" className="mb-6 shadow-sm">
                             <Space direction="vertical" className="w-full">
                                 <div className="flex justify-between items-center">
-                                    <Text strong>Method:</Text>
+                                    <Text strong>Phương thức:</Text>
                                     <Tag icon={getPaymentMethodIcon(order.payment_method)}>
                                         {order.payment_method.toUpperCase()}
                                     </Tag>
                                 </div>
                                 <div className="flex justify-between">
-                                    <Text strong>Status:</Text>
+                                    <Text strong>Trạng thái:</Text>
                                     <Badge
                                         status={order.status === 'Unpaid' ? 'error' : 'success'}
-                                        text={order.status}
+                                        text={translateStatus(order.status)}
                                     />
                                 </div>
                                 <div className="flex justify-between">
-                                    <Text strong>Order Date:</Text>
+                                    <Text strong>Ngày đặt hàng:</Text>
                                     <Text>{formatDate(order.created_at)}</Text>
                                 </div>
                             </Space>
                         </Card>
 
                         {/* Order Timeline */}
-                        <Card title="Order Timeline">
+                        <Card title="Lịch sử đơn hàng" className="shadow-sm">
                             <Timeline>
                                 <Timeline.Item
                                     color="green"
                                     dot={<CheckCircleOutlined />}
                                 >
-                                    <Text strong>Order Created</Text>
+                                    <Text strong>Đơn hàng đã tạo</Text>
                                     <br />
                                     <Text type="secondary">{formatDate(order.created_at)}</Text>
                                 </Timeline.Item>
@@ -437,7 +465,7 @@ const OrderDetailPage: React.FC = () => {
                                         color="blue"
                                         dot={<DollarOutlined />}
                                     >
-                                        <Text strong>Payment Completed</Text>
+                                        <Text strong>Thanh toán hoàn tất</Text>
                                         <br />
                                         <Text type="secondary">{formatDate(order.created_at)}</Text>
                                     </Timeline.Item>
@@ -450,12 +478,12 @@ const OrderDetailPage: React.FC = () => {
 
                 {/* Cancel Order Modal */}
                 <Modal
-                    title="Cancel Order"
+                    title="Hủy đơn hàng"
                     open={cancelModalVisible}
                     onCancel={() => setCancelModalVisible(false)}
                     footer={[
                         <Button key="back" onClick={() => setCancelModalVisible(false)}>
-                            Keep Order
+                            Giữ đơn hàng
                         </Button>,
                         <Button
                             key="submit"
@@ -464,13 +492,13 @@ const OrderDetailPage: React.FC = () => {
                             onClick={handleCancelOrder}
                             icon={<CloseCircleOutlined />}
                         >
-                            Confirm Cancellation
+                            Xác nhận hủy
                         </Button>,
                     ]}
                 >
                     <Alert
-                        message="Are you sure you want to cancel this order?"
-                        description="This action cannot be undone. Once cancelled, the order will be permanently removed from your order history."
+                        message="Bạn có chắc chắn muốn hủy đơn hàng này không?"
+                        description="Thao tác này không thể hoàn tác. Sau khi hủy, đơn hàng sẽ bị xóa vĩnh viễn khỏi lịch sử đơn hàng của bạn."
                         type="warning"
                         showIcon
                     />
