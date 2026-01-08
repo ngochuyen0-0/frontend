@@ -15,7 +15,9 @@ import {
     Switch,
     Modal,
     Form,
+    Upload,
 } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import {
     SearchOutlined,
     PlusOutlined,
@@ -41,7 +43,16 @@ const AdminBrands: React.FC = () => {
 
 
     React.useEffect(() => {
-        form.setFieldsValue(editingBrand);
+        if (editingBrand) {
+            form.setFieldsValue({
+                name: editingBrand.name,
+                description: editingBrand.description,
+                logo_url: editingBrand.logo_url,
+                status: editingBrand.status?.toLowerCase()
+            });
+        } else {
+            form.resetFields();
+        }
     }, [editingBrand, form]);
     useEffect(() => {
         const loadBrands = async () => {
@@ -215,7 +226,7 @@ const AdminBrands: React.FC = () => {
         setIsModalVisible(true);
     };
 
-    const handleModalOk = () => {
+    const handleModalOk = async () => {
         // Save brand logic would go here
         form.validateFields()
             .then(async (values) => {
@@ -227,18 +238,64 @@ const AdminBrands: React.FC = () => {
                         "with data:",
                         values
                     );
+                    // Chuyển đổi status từ lowercase sang uppercase để phù hợp với enum backend
+                    const brandData = {
+                        ...values,
+                        status: values.status ? values.status.toUpperCase() : undefined
+                    };
+                    // Loại bỏ trường logo_url nếu không có giá trị để tránh lỗi cập nhật
+                    const updateData = { ...brandData };
+                    if (!updateData.logo_url) {
+                        delete updateData.logo_url;
+                    }
+                    // Không cho phép cập nhật số lượng sản phẩm trực tiếp từ form
+                    if (updateData.products !== undefined) {
+                        delete updateData.products;
+                    }
                     // API call để update brand
-                    const res = await updateBrand(editingBrand.id, values);
-                    console.log("API response from sendVerifyEmail:", res);
+                    const res = await updateBrand(editingBrand.id, updateData);
+                    console.log("API response from updateBrand:", res);
                     if (res) {
+                        // Sau khi cập nhật, tải lại danh sách thương hiệu để cập nhật số lượng sản phẩm
+                        try {
+                            await getBrands({
+                                id: "",
+                                searchKeyword: "",
+                                page: 1,
+                                row: 10,
+                            });
+                        } catch (err) {
+                            console.error("Error reloading brands:", err);
+                        }
                         toast.success("Chỉnh sửa thương hiệu thành công");
                     }
                 } else {
                     console.log("Adding new brand with data:", values);
+                    // Chuyển đổi status từ lowercase sang uppercase để phù hợp với enum backend
+                    const brandData = {
+                        ...values,
+                        status: values.status ? values.status.toUpperCase() : "ACTIVE"
+                    };
+                    // Loại bỏ trường logo_url nếu không có giá trị để tránh lỗi tạo mới
+                    const createData = { ...brandData };
+                    if (!createData.logo_url) {
+                        delete createData.logo_url;
+                    }
                     // API call để thêm brand mới
-                    const res = await createBrand(values);
-                    console.log("API response from sendVerifyEmail:", res);
+                    const res = await createBrand(createData);
+                    console.log("API response from createBrand:", res);
                     if (res) {
+                        // Sau khi tạo mới, tải lại danh sách thương hiệu để cập nhật
+                        try {
+                            await getBrands({
+                                id: "",
+                                searchKeyword: "",
+                                page: 1,
+                                row: 10,
+                            });
+                        } catch (err) {
+                            console.error("Error reloading brands:", err);
+                        }
                         toast.success("Thêm thương hiệu thành công");
                     }
                 }
@@ -246,6 +303,17 @@ const AdminBrands: React.FC = () => {
                 setIsModalVisible(false);
                 setEditingBrand(null);
                 form.resetFields();
+                // Tải lại danh sách thương hiệu sau khi đóng modal để đảm bảo dữ liệu được cập nhật
+                try {
+                    await getBrands({
+                        id: "",
+                        searchKeyword: "",
+                        page: 1,
+                        row: 10,
+                    });
+                } catch (err) {
+                    console.error("Error reloading brands:", err);
+                }
             })
             .catch((errorInfo) => {
                 console.log("Validation failed:", errorInfo);
@@ -410,11 +478,31 @@ const AdminBrands: React.FC = () => {
                     <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item label="Logo" name="logo_url">
-                                <Input placeholder="URL logo" />
+                                <Input placeholder="URL logo hoặc chọn file" />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="Trạng thái">
+                            <Form.Item label="Upload Logo Mới">
+                                <Upload
+                                    name="logo"
+                                    accept="image/*"
+                                    showUploadList={false}
+                                    beforeUpload={(file) => {
+                                        // Xử lý upload file ở đây
+                                        const reader = new FileReader();
+                                        reader.onload = (e) => {
+                                            form.setFieldsValue({ logo_url: e.target?.result as string });
+                                        };
+                                        reader.readAsDataURL(file);
+                                        return false; // Prevent upload
+                                    }}
+                                >
+                                    <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
+                                </Upload>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="Trạng thái" name="status">
                                 <Select defaultValue="active">
                                     <Option value="active">Hoạt động</Option>
                                     <Option value="draft">Không hoạt động</Option>
