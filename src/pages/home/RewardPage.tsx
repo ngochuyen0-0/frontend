@@ -83,7 +83,9 @@ const PointsAndVouchersPage: React.FC = () => {
   useEffect(() => {
     getInfo().then(res => {
       setUserInfo(res);
-      setPoint(res.loyalty_points?.find(e => e.source == "daily_login")?.points || 0)
+      // Calculate total points from all sources instead of just daily_login
+      const totalPoints = res.loyalty_points?.reduce((sum, point) => sum + (point.points || 0), 0) || 0;
+      setPoint(totalPoints);
     }).catch(() => { });
     getWeeklyTaken().then(res => setPointHistory(res)).catch(() => { });
   }, [])

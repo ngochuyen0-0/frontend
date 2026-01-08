@@ -143,7 +143,12 @@ const Header: React.FC = () => {
                         <div className="flex items-center gap-5">
                             <div>Tiếng Việt</div>
                             <div>VND</div>
-                            <div>Theo dõi đơn hàng</div>
+                            <div
+                              className="cursor-pointer hover:text-orange-500 transition-colors"
+                              onClick={() => navigate('/my-profile')}
+                            >
+                              Theo dõi đơn hàng
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -229,7 +234,7 @@ const Header: React.FC = () => {
                             />
                         </Badge>}
 
-                        <Badge count={3} size="small">
+                        <Badge count={JSON.parse(localStorage.getItem('wishlist') || '[]').length} size="small">
                             <HeartOutlined
                                 style={{ fontSize: "24px" }}
                                 onClick={() => navigate("/wishlist")}

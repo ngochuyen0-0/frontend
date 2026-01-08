@@ -1,5 +1,5 @@
 import Carousel from "../../components/carousel/Carousel";
-import { Carousel as AntCarousel } from "antd";
+import { Carousel as AntCarousel, Button } from "antd";
 import BrandCard from "../../components/card/BrandCard";
 import ProductCard from "../../components/card/ProductCard";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Product } from "../../types/product";
 import { getProducts } from "../../services/productService";
 import { useBrandStore } from "../../store/useBrandStore";
+import { ShoppingOutlined, UserOutlined } from "@ant-design/icons";
 
 const HomePage = () => {
     const navigate = useNavigate();
@@ -51,6 +52,28 @@ const HomePage = () => {
                 {/* Carousel Section with Modern Design */}
                 <div className="relative rounded-2xl overflow-hidden shadow-xl mb-12 transition-all duration-300 hover:shadow-2xl">
                     <Carousel slides={slides} autoplay />
+                </div>
+
+                {/* Order Tracking Section */}
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-4">Theo dõi đơn hàng của bạn</h2>
+                    <p className="text-gray-600 mb-6">Nhập mã đơn hàng để kiểm tra trạng thái đơn hàng của bạn</p>
+                    <div className="flex justify-center gap-4">
+                        <Button
+                            type="primary"
+                            size="large"
+                            className="bg-orange-500 border-orange-500 hover:bg-orange-600 hover:border-orange-600"
+                            onClick={() => navigate('/my-profile')}
+                        >
+                            <ShoppingOutlined /> Xem đơn hàng
+                        </Button>
+                        <Button
+                            size="large"
+                            onClick={() => navigate('/my-profile')}
+                        >
+                            <UserOutlined /> Hồ sơ của tôi
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Brands Section with Enhanced Styling */}

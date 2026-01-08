@@ -36,6 +36,8 @@ const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('personal');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [pointHistory, setPointHistory] = useState<DailyRewardHistory>();
+  const [balance, setBalance] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState<OrderHistoryType[]>();
 
@@ -44,13 +46,45 @@ const ProfilePage: React.FC = () => {
     loadOrders();
   }, []);
 
+  // Hàm để làm mới dữ liệu hồ sơ sau khi nhận xu hoặc thay đổi wishlist
+  const refreshProfile = async () => {
+    await loadProfile();
+  };
+
   const loadProfile = async () => {
     setLoading(true);
-    getInfo().then(res=>{
-      setLoading(false)
-      setProfile(res)
-    })
-    getWeeklyTaken().then(res=>setPointHistory(res)).catch(()=>{})
+    try {
+      const profileRes = await getInfo();
+      setProfile(profileRes);
+      
+      // Tính toán số dư xu từ loyalty_points
+      let calculatedBalance = 0;
+      if (profileRes.loyalty_points && Array.isArray(profileRes.loyalty_points)) {
+        calculatedBalance = profileRes.loyalty_points.reduce((sum, point) => sum + (typeof point.points === 'number' ? point.points : 0), 0);
+      }
+      setBalance(calculatedBalance);
+      
+      // Cập nhật số lượng sản phẩm yêu thích từ localStorage
+      const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+      setWishlistCount(wishlist.length);
+    } catch (err) {
+      console.error('Error loading profile:', err);
+    }
+    
+    try {
+      const weeklyRes = await getWeeklyTaken();
+      setPointHistory(weeklyRes);
+      
+      // Nếu điểm từ weeklyRes có giá trị, cập nhật lại balance
+      if (weeklyRes.history) {
+        const weeklyBalance = weeklyRes.history.reduce((sum, item) => sum + item.amount, 0);
+        setBalance(prev => Math.max(prev, weeklyBalance));
+      }
+    } catch (err) {
+      console.error('Error loading point history:', err);
+    } finally {
+      setLoading(false);
+    }
   };
  const loadOrders = async () => {
     getOrdersByUser({}).then(res=>{
@@ -118,7 +152,7 @@ const ProfilePage: React.FC = () => {
             <Card className="text-center !shadow-sm">
               <Statistic
                 title="Xu hiện có"
-                value={profile.loyalty_points?.find(p => p.source == "daily_login")?.points || 0}
+                value={balance}
                 prefix={<GiftOutlined className="text-yellow-500" />}
                 suffix="xu"
               />
@@ -128,7 +162,7 @@ const ProfilePage: React.FC = () => {
             <Card className="text-center !shadow-sm">
               <Statistic
                 title="Sản phẩm yêu thích"
-                value={12}
+                value={wishlistCount}
                 prefix={<HeartOutlined className="text-red-500" />}
               />
             </Card>
@@ -176,14 +210,15 @@ const ProfilePage: React.FC = () => {
                 <span className="flex items-center gap-2">
                   <GiftOutlined />
                   Ví xu của tôi
-                  <Tag color="gold">{profile.loyalty_points?.find(p => p.source == "daily_login")?.points || 0} xu</Tag>
+                  <Tag color="gold">{balance} xu</Tag>
                 </span>
               }
               key="coins"
             >
-              <CoinWallet 
-                balance={profile.loyalty_points?.find(p => p.source == "daily_login")?.points || 0}
-                history={pointHistory?.history}
+              <CoinWallet
+                balance={balance}
+                history={pointHistory?.history || []}
+                onRefresh={refreshProfile}
               />
             </TabPane>
 

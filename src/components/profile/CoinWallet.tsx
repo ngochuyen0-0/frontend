@@ -7,18 +7,17 @@ import { useNavigate } from 'react-router-dom';
 
 interface CoinWalletProps {
   balance: number;
-  history: [
-    {
-      id: string,
-      amount: number,
-      reason: string,
-      created_at: string,
-      weekday: string
-    }
-  ];
+  history: {
+    id: string,
+    amount: number,
+    reason: string,
+    created_at: string,
+    weekday: string
+  }[];
+  onRefresh?: () => void; // Callback để làm mới dữ liệu
 }
 
-const CoinWallet: React.FC<CoinWalletProps> = ({ balance, history }) => {
+const CoinWallet: React.FC<CoinWalletProps> = ({ balance, history, onRefresh }) => {
   const nav = useNavigate();
   return (
     <div className="space-y-6">
@@ -32,16 +31,21 @@ const CoinWallet: React.FC<CoinWalletProps> = ({ balance, history }) => {
             suffix="xu"
             valueStyle={{ color: '#ff7300ff', fontSize: '48px' }}
           />
-          <div className="mt-4">
+          <div className="mt-4 flex gap-3 justify-center">
             <Button type="primary" size="large" className="bg-white text-orange-500 border-white" onClick={()=>nav("/reward")}>
               Đổi xu lấy voucher
             </Button>
+            {onRefresh && (
+              <Button size="large" onClick={onRefresh}>
+                Làm mới
+              </Button>
+            )}
           </div>
         </div>
       </Card>
 
       {/* History */}
-      <Card 
+      <Card
         title={
           <span className="flex items-center gap-2">
             <HistoryOutlined />
