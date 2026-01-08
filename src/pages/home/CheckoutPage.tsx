@@ -28,6 +28,7 @@ import { ProductVariantSingle } from "../../types/product";
 import { toast } from "sonner";
 import { createOrder } from "../../services/orderService";
 import { useNavigate } from "react-router-dom";
+import { vietnamProvinces, Province, District } from "../../utils/vietnam-provinces";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -73,6 +74,10 @@ const CheckoutPage: React.FC = () => {
     total: 0
   });
   const [selectedShipping, setSelectedShipping] = useState<string>("standard");
+  const [provinces] = useState<Province[]>(vietnamProvinces);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [selectedProvince, setSelectedProvince] = useState<string>("");
+  const [selectedDistrict, setSelectedDistrict] = useState<string>("");
 
 
   useEffect(() => {
@@ -102,6 +107,24 @@ const CheckoutPage: React.FC = () => {
     fecth();
   }, [])
 
+  const handleProvinceChange = (provinceId: string) => {
+    const selectedProv = provinces.find(prov => prov.id === provinceId);
+    if (selectedProv) {
+      setDistricts(selectedProv.districts);
+      setSelectedProvince(selectedProv.name);
+      // Reset district selection when province changes
+      setSelectedDistrict("");
+      form.setFieldsValue({ district: undefined });
+    }
+  };
+
+  const handleDistrictChange = (districtId: string) => {
+    const selectedDist = districts.find(dist => dist.id === districtId);
+    if (selectedDist) {
+      setSelectedDistrict(selectedDist.name);
+    }
+  };
+
   const handleSubmit = async (values: any) => {
     setLoading(true);
     console.log("Information data:", values);
@@ -112,10 +135,10 @@ const CheckoutPage: React.FC = () => {
       phone: values.phone,
       shipping_method: values.shippingMethod,
       country: values.country,
-      city: values.city,
-      zipcode: values.zipCode,
-      province: values.state,
-      ward: values.state,
+      city: selectedProvince, // Gửi tên tỉnh/thành phố đã chọn vào trường city
+      zipcode: "", // Không sử dụng mã bưu điện nữa
+      province: selectedProvince,
+      ward: selectedDistrict,
       specific_address: values.address,
       items: getCart().map((e) => ({
         variant_id: e.variant_id,
@@ -170,7 +193,9 @@ const CheckoutPage: React.FC = () => {
                 onFinish={handleSubmit}
                 initialValues={{
                   country: "VN",
-                  shippingMethod: "standard"
+                  shippingMethod: "standard",
+                  province: "",
+                  district: ""
                 }}
               >
                 {/* Contact Information */}
@@ -187,7 +212,7 @@ const CheckoutPage: React.FC = () => {
                       >
                         <Input
                           prefix={<UserOutlined />}
-                          placeholder="First Name"
+                          placeholder="Nhập tên"
                           size="large"
                         />
                       </Form.Item>
@@ -199,7 +224,7 @@ const CheckoutPage: React.FC = () => {
                         rules={[{ required: true, message: 'Họ là bắt buộc' }]}
                       >
                         <Input
-                          placeholder="Last Name"
+                          placeholder="Nhập họ"
                           size="large"
                         />
                       </Form.Item>
@@ -218,7 +243,7 @@ const CheckoutPage: React.FC = () => {
                       >
                         <Input
                           prefix={<MailOutlined />}
-                          placeholder="Email Address"
+                          placeholder="Nhập email"
                           size="large"
                         />
                       </Form.Item>
@@ -231,7 +256,7 @@ const CheckoutPage: React.FC = () => {
                       >
                         <Input
                           prefix={<PhoneOutlined />}
-                          placeholder="Phone Number"
+                          placeholder="Nhập số điện thoại"
                           size="large"
                         />
                       </Form.Item>
@@ -252,37 +277,68 @@ const CheckoutPage: React.FC = () => {
                   >
                     <Input
                       prefix={<EnvironmentOutlined />}
-                      placeholder="Street Address"
+                      placeholder="Nhập địa chỉ nhận hàng"
                       size="large"
                     />
                   </Form.Item>
 
-                  <Row gutter={12}>
+                  <Row gutter={8}>
                     <Col span={8}>
                       <Form.Item
-                        name="city"
-                        label="Thành phố"
-                        rules={[{ required: true, message: 'Thành phố là bắt buộc' }]}
-                      >
-                        <Input placeholder="City" size="large" />
-                      </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                      <Form.Item
-                        name="state"
+                        name="province"
                         label="Tỉnh/Thành phố"
                         rules={[{ required: true, message: 'Tỉnh/Thành phố là bắt buộc' }]}
                       >
-                        <Input placeholder="State" size="large" />
+                        <Select
+                          size="large"
+                          placeholder="Chọn tỉnh/thành phố"
+                          onChange={handleProvinceChange}
+                          showSearch
+                          filterOption={(input, option) =>
+                            (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+                          }
+                          optionFilterProp="label"
+                        >
+                          {provinces.map(province => (
+                            <Option key={province.id} value={province.id} label={province.name}>
+                              {province.name}
+                            </Option>
+                          ))}
+                        </Select>
                       </Form.Item>
                     </Col>
                     <Col span={8}>
                       <Form.Item
-                        name="zipCode"
-                        label="Mã bưu điện"
-                        rules={[{ required: true, message: 'Mã bưu điện là bắt buộc' }]}
+                        name="district"
+                        label="Quận/Huyện"
+                        rules={[{ required: true, message: 'Quận/Huyện là bắt buộc' }]}
                       >
-                        <Input placeholder="ZIP Code" size="large" />
+                        <Select
+                          size="large"
+                          placeholder="Chọn quận/huyện"
+                          onChange={handleDistrictChange}
+                          disabled={!selectedProvince}
+                          showSearch
+                          filterOption={(input, option) =>
+                            (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+                          }
+                          optionFilterProp="label"
+                        >
+                          {districts.map(district => (
+                            <Option key={district.id} value={district.id} label={district.name}>
+                              {district.name}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                      <Form.Item
+                        name="ward"
+                        label="Phường/Xã"
+                        rules={[{ required: true, message: 'Phường/Xã là bắt buộc' }]}
+                      >
+                        <Input placeholder="Phường/Xã" size="large" />
                       </Form.Item>
                     </Col>
                   </Row>
