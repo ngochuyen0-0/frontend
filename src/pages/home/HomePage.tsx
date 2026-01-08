@@ -7,10 +7,13 @@ import { toast, Toaster } from "sonner";
 import { useEffect, useState } from "react";
 import { Product } from "../../types/product";
 import { getProducts } from "../../services/productService";
+import { useBrandStore } from "../../store/useBrandStore";
 
 const HomePage = () => {
     const navigate = useNavigate();
-    const [newProducts, setNewProduct] = useState<Product[]>([])
+    const [newProducts, setNewProduct] = useState<Product[]>([]);
+    const { brands, getBrands, loading } = useBrandStore();
+
     const slides = [
         {
             id: "1",
@@ -32,20 +35,15 @@ const HomePage = () => {
         },
     ];
 
-    const brands = [
-        { id: '1', name: 'Louis Vuitton', imageUrl: "https://th.bing.com/th/id/R.666b24ea8787a4e8f5c1b108328c3181?rik=NkyXIiRQ0CpUsA&pid=ImgRaw&r=0" },
-        { id: '2', name: 'Gucci', imageUrl: "https://logodix.com/logo/1482.jpg" },
-        { id: '3', name: 'Chanel', imageUrl: "https://tse3.mm.bing.net/th/id/OIP.Dta-yW5xiTzD3biCbVhtdQAAAA?w=420&h=320&rs=1&pid=ImgDetMain&o=7&rm=3" },
-        { id: '4', name: 'Hermès', imageUrl: "https://assets.turbologo.com/blog/en/2021/07/07062102/hermes-logo-color.png" },
-        { id: '5', name: 'Prada', imageUrl: "https://th.bing.com/th/id/R.ab1db814563c8bede3703d88656e5850?rik=ZwtF5lTRxkcf6w&pid=ImgRaw&r=0" },
-        { id: '6', name: 'Charles & Keith', imageUrl: "https://lazamia.com/wp-content/uploads/2018/10/Charles-Keith-logo.png" },
-    ];
-
     useEffect(() => {
+        // Lấy danh sách sản phẩm mới
         getProducts({}).then(res => {
             setNewProduct(res?.data);
         }).catch();
-    }, [])
+
+        // Lấy danh sách thương hiệu
+        getBrands({});
+    }, [getBrands]);
 
     return (
         <>
@@ -64,10 +62,14 @@ const HomePage = () => {
                     </div>
                     <div className="mt-6">
                         {(() => {
+                            // Lọc các thương hiệu nổi bật hoặc tất cả thương hiệu
+                            const featuredBrands = brands.filter(brand => brand.featured === true);
+                            const displayBrands = featuredBrands.length > 0 ? featuredBrands : brands;
+                            
                             const chunkSize = 6;
-                            const chunks: typeof brands[] = [] as any;
-                            for (let i = 0; i < brands.length; i += chunkSize) {
-                                chunks.push(brands.slice(i, i + chunkSize));
+                            const chunks: typeof displayBrands[] = [] as any;
+                            for (let i = 0; i < displayBrands.length; i += chunkSize) {
+                                chunks.push(displayBrands.slice(i, i + chunkSize));
                             }
                             return (
                                 <AntCarousel arrows dots autoplay>
@@ -75,11 +77,11 @@ const HomePage = () => {
                                         <div key={idx}>
                                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
                                                 {group.map((b) => (
-                                                    <div 
-                                                        key={b.id} 
+                                                    <div
+                                                        key={b.id}
                                                         className="flex justify-center items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
                                                     >
-                                                        <BrandCard name={b.name} imageUrl={b.imageUrl} />
+                                                        <BrandCard name={b.name} imageUrl={b.logo_url} />
                                                     </div>
                                                 ))}
                                             </div>
