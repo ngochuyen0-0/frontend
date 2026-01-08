@@ -99,7 +99,7 @@ const ProductDetailsPage: React.FC = () => {
                 price: variant?.price || 0,
                 salePrice: 0, // Không có thông tin giảm giá trong dữ liệu hiện tại
                 rating: 4.5, // Không có thông tin đánh giá cụ thể trong dữ liệu hiện tại
-                stock: variant?.stock || 100,
+                stock: variant?.stock_quantity || 100,
                 addedAt: new Date(),
                 category: 'General' // Không có thông tin category trong dữ liệu hiện tại
             };
@@ -397,6 +397,95 @@ const ProductDetailsPage: React.FC = () => {
                                 <div className="flex flex-wrap gap-2">
                                     {product?.variants?.map((e, i) => {
                                         const active = selectVariant?.color === e.color;
+                                        const getColorValue = (color: any) => {
+                                            if (!color) return '#cccccc';
+                                            
+                                            // Nếu là chuỗi, áp dụng xử lý như trước
+                                            if (typeof color === 'string') {
+                                                // Nếu là mã màu hex, rgb, rgba, hsl, hsla
+                                                if (color.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/) ||
+                                                    color.toLowerCase().startsWith('rgb') ||
+                                                    color.toLowerCase().startsWith('hsl')) {
+                                                    return color;
+                                                }
+                                                // Nếu là tên màu chuẩn CSS
+                                                const validColorNames = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown',
+                                                                         'black', 'white', 'gray', 'grey', 'silver', 'gold', 'cyan', 'magenta',
+                                                                         'lime', 'maroon', 'navy', 'olive', 'teal', 'violet', 'aqua', 'fuchsia',
+                                                                         'aliceblue', 'antiquewhite', 'aquamarine', 'azure', 'beige', 'bisque',
+                                                                         'blanchedalmond', 'blueviolet', 'brown', 'burlywood', 'cadetblue',
+                                                                         'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'cornsilk',
+                                                                         'crimson', 'darkblue', 'darkcyan', 'darkgoldenrod', 'darkgray',
+                                                                         'darkgreen', 'darkgrey', 'darkkhaki', 'darkmagenta', 'darkolivegreen',
+                                                                         'darkorange', 'darkorchid', 'darkred', 'darksalmon', 'darkseagreen',
+                                                                         'darkslateblue', 'darkslategray', 'darkslategrey', 'darkturquoise',
+                                                                         'darkviolet', 'deeppink', 'deepskyblue', 'dimgray', 'dimgrey',
+                                                                         'dodgerblue', 'firebrick', 'floralwhite', 'forestgreen', 'gainsboro',
+                                                                         'ghostwhite', 'gold', 'goldenrod', 'green', 'greenyellow', 'honeydew',
+                                                                         'hotpink', 'indianred', 'indigo', 'ivory', 'khaki', 'lavender',
+                                                                         'lavenderblush', 'lawngreen', 'lemonchiffon', 'lightblue', 'lightcoral',
+                                                                         'lightcyan', 'lightgoldenrodyellow', 'lightgray', 'lightgreen',
+                                                                         'lightgrey', 'lightpink', 'lightsalmon', 'lightseagreen', 'lightskyblue',
+                                                                         'lightslategray', 'lightslategrey', 'lightsteelblue', 'lightyellow',
+                                                                         'limegreen', 'linen', 'magenta', 'mediumaquamarine', 'mediumblue',
+                                                                         'mediumorchid', 'mediumpurple', 'mediumseagreen', 'mediumslateblue',
+                                                                         'mediumspringgreen', 'mediumturquoise', 'mediumvioletred', 'midnightblue',
+                                                                         'mintcream', 'mistyrose', 'moccasin', 'navajowhite', 'oldlace',
+                                                                         'olivedrab', 'orange', 'orangered', 'orchid', 'palegoldenrod',
+                                                                         'palegreen', 'paleturquoise', 'palevioletred', 'papayawhip',
+                                                                         'peachpuff', 'peru', 'pink', 'plum', 'powderblue', 'rosybrown',
+                                                                         'royalblue', 'saddlebrown', 'salmon', 'sandybrown', 'seagreen',
+                                                                         'seashell', 'sienna', 'skyblue', 'slateblue', 'slategray',
+                                                                         'slategrey', 'snow', 'springgreen', 'steelblue', 'tan', 'thistle',
+                                                                         'tomato', 'turquoise', 'violet', 'wheat', 'white', 'whitesmoke',
+                                                                         'yellowgreen'];
+                                                if (validColorNames.includes(color.toLowerCase())) {
+                                                    return color;
+                                                }
+                                                // Một số tên màu tiếng Việt hoặc tên màu mô tả
+                                                const colorMap: Record<string, string> = {
+                                                    'hồng': 'pink',
+                                                    'hồng pastel': '#ffd1dc',
+                                                    'xanh dương': 'blue',
+                                                    'xanh lá': 'green',
+                                                    'đỏ': 'red',
+                                                    'vàng': 'yellow',
+                                                    'tím': 'purple',
+                                                    'cam': 'orange',
+                                                    'nâu': 'brown',
+                                                    'xám': 'gray',
+                                                    'đen': 'black',
+                                                    'trắng': 'white',
+                                                    'hồng đậm': 'deepPink',
+                                                    'xanh ngọc': 'turquoise',
+                                                    'xanh da trời': 'skyblue'
+                                                };
+                                                
+                                                const normalizedColor = color.toLowerCase().trim();
+                                                if (colorMap[normalizedColor]) {
+                                                    return colorMap[normalizedColor];
+                                                }
+                                                
+                                                // Nếu không phải định dạng chuẩn, thử thêm # vào đầu
+                                                if (!color.startsWith('#')) {
+                                                    return `#${color}`;
+                                                }
+                                                return '#cccccc'; // fallback nếu không xác định được
+                                            }
+                                            
+                                            // Nếu là object, thử lấy thuộc tính cụ thể
+                                            if (typeof color === 'object') {
+                                                // Kiểm tra nếu có thuộc tính màu sắc phổ biến
+                                                if (color.hex) return color.hex;
+                                                if (color.value) return color.value;
+                                                if (color.name) return color.name;
+                                                // Nếu không có thuộc tính đặc biệt, trả về fallback
+                                                return '#cccccc';
+                                            }
+                                            
+                                            // Trường hợp khác, chuyển sang string và xử lý
+                                            return '#cccccc';
+                                        };
                                         return (
                                             <div
                                                 key={e.size}
@@ -407,7 +496,10 @@ const ProductDetailsPage: React.FC = () => {
                                             >
                                                 <div
                                                     className={`w-10 h-10 rounded-full border-2 ${active ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300'}`}
-                                                    style={{ backgroundColor: e.color }}
+                                                    style={{
+                                                        backgroundColor: getColorValue(e.color)
+                                                    }}
+                                                    title={e.color || 'Chưa có màu'}
                                                 ></div>
                                                 <span className="mt-1 text-xs">{e.color}</span>
                                             </div>
@@ -441,7 +533,7 @@ const ProductDetailsPage: React.FC = () => {
  
                                     <div>
                                         <span className="text-gray-700 font-medium text-sm">Số lượng</span>
-                                        <div className="text-xs text-gray-500 mt-1">Còn hàng: {selectVariant?.stock || 100}</div>
+                                        <div className="text-xs text-gray-500 mt-1">Còn hàng: {selectVariant?.stock_quantity || 100}</div>
                                     </div>
                                 </div>
  
