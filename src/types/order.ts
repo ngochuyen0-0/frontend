@@ -15,7 +15,11 @@ export interface Order {
     country: string,
     payment_method: string,
     created_at: string,
-    items: OrderItem[]
+    items: OrderItem[],
+    notes?: string,
+    tracking_number?: string,
+    shipping_cost?: number,
+    tax_amount?: number
 }
 
 export interface OrdersData {

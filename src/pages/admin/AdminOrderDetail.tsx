@@ -47,7 +47,7 @@ import {
     PrinterOutlined
 } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getOrderById } from '../../services/orderService';
+import { getOrderById, updateOrderStatus, updateOrderTracking, updateOrderInfo, cancelOrder } from '../../services/orderService';
 import { ProductVariantSingle } from '../../types/product';
 import { getProductVariantById } from '../../services/productService';
 import { Order, OrderItem } from '../../types/order';
@@ -83,28 +83,28 @@ const AdminOrderDetailPage: React.FC = () => {
     const fetchOrderDetail = async () => {
         setLoading(true);
         try {
-            getOrderById(order_id || "").then(res => {
-                Promise.all(res.items.map(item => getProductVariantById(item.variant_id))).then(results => {
-                    const itemsFecth = [] as OrderItem[];
-                    results.forEach((e: ProductVariantSingle) => {
-                        const rawItem = res.items.find(c => c.variant_id === e.id);
-                        const orderItemFecth: OrderItem = {
-                            id: rawItem?.id || "",
-                            variant_id: e?.id || "",
-                            product_name: e.product.name || "",
-                            quantity: rawItem?.quantity || 0,
-                            size: e?.size || "",
-                            color: e?.color || "",
-                            price: e?.price || 0,
-                        }
-                        itemsFecth.push(orderItemFecth)
-                    })
-                    res.items = itemsFecth;
+            const res = await getOrderById(order_id || "");
+            const results = await Promise.all(
+                res.items.map((item: OrderItem) => getProductVariantById(item.variant_id))
+            );
+            const itemsFecth = [] as OrderItem[];
+            results.forEach((e: ProductVariantSingle) => {
+                const rawItem = res.items.find(c => c.variant_id === e.id);
+                const orderItemFecth: OrderItem = {
+                    id: rawItem?.id || "",
+                    variant_id: e?.id || "",
+                    product_name: e.product.name || "",
+                    quantity: rawItem?.quantity || 0,
+                    size: e?.size || "",
+                    color: e?.color || "",
+                    price: e?.price || 0,
+                }
+                itemsFecth.push(orderItemFecth)
+            })
+            res.items = itemsFecth;
 
-                    setOrder(res);
-                    editForm.setFieldsValue(res);
-                })
-            }).catch(err => { })
+            setOrder(res);
+            editForm.setFieldsValue(res);
         } catch (error) {
             console.error('Lỗi khi tải thông tin đơn hàng:', error);
             message.error('Không thể tải thông tin đơn hàng');
@@ -160,7 +160,7 @@ const AdminOrderDetailPage: React.FC = () => {
         setUpdating(true);
         try {
             // Gọi API để cập nhật trạng thái
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Mô phỏng gọi API
+            await updateOrderStatus(order.id, selectedStatus, statusNotes);
 
             const updatedOrder = {
                 ...order,
@@ -187,7 +187,7 @@ const AdminOrderDetailPage: React.FC = () => {
         setUpdating(true);
         try {
             // Gọi API để cập nhật theo dõi
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await updateOrderTracking(order.id, trackingNumber);
 
             const updatedOrder = {
                 ...order,
@@ -213,7 +213,7 @@ const AdminOrderDetailPage: React.FC = () => {
         setUpdating(true);
         try {
             // Gọi API để cập nhật thông tin đơn hàng
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await updateOrderInfo(order.id, values);
 
             const updatedOrder = { ...order, ...values };
             setOrder(updatedOrder);
@@ -233,7 +233,7 @@ const AdminOrderDetailPage: React.FC = () => {
         setUpdating(true);
         try {
             // Gọi API để hủy đơn hàng
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await cancelOrder(order.id);
 
             const updatedOrder = { ...order, status: 'cancelled' };
             setOrder(updatedOrder);
@@ -315,9 +315,9 @@ const AdminOrderDetailPage: React.FC = () => {
     }
 
     const subtotal = order.items.reduce((total, item) => total + (item.price * item.quantity), 0);
-    const shippingCost = order.shipping_method === 'standard' ? 5 :
-        order.shipping_method === 'express' ? 15 : 25;
-    const tax = subtotal * 0.08;
+    const shippingCost = order.shipping_cost || (order.shipping_method === 'standard' ? 5 :
+        order.shipping_method === 'express' ? 15 : 25);
+    const tax = order.tax_amount || subtotal * 0.08;
     const total = subtotal + shippingCost + tax;
 
     return (
@@ -609,8 +609,12 @@ const AdminOrderDetailPage: React.FC = () => {
                             <TextArea
                                 placeholder="Thêm ghi chú nội bộ..."
                                 rows={4}
-                                value={order.notes}
-                                onChange={(e) => setOrder(prev => prev ? { ...prev, notes: e.target.value } : null)}
+                                value={order.notes || ''}
+                                onChange={(e) => {
+                                    if (order) {
+                                        setOrder({ ...order, notes: e.target.value });
+                                    }
+                                }}
                             />
                             <Button type="dashed" block className="mt-2">
                                 Thêm ghi chú
@@ -631,7 +635,7 @@ const AdminOrderDetailPage: React.FC = () => {
                                     icon={<TruckOutlined />}
                                     block
                                     onClick={() => setTrackingModalVisible(true)}
-                                    disabled={!order.tracking_number}
+                                    disabled={!order?.tracking_number}
                                 >
                                     Cập nhật theo dõi
                                 </Button>

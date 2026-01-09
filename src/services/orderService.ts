@@ -35,3 +35,27 @@ export const paidOrder = async (payToken: string) => {
     const res = await apiClient.post(`/orders/paid/${payToken}`);
     return res.data;
 };
+
+// Cập nhật trạng thái đơn hàng
+export const updateOrderStatus = async (orderId: string, status: string, notes?: string) => {
+    const res = await apiClient.put(`/orders/update-status/${orderId}`, { status, notes });
+    return res.data;
+};
+
+// Cập nhật thông tin theo dõi đơn hàng
+export const updateOrderTracking = async (orderId: string, trackingNumber: string) => {
+    const res = await apiClient.put(`/orders/update-tracking/${orderId}`, { tracking_number: trackingNumber });
+    return res.data;
+};
+
+// Cập nhật thông tin đơn hàng
+export const updateOrderInfo = async (orderId: string, data: any) => {
+    const res = await apiClient.put(`/orders/update/${orderId}`, data);
+    return res.data;
+};
+
+// Hủy đơn hàng
+export const cancelOrder = async (orderId: string) => {
+    const res = await apiClient.put(`/orders/cancel/${orderId}`);
+    return res.data;
+};
