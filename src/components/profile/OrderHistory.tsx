@@ -50,15 +50,23 @@ const OrderHistoryComponent: React.FC<OrderHistoryProps> = ({ orders }) => {
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
+        // Hỗ trợ cả trạng thái từ backend và từ định nghĩa types
         const statusConfig = {
+          // Trạng thái từ định nghĩa trong types
           pending: { color: 'orange', text: 'Chờ xác nhận' },
           confirmed: { color: 'blue', text: 'Đã xác nhận' },
-          unpaid: { color: 'purple', text: 'Đang giao hàng' },
-          paid: { color: 'green', text: 'Đã giao hàng' },
-          cancelled: { color: 'red', text: 'Đã hủy' }
+          shipping: { color: 'geekblue', text: 'Đang giao hàng' },
+          delivered: { color: 'green', text: 'Đã giao hàng' },
+          cancelled: { color: 'red', text: 'Đã hủy' },
+          // Trạng thái từ backend
+          Unpaid: { color: 'orange', text: 'Chờ xác nhận' },
+          processing: { color: 'blue', text: 'Đang xử lý' },
+          Paid: { color: 'green', text: 'Hoàn thành' },
+          Canceled: { color: 'red', text: 'Đã hủy' },
+          Deleted: { color: 'red', text: 'Đã xóa' }
         };
 
-        const config = statusConfig[status.toLocaleLowerCase()];
+        const config = statusConfig[status] || { color: 'default', text: status };
         return <Tag color={config.color}>{config.text}</Tag>;
       }
     },
@@ -74,7 +82,7 @@ const OrderHistoryComponent: React.FC<OrderHistoryProps> = ({ orders }) => {
           >
             Chi tiết
           </Button>
-          {record.status === 'delivered' && (
+          {(['delivered', 'Paid'].includes(record.status)) && (
             <Button
               type="link"
               icon={<ShoppingOutlined />}
