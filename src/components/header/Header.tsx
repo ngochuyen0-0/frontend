@@ -97,9 +97,9 @@ const Header: React.FC = () => {
                 </span>
             ),
             children: [
-                { key: "pages:about", label: "Giới thiệu" },
+                { key: "pages:about", label: "Giới thiệu", onClick: () => navigate("/about") },
                 { key: "pages:blog", label: "Blog", onClick: () => navigate("/blogs") },
-                { key: "pages:contact", label: "Liên hệ" },
+                { key: "pages:contact", label: "Liên hệ", onClick: () => navigate("/contact") },
             ],
         },
         { key: "sale", label: "Khuyến mãi" },

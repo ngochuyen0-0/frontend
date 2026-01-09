@@ -31,6 +31,8 @@ import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
 import AdminProductDetail from "../pages/admin/AdminProductDetail";
 import PaymentPage from "../pages/home/PaymentPage";
 import PointsAndVouchersPage from "../pages/home/RewardPage";
+import AboutPage from "../pages/home/AboutPage";
+import ContactPage from "../pages/home/ContactPage";
 import React from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Spin } from "antd";
@@ -181,6 +183,8 @@ export default function AppRoutes() {
                             </ProtectedRoute>
                         }
                     />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
                     <Route path="/blogs" element={<BlogPage />} />
                     <Route path="/reward" element={<PointsAndVouchersPage />} />
                     <Route path="/blogs/:tag" element={<BlogDetailPage />} />
