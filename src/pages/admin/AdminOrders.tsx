@@ -156,16 +156,8 @@ const AdminOrders: React.FC = () => {
       title: "Sản phẩm",
       key: "products",
       render: (_: any, record: any) => (
-        <div>
-          <div className="text-sm">{record.items.length} sản phẩm</div>
-          <div className="text-xs text-gray-500">
-            {record.items.slice(0, 2).map((item: any, idx: number) => (
-              <div key={idx}>{item.product_name || `Sản phẩm ${idx + 1}`}</div>
-            ))}
-            {record.items.length > 2 && (
-              <div>+ {record.items.length - 2} sản phẩm khác</div>
-            )}
-          </div>
+        <div className="h-8 w-8 rounded-full bg-pink-200 flex items-center justify-center text-pink-800 font-medium">
+          {record.items.length}
         </div>
       ),
     },
