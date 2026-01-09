@@ -18,6 +18,8 @@ import {
   Divider,
   Dropdown,
   Input,
+  message,
+  Modal,
   Popconfirm,
   Radio,
   Row,
@@ -32,7 +34,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { OrdersData } from "../../types/order";
-import { getOrders } from "../../services/orderService";
+import { getOrders, updateOrderStatus } from "../../services/orderService";
 import { getOrderStatusStatistics } from "../../services/statisticalService";
 
 const { Option } = Select;
@@ -43,6 +45,10 @@ const AdminOrders: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [ordersData, setOrdersData] = useState<OrdersData>();
   const [orderStats, setOrderStats] = useState<any[]>([]);
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const [newStatus, setNewStatus] = useState<string>('');
+  const [showUpdateModal, setShowUpdateModal] = useState<boolean>(false);
+  const [currentRecord, setCurrentRecord] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -60,6 +66,44 @@ const AdminOrders: React.FC = () => {
       console.error("Lỗi khi lấy dữ liệu thống kê:", err);
     });
   }, []);
+
+  // Hàm xử lý cập nhật trạng thái đơn hàng
+  const handleUpdateStatus = async (orderId: string, status: string) => {
+    setUpdatingOrderId(orderId);
+    try {
+      await updateOrderStatus(orderId, status);
+      
+      // Cập nhật trực tiếp trong dữ liệu hiện tại để phản hồi nhanh
+      if (ordersData && ordersData.data) {
+        const updatedOrders = ordersData.data.map(order =>
+          order.id === orderId ? { ...order, status: status } : order
+        );
+        setOrdersData({ ...ordersData, data: updatedOrders });
+      }
+      
+      // Cập nhật lại thống kê
+      const statsRes = await getOrderStatusStatistics();
+      setOrderStats(statsRes);
+      
+      // Thông báo thành công
+      message.success('Cập nhật trạng thái đơn hàng thành công!');
+    } catch (error) {
+      console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+      message.error('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng!');
+      
+      // Nếu cập nhật thất bại, có thể lấy lại dữ liệu để đảm bảo tính nhất quán
+      try {
+        const res = await getOrders({});
+        setOrdersData(res);
+      } catch (err) {
+        console.error("Lỗi khi lấy lại dữ liệu đơn hàng:", err);
+      }
+    } finally {
+      setUpdatingOrderId(null);
+      // Đảm bảo đóng modal sau khi cập nhật xong
+      setShowUpdateModal(false);
+    }
+  };
 
   // Status configurations
   const statusConfig: any = {
@@ -195,8 +239,9 @@ const AdminOrders: React.FC = () => {
                 label: "Cập nhật trạng thái",
                 icon: <EditOutlined />,
                 onClick: () => {
-                  // Navigate to edit page
-                  navigate(`/admin/v1/order/${record.id}/edit`);
+                  setCurrentRecord(record);
+                  setShowUpdateModal(true);
+                  setNewStatus(''); // Reset trạng thái mới
                 }
               },
               {
@@ -212,6 +257,10 @@ const AdminOrders: React.FC = () => {
                 danger: true,
                 disabled:
                   record.status === "Paid" || record.status === "Canceled",
+                onClick: () => {
+                  // Gọi hàm hủy đơn hàng
+                  handleUpdateStatus(record.id, "Canceled");
+                }
               },
             ],
           }}
@@ -301,11 +350,11 @@ const AdminOrders: React.FC = () => {
               style={{ width: 180 }}
               size="middle"
               allowClear
-            >
-              {Object.entries(statusConfig).map(([key, value]: [string, any]) => (
-                <Option key={key} value={key}>{value.text}</Option>
-              ))}
-            </Select>
+              options={Object.entries(statusConfig).map(([key, value]: [string, any]) => ({
+                value: key,
+                label: value.text
+              }))}
+            />
           </Space>
 
           <Space>
@@ -350,6 +399,55 @@ const AdminOrders: React.FC = () => {
           scroll={{ x: 1000 }}
         />
       </Card>
+
+      {/* Modal cập nhật trạng thái đơn hàng */}
+      <Modal
+        title="Cập nhật trạng thái đơn hàng"
+        open={showUpdateModal}
+        onCancel={() => setShowUpdateModal(false)}
+        footer={null}
+      >
+        {currentRecord && (
+          <div className="mb-4">
+            <p className="mb-2">Mã đơn hàng: <strong>{currentRecord.id}</strong></p>
+            <p className="mb-2">
+              Trạng thái hiện tại: <Tag color={statusConfig[currentRecord.status]?.color}>
+                {statusConfig[currentRecord.status]?.text}
+              </Tag>
+            </p>
+            <p className="mb-2">Chọn trạng thái mới:</p>
+            <Select
+              style={{ width: '100%' }}
+              placeholder="Chọn trạng thái mới"
+              value={newStatus}
+              onChange={(value) => setNewStatus(value)}
+              loading={updatingOrderId === currentRecord.id}
+              options={Object.keys(statusConfig)
+                .filter((status) => status !== currentRecord.status)
+                .map((status) => ({
+                  value: status,
+                  label: statusConfig[status].text
+                }))}
+            />
+          </div>
+        )}
+        <div className="flex justify-end space-x-2">
+          <Button onClick={() => setShowUpdateModal(false)}>Hủy</Button>
+          <Button
+            type="primary"
+            loading={updatingOrderId === currentRecord?.id}
+            disabled={!newStatus}
+            onClick={() => {
+              if (currentRecord && newStatus) {
+                handleUpdateStatus(currentRecord.id, newStatus);
+                // setShowUpdateModal(false); // Đã chuyển vào finally của hàm handleUpdateStatus
+              }
+            }}
+          >
+            Cập nhật
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };
