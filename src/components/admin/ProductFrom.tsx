@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Select, Upload, Button, message, Row, Col, Card, Image, Tag } from 'antd';
 import { CheckOutlined, DeleteOutlined, EyeOutlined, FileImageOutlined, PlusCircleFilled, PlusCircleOutlined, PlusSquareFilled, UploadOutlined } from '@ant-design/icons';
 import { Product } from '../../types/product';
-import { createProduct, createProductImage, updateProduct, updateProductImage } from '../../services/productService';
+import { createProduct, createProductImage, updateProduct, updateProductImage, deleteProductImage } from '../../services/productService';
 import TextArea from 'antd/es/input/TextArea';
 import { Brand } from '../../types/brand';
 import { Category } from '../../types/category';
@@ -79,9 +79,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 
                 // Cập nhật danh sách hình ảnh ngay lập tức
                 setImages(prev => [...prev, {
-                  id: imageRes.data.id || "",
-                  is_thumbnail: imageRes.data.is_thumbnail || false,
-                  image_url: imageRes.data.image_url || ""
+                  id: imageRes.id || "",
+                  is_thumbnail: imageRes.is_thumbnail || false,
+                  image_url: imageRes.image_url || ""
                 }]);
               } catch (error) {
                 console.error("Lỗi khi tạo hình ảnh:", error);
@@ -115,9 +115,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 
                 // Cập nhật danh sách hình ảnh ngay lập tức
                 setImages(prev => [...prev, {
-                  id: imageRes.data.id || "",
-                  is_thumbnail: imageRes.data.is_thumbnail || false,
-                  image_url: imageRes.data.image_url || ""
+                  id: imageRes.id || "",
+                  is_thumbnail: imageRes.is_thumbnail || false,
+                  image_url: imageRes.image_url || ""
                 }]);
               } catch (error) {
                 console.error("Lỗi khi tạo hình ảnh:", error);
@@ -138,6 +138,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       useProduct.getProducts();
       
     } catch (error) {
+      console.error('Lỗi khi xử lý sản phẩm:', error);
       if (type === 'create') {
         message.error('Tạo sản phẩm thất bại');
       } else {
@@ -228,58 +229,95 @@ const ProductForm: React.FC<ProductFormProps> = ({
         <label>Hình ảnh</label>
         {Array.from(inputImageURLs.keys()).map((id, i) => {
           return (
-            <Card>
+            <Card key={id}>
               <div className='flex gap-1 w-full'>
-                <Input className='w-full' value={inputImageURLs.get(id) || ''}
+                <Input
+                  className='w-full'
+                  value={inputImageURLs.get(id) || ''}
                   onChange={(e) => {
                     const updatedData = new Map(inputImageURLs);
                     updatedData.set(id, e.target.value);
                     setinputImageURLs(updatedData);
                   }}
                   placeholder='ví dụ: https://hostname.image.service...'
+                  disabled={loading} // Disable input khi đang xử lý
                 />
-                <Button onClick={() => {
-                  const inputValue = inputImageURLs.get(id);
-                  if (!inputValue || inputValue == "") return toast.error("URL không hợp lệ!");
-                  
-                  // Nếu đang tạo sản phẩm mới mà chưa submit thì lưu URL hình ảnh vào mảng chờ
-                  if (type === 'create' && !product?.id) {
-                    // Thêm URL vào danh sách chờ và sẽ xử lý sau khi tạo sản phẩm xong
-                    toast.info("Hình ảnh sẽ được thêm sau khi tạo sản phẩm!");
-                    return;
-                  }
-                  
-                  const newImages = {
-                    image_url: inputImageURLs.get(id) || "",
-                    is_thumbnail: false,
-                    product_id: product?.id || ""
-                  }
-                  createProductImage(newImages).then(res => {
-                    toast.success('Tạo hình ảnh thành công!')
-                    setImages(prev => [...prev, {
-                      id: res.data.id || "",
-                      is_thumbnail: res.data.is_thumbnail || false,
-                      image_url: res.data.image_url || ""
-                    }]);
+                <Button
+                  onClick={() => {
+                    const inputValue = inputImageURLs.get(id);
+                    if (!inputValue || inputValue == "") return toast.error("URL không hợp lệ!");
+                    
+                    // Nếu đang tạo sản phẩm mới mà chưa submit thì lưu URL hình ảnh vào mảng chờ
+                    if (type === 'create' && !product?.id) {
+                      // Thêm URL vào danh sách chờ và sẽ xử lý sau khi tạo sản phẩm xong
+                      toast.info("Hình ảnh sẽ được thêm sau khi tạo sản phẩm!");
+                      return;
+                    }
+                    
+                    // Kiểm tra xem URL có hợp lệ không trước khi gửi yêu cầu
+                    try {
+                      new URL(inputImageURLs.get(id) || '');
+                    } catch (e) {
+                      toast.error("URL hình ảnh không hợp lệ!");
+                      return;
+                    }
+                    
+                    // Kiểm tra xem product có tồn tại không trước khi tạo hình ảnh
+                    if (!product?.id && type === 'edit') {
+                      toast.error("Sản phẩm không tồn tại!");
+                      return;
+                    }
+                    
+                    const newImages = {
+                      image_url: inputImageURLs.get(id) || "",
+                      is_thumbnail: false,
+                      product_id: product?.id || ""
+                    }
+                    
+                    // Gọi API tạo hình ảnh với xử lý lỗi đầy đủ
+                    createProductImage(newImages)
+                      .then(res => {
+                        // Backend trả về đối tượng ProductImages trực tiếp, không có trong thuộc tính data
+                        if (res) {
+                          toast.success('Tạo hình ảnh thành công!')
+                          setImages(prev => [...prev, {
+                            id: res.id || "",
+                            is_thumbnail: res.is_thumbnail || false,
+                            image_url: res.image_url || ""
+                          }]);
+                          const updatedData = new Map(inputImageURLs);
+                          updatedData.delete(id);
+                          setinputImageURLs(updatedData);
+                        } else {
+                          toast.error("Dữ liệu trả về không hợp lệ!");
+                        }
+                      })
+                      .catch(err => {
+                        console.error("Lỗi khi tạo hình ảnh:", err);
+                        toast.error("Tạo hình ảnh thất bại!");
+                      });
+                  }}
+                  disabled={loading} // Disable button khi đang xử lý
+                >
+                  <CheckOutlined />
+                </Button>
+                <Button
+                  onClick={() => {
                     const updatedData = new Map(inputImageURLs);
                     updatedData.delete(id);
                     setinputImageURLs(updatedData);
-                  }).catch(err => {
-                    toast.error("Tạo hình ảnh thất bại!");
-                  });
-                }}><CheckOutlined /></Button>
-                <Button onClick={() => {
-                  const updatedData = new Map(inputImageURLs);
-                  updatedData.delete(id);
-                  setinputImageURLs(updatedData);
-                }}><DeleteOutlined /></Button>
+                  }}
+                  disabled={loading} // Disable button khi đang xử lý
+                >
+                  <DeleteOutlined />
+                </Button>
               </div>
             </Card>
           )
         })}
         <Row gutter={[16, 16]} className='p-1'>
           {images?.map((image, index) => (
-            <Col xs={12} md={8} lg={6} key={index}>
+            <Col xs={12} md={8} lg={6} key={image.id || index}>
               <Card
                 size="small"
                 className="relative"
@@ -326,7 +364,17 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
                       // Chờ tất cả các yêu cầu cập nhật hoàn thành
                       Promise.all(updatePromises)
-                        .then(() => {
+                        .then(results => {
+                          // Cập nhật lại trạng thái hình ảnh trong giao diện
+                          const updatedImages = images.map(img => {
+                            if (img.id === image.id) {
+                              return { ...img, is_thumbnail: true };
+                            } else {
+                              return { ...img, is_thumbnail: false };
+                            }
+                          });
+                          setImages(updatedImages);
+                          
                           toast.success("Cập nhật ảnh đại diện thành công!");
                           // Không gọi onSuccess ở đây để tránh đóng modal
                         })
@@ -349,10 +397,29 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   <DeleteOutlined
                     key="delete"
                     onClick={() => {
-                      // Cập nhật giao diện để loại bỏ hình ảnh khỏi danh sách
-                      const updatedImages = images.filter(img => img.id !== image.id);
-                      setImages(updatedImages);
-                      toast.success("Xóa hình ảnh thành công!");
+                      // Gọi API xóa hình ảnh nếu có id
+                      if (image.id) {
+                        // Hiển thị trạng thái đang xử lý
+                        toast.info("Đang xóa hình ảnh...");
+                        
+                        // Gọi API xóa hình ảnh trên server
+                        deleteProductImage(image.id)
+                          .then(() => {
+                            // Cập nhật giao diện để loại bỏ hình ảnh khỏi danh sách
+                            const updatedImages = images.filter(img => img.id !== image.id);
+                            setImages(updatedImages);
+                            toast.success("Xóa hình ảnh thành công!");
+                          })
+                          .catch(error => {
+                            console.error("Lỗi khi xóa hình ảnh:", error);
+                            toast.error("Xóa hình ảnh thất bại! Vui lòng thử lại.");
+                          });
+                      } else {
+                        // Nếu không có id (hình ảnh chưa được lưu trên server), chỉ xóa ở giao diện
+                        const updatedImages = images.filter(img => img.id !== image.id);
+                        setImages(updatedImages);
+                        toast.success("Xóa hình ảnh thành công!");
+                      }
                     }
                     }
                     className="hover:text-red-500"

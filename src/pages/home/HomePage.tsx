@@ -54,28 +54,6 @@ const HomePage = () => {
                     <Carousel slides={slides} autoplay />
                 </div>
 
-                {/* Order Tracking Section */}
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">Theo dõi đơn hàng của bạn</h2>
-                    <p className="text-gray-600 mb-6">Nhập mã đơn hàng để kiểm tra trạng thái đơn hàng của bạn</p>
-                    <div className="flex justify-center gap-4">
-                        <Button
-                            type="primary"
-                            size="large"
-                            className="bg-orange-500 border-orange-500 hover:bg-orange-600 hover:border-orange-600"
-                            onClick={() => navigate('/my-profile')}
-                        >
-                            <ShoppingOutlined /> Xem đơn hàng
-                        </Button>
-                        <Button
-                            size="large"
-                            onClick={() => navigate('/my-profile')}
-                        >
-                            <UserOutlined /> Hồ sơ của tôi
-                        </Button>
-                    </div>
-                </div>
-
                 {/* Brands Section with Enhanced Styling */}
                 <div className="mt-12">
                     <div className="flex items-center justify-between mb-6">
@@ -122,7 +100,7 @@ const HomePage = () => {
                         <h2 className="text-3xl font-bold text-gray-900 relative after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-orange-500 after:rounded-full">
                             Sản phẩm mới
                         </h2>
-                        <button 
+                        <button
                             className="text-orange-500 hover:text-orange-600 font-medium transition-colors cursor-pointer"
                             onClick={() => navigate('/products?sortBy=latest')}
                         >
@@ -130,7 +108,7 @@ const HomePage = () => {
                         </button>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-                        {newProducts.map((p) => {
+                        {newProducts.slice(0, 18).map((p) => {
                             const thumbnail = p.images?.find(p => p.is_thumbnail);
                             const variants = p.variants || [];
                             let index = 0;
@@ -143,8 +121,8 @@ const HomePage = () => {
                             });
                             const minPriceVariant = variants[index];
                             return (
-                                <div 
-                                    key={p.id} 
+                                <div
+                                    key={p.id}
                                     className="transition-all duration-300 hover:-translate-y-1"
                                 >
                                     <ProductCard
@@ -169,7 +147,7 @@ const HomePage = () => {
                         <h2 className="text-3xl font-bold text-gray-900 relative after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-orange-500 after:rounded-full">
                             Sản phẩm nổi bật
                         </h2>
-                        <button 
+                        <button
                             className="text-orange-500 hover:text-orange-600 font-medium transition-colors cursor-pointer"
                             onClick={() => navigate('/products?sortBy=featured')}
                         >
@@ -179,7 +157,7 @@ const HomePage = () => {
                     <div className="flex flex-col lg:flex-row gap-8">
                         {/* Enhanced Banner Section */}
                         <div className="lg:w-1/3">
-                            <div className="relative h-[450px] bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl overflow-hidden shadow-lg group transition-all duration-500 hover:shadow-xl">
+                            <div className="relative h-full min-h-[450px] bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl overflow-hidden shadow-lg group transition-all duration-500 hover:shadow-xl">
                                 <img
                                     src="/banner/Handbag-PNG-Picture.png"
                                     alt="Banner"
@@ -217,8 +195,8 @@ const HomePage = () => {
                                     });
                                     const minPriceVariant = variants[index];
                                     return (
-                                        <div 
-                                            key={p.id} 
+                                        <div
+                                            key={p.id}
                                             className="transition-all duration-300 hover:-translate-y-1"
                                         >
                                             <ProductCard

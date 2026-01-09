@@ -131,3 +131,8 @@ export const deleteProduct = async (id: string) => {
     const res = await apiClient.delete(`/products/delete/${id}`);
     return res.data;
 }
+
+export const deleteProductImage = async (id: string) => {
+    const res = await apiClient.delete(`/products/image-delete/${id}`);
+    return res.data;
+}
