@@ -566,9 +566,9 @@ const ProductDetailsPage: React.FC = () => {
                                         className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-pink-200 text-gray-800 hover:bg-pink-300 transition-all duration-300 shadow-md hover:shadow-lg"
                                         onClick={() => {
                                             if (selectVariant?.id) {
-                                                // Thêm sản phẩm vào giỏ hàng trước
-                                                addToCart({ id: product.id, variant_id: selectVariant.id, qty });
-                                                toast.success('Sản phẩm đã được thêm vào giỏ hàng!');
+                                                // Tạo giỏ hàng tạm thời chỉ chứa sản phẩm này
+                                                const tempCart = [{ id: product.id, variant_id: selectVariant.id, qty }];
+                                                localStorage.setItem('temp_cart', JSON.stringify(tempCart));
                                                 // Sau đó chuyển hướng đến trang thanh toán
                                                 navigate('/checkout');
                                             } else {

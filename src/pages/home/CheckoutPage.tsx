@@ -102,13 +102,23 @@ const CheckoutPage: React.FC = () => {
     });
 
     // Cập nhật giỏ hàng trong localStorage
-    const cartItems = getCart();
-    const updatedCart = cartItems.map(item =>
-      item.variant_id === itemId ? { ...item, qty: newQty } : item
-    );
-    
-    // Lưu lại giỏ hàng đã cập nhật
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    const tempCart = JSON.parse(localStorage.getItem('temp_cart') || '[]');
+    if (tempCart.length > 0) {
+      // Nếu đang dùng giỏ hàng tạm thời, cập nhật giỏ hàng tạm thời
+      const updatedTempCart = tempCart.map(item =>
+        item.variant_id === itemId ? { ...item, qty: newQty } : item
+      );
+      localStorage.setItem('temp_cart', JSON.stringify(updatedTempCart));
+    } else {
+      // Ngược lại, cập nhật giỏ hàng chính
+      const cartItems = getCart();
+      const updatedCart = cartItems.map(item =>
+        item.variant_id === itemId ? { ...item, qty: newQty } : item
+      );
+      
+      // Lưu lại giỏ hàng đã cập nhật
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+    }
   };
 
   const removeItem = (itemId: string) => {
@@ -119,14 +129,25 @@ const CheckoutPage: React.FC = () => {
     });
 
     // Cập nhật giỏ hàng trong localStorage
-    const cartItems = getCart();
-    const updatedCart = cartItems.filter(item => item.variant_id !== itemId);
-    
-    // Lưu lại giỏ hàng đã cập nhật
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    const tempCart = JSON.parse(localStorage.getItem('temp_cart') || '[]');
+    if (tempCart.length > 0) {
+      // Nếu đang dùng giỏ hàng tạm thời, cập nhật giỏ hàng tạm thời
+      const updatedTempCart = tempCart.filter(item => item.variant_id !== itemId);
+      localStorage.setItem('temp_cart', JSON.stringify(updatedTempCart));
+    } else {
+      // Ngược lại, cập nhật giỏ hàng chính
+      const cartItems = getCart();
+      const updatedCart = cartItems.filter(item => item.variant_id !== itemId);
+      
+      // Lưu lại giỏ hàng đã cập nhật
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+    }
   };
   useEffect(() => {
-    const cartItems = getCart();
+    // Kiểm tra xem có giỏ hàng tạm thời (dành cho mua ngay) hay không
+    const tempCart = JSON.parse(localStorage.getItem('temp_cart') || '[]');
+    const cartItems = tempCart.length > 0 ? tempCart : getCart();
+    
     const fetch = async () => {
       const results = await Promise.all(cartItems.map(item => getProductVariantById(item.variant_id)));
       const itemsFetch = [] as CartItem[];
@@ -194,6 +215,8 @@ const CheckoutPage: React.FC = () => {
 
     createOrder(order_payload).then(res => {
       if (res.id) {
+        // Xóa giỏ hàng tạm thời nếu có
+        localStorage.removeItem('temp_cart');
         navigate(`/payment/${res.id}`)
       }
     }).catch(() => { }).finally(() => {

@@ -58,7 +58,7 @@ const PaymentCapturePage: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        let timer: NodeJS.Timeout;
+        let timer: ReturnType<typeof setTimeout>;
 
         if (paymentStatus.status === 'processing') {
             // Progress animation
@@ -116,6 +116,8 @@ const PaymentCapturePage: React.FC = () => {
                             transactionId: generateTransactionId()
                         });
                         setProgress(100);
+                        // Xóa giỏ hàng sau khi thanh toán thành công
+                        localStorage.removeItem("cart");
                     } else {
                         setPaymentStatus({
                             status: 'failed',
@@ -268,7 +270,7 @@ const PaymentCapturePage: React.FC = () => {
                             <Text strong>Mã đơn hàng: {paymentStatus.orderId}</Text>
                         )}
                         {paymentStatus.transactionId && (
-                            <Text strong display="block">
+                            <Text strong>
                                 Mã giao dịch: {paymentStatus.transactionId}
                             </Text>
                         )}
@@ -391,7 +393,7 @@ const PaymentCapturePage: React.FC = () => {
                             <Col xs={24} md={8}>
                                 <div className="text-center">
                                     <SecurityOutlined className="text-2xl text-green-500 mb-2" />
-                                    <Text strong display="block">Bảo mật</Text>
+                                    <Text strong>Bảo mật</Text>
                                     <Text type="secondary" className="text-sm">
                                         Giao dịch được bảo mật SSL 256-bit
                                     </Text>
@@ -400,7 +402,7 @@ const PaymentCapturePage: React.FC = () => {
                             <Col xs={24} md={8}>
                                 <div className="text-center">
                                     <ClockCircleOutlined className="text-2xl text-blue-500 mb-2" />
-                                    <Text strong display="block">24/7 Hỗ trợ</Text>
+                                    <Text strong>24/7 Hỗ trợ</Text>
                                     <Text type="secondary" className="text-sm">
                                         Hỗ trợ khách hàng 24/7
                                     </Text>
@@ -409,7 +411,7 @@ const PaymentCapturePage: React.FC = () => {
                             <Col xs={24} md={8}>
                                 <div className="text-center">
                                     <CheckCircleOutlined className="text-2xl text-green-500 mb-2" />
-                                    <Text strong display="block">Đảm bảo</Text>
+                                    <Text strong>Đảm bảo</Text>
                                     <Text type="secondary" className="text-sm">
                                         Hoàn tiền 100% nếu có lỗi
                                     </Text>

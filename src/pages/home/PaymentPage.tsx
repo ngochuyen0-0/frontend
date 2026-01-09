@@ -184,11 +184,15 @@ const PaymentPage: React.FC = () => {
                 toast.success("Đơn hàng đã được tạo! Vui lòng hoàn tất chuyển khoản trong vòng 24 giờ.");
             } else if (paymentMethod === "cod") {
                 toast.success("Đơn hàng đã được đặt thành công! Bạn sẽ thanh toán khi nhận hàng.");
+                // Xóa giỏ hàng sau khi tạo đơn hàng thành công
+                localStorage.removeItem("cart");
                 setTimeout(() => {
                     navigate(`/order-info/${orderData.id}`); // Điều hướng đến trang thông tin đơn hàng sau 2 giây
                 }, 2000);
             } else {
                 toast.success("Thanh toán thành công! Đơn hàng của bạn đã được đặt.");
+                // Xóa giỏ hàng sau khi thanh toán thành công
+                localStorage.removeItem("cart");
                 setTimeout(() => {
                     navigate(`/order-info/${orderData.id}`); // Điều hướng đến trang thông tin đơn hàng sau 2 giây
                 }, 2000);
