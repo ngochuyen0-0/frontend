@@ -1,9 +1,11 @@
 import {
     DashboardOutlined,
+    DownloadOutlined,
     LogoutOutlined,
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     OrderedListOutlined,
+    PlusOutlined,
     ProfileOutlined,
     SettingOutlined,
     ShoppingOutlined,
@@ -48,7 +50,12 @@ const AdminLayout: React.FC = () => {
         {
             key: "/admin/v1/orders",
             icon: <OrderedListOutlined />,
-            label: "Đơn hàng",
+            label: "Đơn hàng bán",
+        },
+        {
+            key: "/admin/v1/import-orders",
+            icon: <DownloadOutlined />,
+            label: "Đơn hàng nhập",
         },
         {
             key: "/admin/v1/users",

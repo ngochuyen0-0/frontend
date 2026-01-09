@@ -41,6 +41,9 @@ import ProductsPage from "../pages/home/Products";
 import PaymentCapturePage from "../pages/home/PayCapture";
 import OrderDetailPage from "../pages/home/OrderInfo";
 import AdminOrderDetailPage from "../pages/admin/AdminOrderDetail";
+import AdminImportOrders from "../pages/admin/AdminImportOrders";
+import AdminImportOrderDetailPage from "../pages/admin/AdminImportOrderDetail";
+import CreateImportOrder from "../pages/admin/CreateImportOrder";
 
 const ProtectedRoute: React.FC<{
     children: React.ReactNode;
@@ -200,6 +203,9 @@ export default function AppRoutes() {
                 >
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="order/:order_id" element={<AdminOrderDetailPage />} />
+                    <Route path="import-orders" element={<AdminImportOrders />} />
+                    <Route path="import-order/:order_id" element={<AdminImportOrderDetailPage />} />
+                    <Route path="import-orders/create" element={<CreateImportOrder />} />
                     <Route path="products" element={<AdminProducts />} />
                     <Route
                         path="product/:product_id"
