@@ -56,6 +56,7 @@ export interface Product {
     brand_id?: string;
     category_id?: string;
     is_active?: boolean;
+    status?: string;
     created_at?: string;
     updated_at?: string;
     variants?: ProductVariant[];

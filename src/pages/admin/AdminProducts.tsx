@@ -9,6 +9,8 @@ import {
     MoreOutlined,
     PlusOutlined,
     SearchOutlined,
+    PlayCircleOutlined,
+    PoweroffOutlined,
 } from "@ant-design/icons";
 import {
     Button,
@@ -26,7 +28,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProductStore } from "../../store/useProductStore";
-import { createProduct, deleteProduct } from "../../services/productService";
+import { createProduct, deleteProduct, toggleProductStatus } from "../../services/productService";
 import ProductForm from "../../components/admin/ProductFrom";
 import { Product } from "../../types/product";
 
@@ -132,7 +134,7 @@ const AdminProducts: React.FC = () => {
             minPrice: product.variants && product.variants.length > 0
                 ? Math.min(...product.variants.map(v => v.price || 0)).toLocaleString() + 'đ'
                 : '0đ',
-            status: product.is_active ? 'Hoạt động' : 'Không hoạt động'
+            status: product.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'
         }));
         
         // Chuyển đổi dữ liệu sang định dạng JSON
@@ -200,6 +202,20 @@ const AdminProducts: React.FC = () => {
         }
     };
 
+
+    const handleToggleStatus = async (product: Product) => {
+        if (window.confirm(`Bạn có chắc chắn muốn ${product.status === 'ACTIVE' ? 'vô hiệu hóa' : 'kích hoạt'} sản phẩm "${product.name}"?`)) {
+            try {
+                await toggleProductStatus(product.id, product.status !== 'ACTIVE');
+                // Cập nhật lại danh sách sản phẩm sau khi thay đổi trạng thái
+                await getProducts();
+                console.log(`${product.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'} sản phẩm thành công`);
+            } catch (error) {
+                console.error(`Lỗi ${product.status === 'ACTIVE' ? 'vô hiệu hóa' : 'kích hoạt'} sản phẩm:`, error);
+                alert(`${product.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'} sản phẩm thất bại. Vui lòng thử lại.`);
+            }
+        }
+    };
 
     // Tính toán các thống kê dựa trên dữ liệu đã lọc
     const totalProducts = filteredProducts.length;
@@ -355,31 +371,23 @@ const AdminProducts: React.FC = () => {
         },
         {
             title: "Trạng thái ",
-            dataIndex: "is_active",
-            key: "is_active",
-            render: (is_active: boolean, record: any) => {
-                // Trạng thái sản phẩm là hoạt động nếu:
-                // Sản phẩm chính đang hoạt động HOẶC có ít nhất một biến thể đang hoạt động
-                const isProductActive = record.is_active;
-                const hasActiveVariant = record.variants && record.variants.some((v: any) => v.is_active);
-                
-                // Sản phẩm được coi là hoạt động nếu sản phẩm chính hoạt động hoặc có biến thể hoạt động
-                const isActive = isProductActive || hasActiveVariant;
+            dataIndex: "status",
+            key: "status",
+            render: (status: any, record: any) => {
+                // Sử dụng trường status từ sản phẩm chính
+                const isActive = record.status === 'ACTIVE';
                 
                 const color = isActive ? "green" : "red";
                 const text = isActive ? "Hoạt động" : "Không hoạt động";
                 return <Tag color={color}>{text}</Tag>;
             },
             filters: [
-                { text: "Hoạt động", value: true },
-                { text: "Không hoạt động", value: false },
+                { text: "Hoạt động", value: "ACTIVE" },
+                { text: "Không hoạt động", value: "DRAFT" },
             ],
             onFilter: (value: any, record: any) => {
-                const isProductActive = record.is_active;
-                const hasActiveVariant = record.variants && record.variants.some((v: any) => v.is_active);
-                
-                const isActive = isProductActive || hasActiveVariant;
-                return isActive === value;
+                // Chỉ lọc theo trạng thái của sản phẩm chính
+                return record.status === value;
             },
         },
         {
@@ -415,6 +423,13 @@ const AdminProducts: React.FC = () => {
                                 icon: <DeleteOutlined />,
                                 danger: true,
                                 onClick: () => handleDelete(record)
+                            },
+                            { type: "divider" },
+                            {
+                                key: "toggleStatus",
+                                label: record.status === 'ACTIVE' ? "Vô hiệu hóa" : "Kích hoạt",
+                                icon: record.status === 'ACTIVE' ? <PoweroffOutlined /> : <PlayCircleOutlined />,
+                                onClick: () => handleToggleStatus(record)
                             },
                         ],
                     }}

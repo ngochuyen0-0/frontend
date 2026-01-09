@@ -136,3 +136,9 @@ export const deleteProductImage = async (id: string) => {
     const res = await apiClient.delete(`/products/image-delete/${id}`);
     return res.data;
 }
+
+export const toggleProductStatus = async (id: string, isActive: boolean) => {
+    const status = isActive ? 'ACTIVE' : 'DRAFT';
+    const res = await apiClient.patch(`/products/update/${id}`, { status: status });
+    return res.data;
+}
