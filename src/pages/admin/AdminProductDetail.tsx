@@ -52,7 +52,8 @@ const AdminProductDetail: React.FC = () => {
     const [searchText, setSearchText] = useState('');
 
     useEffect(() => {
-        getProductVariants({ product_id: product_id });
+        // Gọi API để lấy cả các biến thể không hoạt động
+        getProductVariants({ product_id: product_id, include_inactive: true });
         apiClient.post("/products/get", { id: product_id }).then(res => {
             setProduct(res?.data?.data?.[0])
         }).catch((err) => {
@@ -247,6 +248,23 @@ const AdminProductDetail: React.FC = () => {
                                 label: "Sửa",
                                 icon: <EditOutlined />,
                                 onClick: () => handleEdit(record)
+                            },
+                            {
+                                key: "toggle",
+                                label: record.is_active ? "Vô hiệu hóa" : "Kích hoạt",
+                                icon: record.is_active ? <DeleteOutlined /> : <FormOutlined />,
+                                onClick: () => {
+                                    // Gọi API cập nhật trạng thái biến thể
+                                    useProductStore.getState().updateProductVariant(record.id, {
+                                        is_active: !record.is_active
+                                    }).then(() => {
+                                        message.success(`Biến thể đã được ${record.is_active ? 'vô hiệu hóa' : 'kích hoạt'}`);
+                                        // Làm mới danh sách biến thể
+                                        setRefreshKey(prev => prev + 1);
+                                    }).catch(() => {
+                                        message.error(`Lỗi khi ${record.is_active ? 'vô hiệu hóa' : 'kích hoạt'} biến thể`);
+                                    });
+                                }
                             },
                             {
                                 key: "delete",

@@ -135,7 +135,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       }
       
       // Cập nhật lại danh sách sản phẩm
-      useProduct.getProducts();
+      await useProduct.getProducts();
       
     } catch (error) {
       console.error('Lỗi khi xử lý sản phẩm:', error);
@@ -406,8 +406,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                         deleteProductImage(image.id)
                           .then(() => {
                             // Cập nhật giao diện để loại bỏ hình ảnh khỏi danh sách
-                            const updatedImages = images.filter(img => img.id !== image.id);
-                            setImages(updatedImages);
+                            setImages(prevImages => prevImages.filter(img => img.id !== image.id));
                             toast.success("Xóa hình ảnh thành công!");
                           })
                           .catch(error => {
@@ -416,8 +415,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                           });
                       } else {
                         // Nếu không có id (hình ảnh chưa được lưu trên server), chỉ xóa ở giao diện
-                        const updatedImages = images.filter(img => img.id !== image.id);
-                        setImages(updatedImages);
+                        setImages(prevImages => prevImages.filter(img => img.id !== image.id));
                         toast.success("Xóa hình ảnh thành công!");
                       }
                     }
